@@ -1,0 +1,19 @@
+{
+  "name": "zomboid-mod-template",
+  "version": "0.0.1",
+  "scripts": {
+    "release": "standard-version",
+    "postrelease": "node scripts/steam.js",
+    "zipname": "node scripts/zipname.js"
+  },
+  "keywords": [],
+  "author": "Diego Lopes <dihgg@dihgg.com>",
+  "license": "ISC",
+  "description": "A mod Template for Zomboid mods",
+  "devDependencies": {
+    "archiver": "^7.0.1",
+    "fs-extra": "^11.3.0",
+    "micromatch": "^4.0.8",
+    "standard-version": "^9.5.0"
+  }
+}
