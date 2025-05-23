@@ -1,6 +1,6 @@
 {
   "name": "zomboid-mod-template",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "scripts": {
     "release": "standard-version",
     "postrelease": "node scripts/steam.js",
