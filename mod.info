@@ -1,5 +1,6 @@
-name=Mod Template
+name=Naninhas
 poster=poster.png
-id=ModId
-description=A Zomboid mod
-url=https://github.com/Dihgg/zomboid-mod-template
+id=Naninhas
+description=Add Buffs when attaching plushies to backpacks
+url=https://github.com/Dihgg/naninhas
+require=Authentic Z - Current
