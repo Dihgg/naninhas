@@ -4,7 +4,7 @@ local Events = Events
 --- This class will handle the "Naninha" buffs when a plushie is attached to backpack
 --- @class NaninhaClass
 --- @field player table The player Object
---- @field Events table The events table
+--- @field Plushies table All the Plushies
 local NaninhasClass = {}
 NaninhasClass.__index = NaninhasClass
 
@@ -13,7 +13,7 @@ function NaninhasClass:new()
     instance.Plushies = {
         SpiffoSanta = {
             type = "AuthenticZClothing.SpiffoSanta",
-            buff = function() print("Apply SpiffoSant Buff here!")  end
+            buff = function() print("Apply SpiffoSant Buff here!") end
         }
     }
     -- instance.Events = {}
