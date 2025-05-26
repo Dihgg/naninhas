@@ -1,0 +1,17 @@
+module AuthenticZClothing {
+    imports {
+        AuthenticZClothing
+    }
+    item SpiffoSanta
+    {
+        DisplayCategory 		= 	Raccoon,
+        Weight					=	0.2,
+        Type					=	Normal,
+        DisplayName				=	Santa Spiffo,
+        Icon					=	SantaSpiffo,
+        WorldStaticModel 		= 	SpiffoPlushieSanta,
+        AttachmentType  		= 	SpiffoPlushie,
+        StaticModel 			= 	SpiffoPlushieSanta,
+        Tooltip                 =  A plushie of Spiffo dressed as Santa.<br>+x of something,
+    }
+}
