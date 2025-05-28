@@ -1,5 +1,6 @@
 .idea/
 node_modules/
+.vscode/
 *.iml
 *.code-workspace
 .DS_Store
