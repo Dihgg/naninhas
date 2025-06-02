@@ -1,6 +1,9 @@
 .idea/
-node_modules/
 .vscode/
+node_modules/
 *.iml
 *.code-workspace
 .DS_Store
+dist/
+coverage/
+*.zip
