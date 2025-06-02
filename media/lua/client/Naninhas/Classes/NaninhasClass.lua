@@ -4,7 +4,7 @@ local Events = Events
 --- This class handles plushie buffs ("Naninhas") when attached to the backpack
 --- @class NaninhasClass
 --- @field player IsoPlayer The player object
---- @field PLUSHIE_SLOTS table The valid slots to a plushie to be attached to
+--- @field PLUSHIE_SLOTS table<string> The valid slots to a plushie to be attached to
 --- @field Plushies table<string, fun(player: IsoPlayer): void> Mapping of plushie names to their buff functions
 local NaninhasClass = {}
 NaninhasClass.__index = NaninhasClass
@@ -134,7 +134,7 @@ end
 		slots = slots or self.PLUSHIE_SLOTS
 		local attachedItems = self.player and self.player:getAttachedItems()
 		if not attachedItems then return false end
-	
+
 		for i = 0, attachedItems:size() - 1 do
 			local attachedItem = attachedItems:get(i)
 			if attachedItem then
@@ -142,13 +142,13 @@ end
 				local item = attachedItem:getItem()
 				local isValidLocataion = location and slots[location]
 				local isValidItem = item and (item:getFullType() == itemType) or false
-	
+
 				if isValidLocataion and isValidItem then
 					return true
 				end
 			end
 		end
-	
+
 		return false
 	end
 ]]
@@ -158,10 +158,26 @@ function NaninhasClass:Update()
 	if not self.player then return end
 	local attachedItems = self.player:getAttachedItems()
 	if not attachedItems then return end
+	print("Checking attached items for player! " .. tostring(attachedItems))
+	print("Slots to check: " .. tostring(self.PLUSHIE_SLOTS))
 
-	for _, slot in ipairs(self.PLUSHIE_SLOTS) do
+	for i = 0, attachedItems:size() - 1 do
+		local attachedItem = attachedItems:get(i)
+		if attachedItem then
+			print("Attached item: " .. tostring(attachedItem))
+			local location = attachedItem:getLocation()
+			print("Location: " .. tostring(location))
+			if location and self.PLUSHIE_SLOTS[location] then
+				print("Valid plushie slot found: " .. location)
+			end
+		end
+	end
+	--[[ for _, slot in pairs(self.PLUSHIE_SLOTS) do
+		print("Checking slot: " .. slot)
 		local item = attachedItems:getItem(slot)
+		print("Item in slot: " .. tostring(item))
 		if item then
+			print("Found item in slot: " .. slot .. " - " .. item:getFullType())
 			local fullType = item:getFullType()
 			local plushieKey = fullType:gsub("AuthenticZClothing%.", "")
 			local buffFn = self.Plushies[plushieKey]
@@ -169,13 +185,14 @@ function NaninhasClass:Update()
 				buffFn(self.player)
 			end
 		end
-	end
+	end ]]
 end
 
 --- Registers event handlers for Naninhas
 function NaninhasClass:register()
 	Events.OnCreatePlayer.Add(function(_, player) self:OnCreatePlayer(player) end)
-	Events.EveryTenMinutes.Add(function() self:Update() end)
+	-- Events.EveryTenMinutes.Add(function() self:Update() end)
+	Events.EveryOneMinute.Add(function() self:Update() end)
 end
 
 return NaninhasClass
