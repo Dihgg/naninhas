@@ -1,3 +1,8 @@
+import * as Events from "@asledgehammer/pipewrench-events";
+
 import { NaninhaClass } from "components";
 
-const naninhas = new NaninhaClass();
+
+Events.onCreatePlayer.addListener((_, player) => {
+	const naninhas = new NaninhaClass(player);
+});
