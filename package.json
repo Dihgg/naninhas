@@ -2,6 +2,7 @@
   "name": "naninhas",
   "version": "0.0.1",
   "scripts": {
+    "prebuild":"npm run clean",
     "build": "tstl",
     "clean": "rimraf dist",
     "check": "prettier --check . && eslint .",
