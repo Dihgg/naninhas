@@ -1,7 +1,31 @@
 import { AttachedItem, IsoPlayer } from "@asledgehammer/pipewrench";
 import * as Events from "@asledgehammer/pipewrench-events";
 import { Subject } from "components/Observer";
-import { Plushie, SpiffoSanta } from "./Plushies";
+import {
+	Plushie,
+	BorisBadger,
+	Doll,
+	Flamingo,
+	FluffyfootBunny,
+	FreddyFox,
+	FurbertSquirrel,
+	GroguAZ,
+	JacquesBeaver,
+	MoleyMole,
+	OtisPug,
+	PancakeHedgehog,
+	Spiffo,
+	SpiffoBlueberry,
+	SpiffoCherry,
+	SpiffoGrey,
+	SpiffoHeart,
+	SpiffoPlushieRainbow,
+	SpiffoSanta,
+	SpiffoShamrock,
+	SubstitutionDoll,
+	ToyBear,
+	ToyBearSmall
+} from "./Plushies";
 
 /* enum SLOTS {
 	SpiffoPlushie = "SpiffoPlushie",
@@ -21,7 +45,28 @@ export class Naninhas {
 		this.player = player;
 		this.subject = new Subject();
 		this.PLUSHIES = [
-			new SpiffoSanta(player, "SpiffoSanta")
+			new BorisBadger(player),
+			new Doll(player),
+			new Flamingo(player),
+			new FluffyfootBunny(player),
+			new FreddyFox(player),
+			new FurbertSquirrel(player),
+			new GroguAZ(player),
+			new JacquesBeaver(player),
+			new MoleyMole(player),
+			new OtisPug(player),
+			new PancakeHedgehog(player),
+			new Spiffo(player),
+			new SpiffoBlueberry(player),
+			new SpiffoCherry(player),
+			new SpiffoGrey(player),
+			new SpiffoHeart(player),
+			new SpiffoPlushieRainbow(player),
+			new SpiffoSanta(player),
+			new SpiffoShamrock(player),
+			new SubstitutionDoll(player),
+			new ToyBear(player),
+			new ToyBearSmall(player),
 		];
 		this.registerEvents();
 	}

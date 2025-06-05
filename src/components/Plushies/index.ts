@@ -1,2 +1,2 @@
 export * from "./Plushie.class";
-export * from "./SpiffoSanta.plushie";
+export * from "./PlushieList.plushie";

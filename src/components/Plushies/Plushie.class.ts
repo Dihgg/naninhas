@@ -1,6 +1,36 @@
 import { IsoPlayer } from "@asledgehammer/pipewrench";
 import { Observer } from "components/Observer";
+// import { LuaEventManager } from "@asledgehammer/pipewrench"
 
+/**
+ * Wrapper around `player.getModData()` to ensure the data can be retrieve type safely
+ */
+class PlayerData<T> {
+	private player: IsoPlayer;
+	private defaultData: T;
+	/**
+	 * @param player Player object from PZ
+	 * @param defaultData The data that shall be returned by default
+	 */
+	constructor(player: IsoPlayer, defaultData: T)  {
+		this.player = player;
+		this.defaultData = defaultData;
+	}
+	/**
+	 * Safely retrieve some data from `player.getModData()`
+	 * @param key The key to be used in `getModData()`
+	 * @returns The data in expected format
+	 */
+	get(key: string) {
+		if(!this.player.getModData()[key]) {
+			this.player.getModData()[key] = {}
+		}
+		if(!(this.player.getModData()[key] as T)) {
+			(this.player.getModData()[key] as T) = this.defaultData;
+		}
+		return (this.player.getModData()[key] as T);
+	}
+}
 
 /**
  * This class control the Plushie behavior
@@ -13,36 +43,34 @@ export abstract class Plushie implements Observer {
 	private traitNames: string[];
 	/** List of traits the player current posseses that are from Plushies ONLY */
 	private naninhasTraits: string[];
+	/** The data from `player.getModData()` to ensure traits are not permanent */
+	private data: PlayerData<{ traits: string[] }>;
 
+	/**
+	 * @param player Player object from PZ
+	 * @param name Plushie name
+	 * @param traitsNames A string with traits that this plushies gives when equipped
+	 */
 	constructor(player: IsoPlayer, name: string, traitsNames: string[] = []) {
 		this.name = name;
 		this.player = player;
 		this.traitNames = traitsNames;
-		// TODO: improve this, maybe creating a wrapper into the player object
-		this.ensureModData();
+		this.data = new PlayerData(this.player, { traits: [] });
 
-		this.naninhasTraits = this.player.getModData().NaninhaClass.naninhasTraits;
+		this.naninhasTraits = this.data.get('NaninhasData').traits;
 	}
 
 	/**
-	 * This method will ensure the naninhas data in the `getModData`.
-	 * This is where the traits from naninhas will be set, so the
-	 * traits are not permanent
+	 * Method that should be called periodically to apply the Plushie effect
 	 */
-	private ensureModData() {
-		if (!this.player.getModData().NaninhaClass) {
-			this.player.getModData().NaninhaClass = {};
-		}
-		if (!this.player.getModData().NaninhaClass.naninhasTraits) {
-			this.player.getModData().NaninhaClass.naninhasTraits = [];
-		}
-	}
-
 	update() {
 		print(`Buff for ${this.name} should be applied here!`);
-		this.player.getModData().NaninhaClass.naninhasTraits = this.naninhasTraits;
+		this.data.get('NaninhasData').traits = this.naninhasTraits;
 	}
 
+	/**
+	 * Method that should be called when the Plushie is equipped
+	 */
 	public subscribe() {
 		for (const trait of this.traitNames) {
 			// Only saves traits that the player does not have without the Naninha
@@ -53,6 +81,9 @@ export abstract class Plushie implements Observer {
 		}
 	}
 
+	/**
+	 * Method that should be called when Plushie is unequipped
+	 */
 	public unsubscribe() {
 		for (const trait of this.traitNames) {
 			// Remove all the traits that are exclusive this Naninha
