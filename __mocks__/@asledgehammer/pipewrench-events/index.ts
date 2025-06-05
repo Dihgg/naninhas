@@ -11,3 +11,10 @@ export const everyOneMinute = ({
 		callback();
 	})
 });
+
+export const onCreatePlayer = ({
+	addListener: jest.fn((callback) => {
+		// Simulate the event firing
+		callback();
+	})
+});
