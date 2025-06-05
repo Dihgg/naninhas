@@ -21,6 +21,7 @@ module.exports = {
   moduleFileExtensions: ['js', 'json', 'ts', 'd.ts', 'node'],
   testRegex: '.*\\.spec\\.ts$',
   collectCoverageFrom: ['src/**/*.(t|j)s'],
+  coveragePathIgnorePatterns: ['index.(t|j)s'],
   transformIgnorePatterns: [
     // '/node_modules/(?!<module-name>).+\\.js$',
   ],
