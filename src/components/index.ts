@@ -1,1 +1,1 @@
-export * from "./NaninhaClass";
+export * from "./Naninhas.class";

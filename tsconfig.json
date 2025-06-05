@@ -30,6 +30,5 @@
       }
     ]
   },
-  "include": ["src"],
-  "exclude": ["**/*.spec.*"]
+  "exclude": ["**/*.spec.*", "__mocks__/**/*.ts", "test/**/*.ts"]
 }
