@@ -22,13 +22,9 @@ class PlayerData<T> {
 	 * @returns The data in expected format
 	 */
 	get(key: string) {
-		print("player", this.player);
 		if(!this.player.getModData()[key]) {
 			this.player.getModData()[key] = this.defaultData;
 		}
-		/* if(!(this.player.getModData()[key] as T)) {
-			(this.player.getModData()[key] as T) = this.defaultData;
-		} */
 		return (this.player.getModData()[key] as T);
 	}
 }
@@ -87,7 +83,7 @@ export abstract class Plushie implements Observer {
 	 */
 	public unsubscribe() {
 		for (const trait of this.traitNames) {
-			// Remove all the traits that are exclusive this Naninha
+			// Remove all the traits that are exclusive this Plushie
 			if (this.naninhasTraits.includes(trait)) {
 				this.player.getTraits().remove(trait);
 				this.naninhasTraits = this.naninhasTraits.filter(nTrait => nTrait != trait);
