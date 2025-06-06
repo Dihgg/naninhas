@@ -22,12 +22,13 @@ class PlayerData<T> {
 	 * @returns The data in expected format
 	 */
 	get(key: string) {
+		print("player", this.player);
 		if(!this.player.getModData()[key]) {
-			this.player.getModData()[key] = {}
+			this.player.getModData()[key] = this.defaultData;
 		}
-		if(!(this.player.getModData()[key] as T)) {
+		/* if(!(this.player.getModData()[key] as T)) {
 			(this.player.getModData()[key] as T) = this.defaultData;
-		}
+		} */
 		return (this.player.getModData()[key] as T);
 	}
 }
@@ -38,9 +39,9 @@ class PlayerData<T> {
 export abstract class Plushie implements Observer {
 	name: string;
 	/** Zomboid player object */
-	private player: IsoPlayer;
+	private readonly player: IsoPlayer;
 	/** List of traits that this Plushie should grant */
-	private traitNames: string[];
+	private readonly traitNames: string[];
 	/** List of traits the player current posseses that are from Plushies ONLY */
 	private naninhasTraits: string[];
 	/** The data from `player.getModData()` to ensure traits are not permanent */
