@@ -17,7 +17,8 @@
       "jest"
     ],
     "paths": {
-      "@components": ["src/components/index.ts"]
+      "components/*": ["components/*"],
+      "components": ["components/index.ts"]
     }
   },
   "tstl": {
@@ -30,5 +31,9 @@
       }
     ]
   },
-  "exclude": ["**/*.spec.*", "__mocks__/**/*.ts", "test/**/*.ts"]
+  "exclude": [
+    "**/*.spec.*",
+    "src/__mocks__/**/*.ts",
+    "src/test/**/*.ts"
+  ]
 }
