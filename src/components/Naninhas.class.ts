@@ -25,7 +25,7 @@ import {
 	SubstitutionDoll,
 	ToyBear,
 	ToyBearSmall
-} from "./Plushies";
+} from "components/Plushies";
 
 /* enum SLOTS {
 	SpiffoPlushie = "SpiffoPlushie",
