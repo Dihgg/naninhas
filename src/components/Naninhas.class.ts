@@ -37,14 +37,14 @@ import {
 export class Naninhas {
 	private player: IsoPlayer;
 
-	PLUSHIES: Plushie[] = [];
+	private readonly PLUSHIES: Plushie[] = [];
 
 	private subject: Subject;
 
-	constructor(player: IsoPlayer) {
+	constructor(player: IsoPlayer, plushies: Plushie[] = []) {
 		this.player = player;
 		this.subject = new Subject();
-		this.PLUSHIES = [
+		this.PLUSHIES = (plushies.length > 0) ? plushies : [
 			new BorisBadger(player),
 			new Doll(player),
 			new Flamingo(player),
@@ -75,7 +75,7 @@ export class Naninhas {
 	 * Method that should be called periodically
 	 */
 	update() {
-		// Tracks attached plushie names for easy lookup 
+		// Tracks attached plushie names for easy lookup
 		const attachedSet = new Set<string>();
 
 		// Step 1: Scan all attached items and track plushie names
