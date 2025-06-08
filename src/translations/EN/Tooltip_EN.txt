@@ -1,0 +1,4 @@
+Tooltip_EN = {
+	Tooltip_SubstitutionDoll 	= "Testing!",
+	Tooltip_SpiffoSanta			= "A plushie of Spiffo dressed as Santa."
+}

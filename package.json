@@ -4,6 +4,7 @@
   "scripts": {
     "prebuild":"npm run clean",
     "build": "tstl",
+    "postbuild": "node scripts/translations.js",
     "clean": "rimraf dist",
     "check": "prettier --check . && eslint .",
     "lint": "prettier --write . && eslint .",
@@ -32,7 +33,6 @@
     "url": "https://github.com/dihgg/naninhas/issues"
   },
   "homepage": "https://github.com/dihgg/naninhas.git#readme",
-  
   "keywords": [
     "zomboid",
     "mod",
