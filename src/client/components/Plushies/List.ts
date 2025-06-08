@@ -4,109 +4,181 @@ import { Plushie } from "./Plushie";
 
 export class BorisBadger extends Plushie {
 	constructor(player: IsoPlayer) {
-		super(player, "BorisBadger");
+		super({
+			player,
+			name:  "BorisBadger"
+		});
 	}
 }
 
 export class Doll extends Plushie {
 	constructor(player: IsoPlayer) {
-		super(player, "Doll");
+		super({
+			player,
+			name:  "Doll"
+		});
 	}
 }
 
 export class Flamingo extends Plushie {
 	constructor(player: IsoPlayer) {
-		super(player, "Flamingo");
+		super({
+			player,
+			name:  "Flamingo",
+			traitsToAdd: ["Graceful"],
+			traitsToSuppress: ["Clumsy"]
+		});
 	}
 }
 
 export class FluffyfootBunny extends Plushie {
 	constructor(player: IsoPlayer) {
-		super(player, "FluffyfootBunny");
+		super({
+			player,
+			name:  "FluffyfootBunny",
+			traitsToAdd: ["Inconspicuous"],
+			traitsToSuppress: ["Conspicuous"]
+		});
 	}
 }
 
 export class FreddyFox extends Plushie {
 	constructor(player: IsoPlayer) {
-		super(player, "FreddyFox");
+		super({
+			player,
+			name:  "FreddyFox"
+		});
 	}
 }
 
 export class FurbertSquirrel extends Plushie {
 	constructor(player: IsoPlayer) {
-		super(player, "FurbertSquirrel");
+		super({
+			player,
+			name:  "FurbertSquirrel"
+		});
 	}
 }
 
 export class GroguAZ extends Plushie {
 	constructor(player: IsoPlayer) {
-		super(player, "GroguAZ");
+		super({
+			player,
+			name:  "GroguAZ"
+		});
 	}
 }
 
 export class JacquesBeaver extends Plushie {
 	constructor(player: IsoPlayer) {
-		super(player, "JacquesBeaver", ["Organized"]);
+		super({
+			player,
+			name:  "JacquesBeaver",
+			traitsToAdd: ["Organized"],
+			traitsToSuppress: ["Disorganized"]
+		});
 	}
 }
 
 export class MoleyMole extends Plushie {
 	constructor(player: IsoPlayer) {
-		super(player, "MoleyMole");
+		super({
+			player,
+			name:  "MoleyMole"
+		});
 	}
 }
 
 export class OtisPug extends Plushie {
 	constructor(player: IsoPlayer) {
-		super(player, "OtisPug", ["FastReader"]);
+		super({
+			player,
+			name:  "OtisPug",
+			traitsToAdd: ["FastLearner"],
+			traitsToSuppress: ["SlowLearner"]
+		});
 	}
 }
 
 export class PancakeHedgehog extends Plushie {
 	constructor(player: IsoPlayer) {
-		super(player, "PancakeHedgehog");
+		super({
+			player,
+			name:  "PancakeHedgehog"
+		});
 	}
 }
 
 export class Spiffo extends Plushie {
 	constructor(player: IsoPlayer) {
-		super(player, "Spiffo");
+		super({
+			player,
+			name:  "Spiffo"
+		});
 	}
 }
 
 export class SpiffoBlueberry extends Plushie {
 	constructor(player: IsoPlayer) {
-		super(player, "SpiffoBlueberry", ["LowThirst"]);
+		super({
+			player,
+			name:  "SpiffoBlueberry",
+			traitsToAdd: ["LowThirst"],
+			traitsToSuppress: ["HighThirst"]
+		});
 	}
 }
 
 export class SpiffoCherry extends Plushie {
 	constructor(player: IsoPlayer) {
-		super(player, "SpiffoCherry", ["LightEater"]);
+		super({
+			player,
+			name:  "SpiffoCherry",
+			traitsToAdd: ["LightEater"],
+			traitsToSuppress: ["HeartyAppitite"]
+		});
 	}
 }
 
 export class SpiffoGrey extends Plushie {
 	constructor(player: IsoPlayer) {
-		super(player, "SpiffoGrey", ["Brave"]);
+		super({
+			player,
+			name:  "SpiffoGrey",
+			traitsToAdd: ["Brave"],
+			traitsToSuppress: ["Cowardly", "Agoraphobic", "Claustophobic"]
+		});
 	}
 }
 
 export class SpiffoHeart extends Plushie {
 	constructor(player: IsoPlayer) {
-		super(player, "SpiffoHeart");
+		super({
+			player,
+			name:  "SpiffoHeart"
+		});
 	}
 }
 
 export class SpiffoPlushieRainbow extends Plushie {
 	constructor(player: IsoPlayer) {
-		super(player, "SpiffoPlushieRainbow", ["FastLearner"]);
+		super({
+			player,
+			name:  "SpiffoPlushieRainbow",
+			traitsToAdd: ["FastLearner"],
+			traitsToSuppress: ["SlowLearner"]
+		});
 	}
 }
 
 export class SpiffoSanta extends Plushie {
 	constructor(player: IsoPlayer) {
-		super(player, "SpiffoSanta", ["Outdoorsman"]);
+		super({
+			player,
+			name:  "SpiffoSanta",
+			traitsToAdd: ["Outdoorsman"]
+			
+		});
 	}
 	public update() {
 		super.update();
@@ -116,25 +188,37 @@ export class SpiffoSanta extends Plushie {
 
 export class SpiffoShamrock extends Plushie {
 	constructor(player: IsoPlayer) {
-		super(player, "SpiffoShamrock");
+		super({
+			player,
+			name:  "SpiffoShamrock"
+		});
 	}
 }
 
 export class SubstitutionDoll extends Plushie {
 	constructor(player: IsoPlayer) {
-		super(player, "SubstitutionDoll");
+		super({
+			player,
+			name:  "SubstitutionDoll"
+		});
 	}
 }
 
 export class ToyBear extends Plushie {
 	constructor(player: IsoPlayer) {
-		super(player, "ToyBear");
+		super({
+			player,
+			name:  "ToyBear"
+		});
 	}
 }
 
 export class ToyBearSmall extends Plushie {
 	constructor(player: IsoPlayer) {
-		super(player, "ToyBearSmall");
+		super({
+			player,
+			name:  "ToyBearSmall"
+		});
 	}
 }
 
