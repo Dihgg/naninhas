@@ -1,5 +1,5 @@
 import { IsoPlayer } from "@asledgehammer/pipewrench";
-import { Plushie } from "./Plushie.class";
+import { Plushie } from "./Plushie";
 
 
 export class BorisBadger extends Plushie {
@@ -106,7 +106,7 @@ export class SpiffoPlushieRainbow extends Plushie {
 
 export class SpiffoSanta extends Plushie {
 	constructor(player: IsoPlayer) {
-		super(player, "SpiffoSanta", ["Outdoorsy"]);
+		super(player, "SpiffoSanta", ["Outdoorsman"]);
 	}
 	public update() {
 		super.update();

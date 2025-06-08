@@ -1,6 +1,6 @@
 import { mock } from 'jest-mock-extended';
-import { Observer } from "./Observer.interface";
-import { Subject } from "./Subject.class";
+import { Observer } from "./Observer";
+import { Subject } from "./Subject";
 
 describe("Subject", () => {
 	const observer = mock<Observer>({name: "mock"});

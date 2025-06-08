@@ -23,12 +23,12 @@ import {
 	SubstitutionDoll,
 	ToyBear,
 	ToyBearSmall
-} from "./List.plushie";
-import { Plushie } from './Plushie.class';
+} from "./List";
+import { Plushie } from './Plushie';
 
-jest.mock('./Plushie.class');
+jest.mock('./Plushie');
 
-describe("List.plushie.ts", () => {
+describe("List.ts", () => {
 	const spyUpdate = jest.spyOn(Plushie.prototype, 'update');
 	const player = mock<IsoPlayer>();
 	const PLUSHIES = [

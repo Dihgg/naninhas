@@ -1,5 +1,5 @@
 import { mock } from "jest-mock-extended";
-import { Plushie } from "./Plushie.class";
+import { Plushie } from "./Plushie";
 import { IsoPlayer } from "@asledgehammer/pipewrench";
 
 describe("Plushie", () => {

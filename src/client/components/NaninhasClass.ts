@@ -1,8 +1,8 @@
 import { AttachedItem, IsoPlayer } from "@asledgehammer/pipewrench";
 import * as Events from "@asledgehammer/pipewrench-events";
-import { Subject } from "components/Observer";
+import { Subject } from "./Observer/Subject";
+import { Plushie } from "./Plushies/Plushie";
 import {
-	Plushie,
 	BorisBadger,
 	Doll,
 	Flamingo,
@@ -25,14 +25,7 @@ import {
 	SubstitutionDoll,
 	ToyBear,
 	ToyBearSmall
-} from "components/Plushies";
-
-/* enum SLOTS {
-	SpiffoPlushie = "SpiffoPlushie",
-	Doll = "Doll",
-	TeddyBear = "TeddyBear",
-	RubberDuck = "RubberDuck",
-} */
+} from "./Plushies/List";
 
 export class Naninhas {
 	private player: IsoPlayer;
@@ -79,14 +72,16 @@ export class Naninhas {
 		const attachedSet = new Set<string>();
 
 		// Step 1: Scan all attached items and track plushie names
-		this.player.getAttachedItems().forEach((attachedItem: AttachedItem) => {
+		const attachedItems = this.player.getAttachedItems();
+		for (let i = 0; i < attachedItems.size(); i++) {
+			const attachedItem: AttachedItem = attachedItems.get(i);
 			const fullType = attachedItem.getItem().getFullType();
 			const name = fullType.replace("AuthenticZClothing.", "");
-			const plushie = this.PLUSHIES.find(p => p.name === name);
-			if (plushie) {
-				attachedSet.add(plushie.name);
+			// Check if the item is a plushie
+			if (this.PLUSHIES.some(p => p.name === name)) {
+				attachedSet.add(name);
 			}
-		});
+		}
 
 		for (const plushie of this.PLUSHIES) {
 			// Step 2: Subscribe plushies that are now attached and not yet observed

@@ -1,5 +1,5 @@
 import { IsoPlayer } from "@asledgehammer/pipewrench";
-import { Observer } from "components/Observer";
+import { Observer } from "../Observer/Observer";
 // import { LuaEventManager } from "@asledgehammer/pipewrench"
 
 /**
@@ -7,7 +7,7 @@ import { Observer } from "components/Observer";
  */
 class PlayerData<T> {
 	private player: IsoPlayer;
-	private defaultData: T;
+	private readonly defaultData: T;
 	/**
 	 * @param player Player object from PZ
 	 * @param defaultData The data that shall be returned by default
@@ -61,7 +61,7 @@ export abstract class Plushie implements Observer {
 	 * Method that should be called periodically to apply the Plushie effect
 	 */
 	update() {
-		print(`Buff for ${this.name} should be applied here!`);
+		// This ensures the data is saved in the `player.getModData()`
 		this.data.get('NaninhasData').traits = this.naninhasTraits;
 	}
 
@@ -89,5 +89,7 @@ export abstract class Plushie implements Observer {
 				this.naninhasTraits = this.naninhasTraits.filter(nTrait => nTrait != trait);
 			}
 		}
+		// This ensures the data is saved in the `player.getModData()` before the Plushie effect is no longer applied
+		this.update();
 	}
 }

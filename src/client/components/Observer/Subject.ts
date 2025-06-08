@@ -1,4 +1,4 @@
-import { Observer } from "./Observer.interface";
+import { Observer } from "./Observer";
 
 /**
  * This class will handle all the observers
@@ -28,5 +28,5 @@ export class Subject {
 	/** Method to find an observer by its name */
 	find(name:string) {
 		return this.observers.find( (observer) => observer.name == name );
-	} 
+	}
 }
