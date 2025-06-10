@@ -13,10 +13,11 @@ module.exports = {
 	moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths, {
 		prefix: "<rootDir>"
 	}),
+	collectCoverageFrom: ["**/*.(t|j)s"],
 	coverageDirectory: "../coverage",
+	coverageReporters: ["text", "lcov"],
+	coveragePathIgnorePatterns: ["index.(t|j)s"],
 	moduleFileExtensions: ["js", "json", "ts", "d.ts", "node"],
 	testRegex: ".*\\.spec\\.ts$",
-	collectCoverageFrom: ["**/*.(t|j)s"],
-	coveragePathIgnorePatterns: ["index.(t|j)s"],
 	transformIgnorePatterns: ["/node_modules/(?!<module-name>).+\\.js$"]
 };

@@ -2,11 +2,14 @@
 
 ## Project Zomboid Plushie Buffs
 
+[![codecov](https://codecov.io/gh/dihgg/naninhas/branch/main/graph/badge.svg)](https://codecov.io/gh/dihgg/naninhas)
+
 <p align="center">
   <img src="./contents/preview.png">
 </p>
 
 This mod introduces the concept of "naninhas" to AuthenticZ attachable plushies!
+
 Each plushie will give a different bonus when attached to the backpack!
 
 ## Buffs
@@ -40,4 +43,4 @@ Each plushie grants a unique bonus when attached to your backpack. Only one plus
 
 ## Useful links
 
--   [Umbrella](https://github.com/asledgehammer/Umbrella) - Lua script code completion for Zomboid API
+- [Umbrella](https://github.com/asledgehammer/Umbrella) - Lua script code completion for Zomboid API
