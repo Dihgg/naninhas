@@ -1,4 +1,4 @@
-import { /* mock, */ mockDeep } from 'jest-mock-extended';
+import { mock } from 'jest-mock-extended';
 import { IsoPlayer } from "@asledgehammer/pipewrench";
 import {
 	BorisBadger,
@@ -29,9 +29,7 @@ import { Plushie } from './Plushie';
 jest.mock('./Plushie');
 
 describe("List.ts", () => {
-	const spyUpdate = jest.spyOn(Plushie.prototype, 'update');
-	// TODO: fix this test
-	const player = mockDeep<IsoPlayer>(/*{
+	const player = mock<IsoPlayer>({
 		getStats: jest.fn().mockImplementation(() => ({
 			setEndurance: jest.fn(),
 			getEndurance: jest.fn(),
@@ -44,7 +42,7 @@ describe("List.ts", () => {
 			setPanic: jest.fn(),
 			getPanic: jest.fn(),
 		}))
-	}*/);
+	});
 	const PLUSHIES = [
 		{
 			name: "BorisBadger",
@@ -141,8 +139,9 @@ describe("List.ts", () => {
 			expect(plushie).toBeInstanceOf(Plushie);
 		});
 		it(`Should call update for ${name}`, () => {
+			const spy = jest.spyOn(Plushie.prototype, 'update');
 			plushie.update();
-			expect(spyUpdate).toHaveBeenCalled();
+			expect(spy).toHaveBeenCalled();
 		});
 	});
 });

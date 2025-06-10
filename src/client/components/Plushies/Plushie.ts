@@ -1,10 +1,10 @@
 import { IsoPlayer } from "@asledgehammer/pipewrench";
 import { Observer } from "../Observer/Observer";
 import { PlayerData } from "./PlayerData";
-// TODO: Apply the LuaEventManager to allow other mods to interact with this one 
+// TODO: Apply the LuaEventManager to allow other mods to interact with this one
 // import { LuaEventManager } from "@asledgehammer/pipewrench"
 
-type PlushieProps = {
+export type PlushieProps = {
 	player: IsoPlayer;
 	name: string;
 	traitsToAdd?: string[];
@@ -28,7 +28,7 @@ export abstract class Plushie implements Observer {
 	
 	
 	/** The data from `player.getModData()` to ensure traits are not permanent */
-	private playerData: PlayerData<{ addedTraits: string[], suppressedTraits: string[] }>;
+	private readonly playerData: PlayerData<{ addedTraits: string[], suppressedTraits: string[] }>;
 
 	/**
 	 * @param player Player object from PZ

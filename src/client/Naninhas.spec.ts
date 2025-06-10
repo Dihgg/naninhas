@@ -11,10 +11,6 @@ jest.mock("./components/NaninhasClass", () => ({
 }));
 
 describe("Naninhas event registration", () => {
-	beforeEach(() => {
-		jest.clearAllMocks();
-		jest.resetModules();
-	});
 	
 	it("The Naninhas should be initialized", () => {
 		require("./Naninhas"); // triggers event registration
