@@ -17,7 +17,7 @@ type PlushieProps = {
 export abstract class Plushie implements Observer {
 	name: string;
 	/** Zomboid player object */
-	private readonly player: IsoPlayer;
+	protected readonly player: IsoPlayer;
 	/** List of traits that this Plushie should grant */
 	private readonly traitsToAdd: string[];
 	private readonly traitsToSuppress: string[] = [];

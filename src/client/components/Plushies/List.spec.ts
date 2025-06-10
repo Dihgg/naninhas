@@ -1,4 +1,4 @@
-import { mock } from 'jest-mock-extended';
+import { /* mock, */ mockDeep } from 'jest-mock-extended';
 import { IsoPlayer } from "@asledgehammer/pipewrench";
 import {
 	BorisBadger,
@@ -30,7 +30,21 @@ jest.mock('./Plushie');
 
 describe("List.ts", () => {
 	const spyUpdate = jest.spyOn(Plushie.prototype, 'update');
-	const player = mock<IsoPlayer>();
+	// TODO: fix this test
+	const player = mockDeep<IsoPlayer>(/*{
+		getStats: jest.fn().mockImplementation(() => ({
+			setEndurance: jest.fn(),
+			getEndurance: jest.fn(),
+			getBoredom: jest.fn(),
+			setBoredom: jest.fn(),
+			setFatigue: jest.fn(),
+			getFatigue: jest.fn(),
+			setFear: jest.fn(),
+			getFear: jest.fn(),
+			setPanic: jest.fn(),
+			getPanic: jest.fn(),
+		}))
+	}*/);
 	const PLUSHIES = [
 		{
 			name: "BorisBadger",

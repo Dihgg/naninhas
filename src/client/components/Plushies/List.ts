@@ -1,12 +1,12 @@
 import { IsoPlayer } from "@asledgehammer/pipewrench";
 import { Plushie } from "./Plushie";
 
-
 export class BorisBadger extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
 			player,
-			name:  "BorisBadger"
+			name:  "BorisBadger",
+			traitsToAdd: ["NightVision"]
 		});
 	}
 }
@@ -15,7 +15,9 @@ export class Doll extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
 			player,
-			name:  "Doll"
+			name:  "Doll",
+			traitsToAdd: ["EagleEyed"],
+			traitsToSuppress: ["ShortSighted"]
 		});
 	}
 }
@@ -36,8 +38,8 @@ export class FluffyfootBunny extends Plushie {
 		super({
 			player,
 			name:  "FluffyfootBunny",
-			traitsToAdd: ["Inconspicuous"],
-			traitsToSuppress: ["Conspicuous"]
+			traitsToAdd: ["LightEater"],
+			traitsToSuppress: ["HeartyAppitite"]
 		});
 	}
 }
@@ -46,7 +48,9 @@ export class FreddyFox extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
 			player,
-			name:  "FreddyFox"
+			name:  "FreddyFox",
+			traitsToAdd: ["Inconspicuous"],
+			traitsToSuppress: ["Conspicuous"]
 		});
 	}
 }
@@ -55,7 +59,8 @@ export class FurbertSquirrel extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
 			player,
-			name:  "FurbertSquirrel"
+			name:  "FurbertSquirrel",
+			traitsToAdd: ["Outdoorsman"]
 		});
 	}
 }
@@ -64,7 +69,9 @@ export class GroguAZ extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
 			player,
-			name:  "GroguAZ"
+			name:  "GroguAZ",
+			traitsToAdd: ["FastLearner"],
+			traitsToSuppress: ["SlowLearner"]
 		});
 	}
 }
@@ -74,8 +81,7 @@ export class JacquesBeaver extends Plushie {
 		super({
 			player,
 			name:  "JacquesBeaver",
-			traitsToAdd: ["Organized"],
-			traitsToSuppress: ["Disorganized"]
+			traitsToAdd: ["Naninhas_JacquesBeaver"]
 		});
 	}
 }
@@ -84,7 +90,8 @@ export class MoleyMole extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
 			player,
-			name:  "MoleyMole"
+			name:  "MoleyMole",
+			traitsToAdd: ["Naninhas_MoleyMole"]
 		});
 	}
 }
@@ -94,8 +101,8 @@ export class OtisPug extends Plushie {
 		super({
 			player,
 			name:  "OtisPug",
-			traitsToAdd: ["FastLearner"],
-			traitsToSuppress: ["SlowLearner"]
+			traitsToAdd: ["FastReader"],
+			traitsToSuppress: ["SlowReader"]
 		});
 	}
 }
@@ -104,7 +111,8 @@ export class PancakeHedgehog extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
 			player,
-			name:  "PancakeHedgehog"
+			name:  "PancakeHedgehog",
+			traitsToAdd: ["Naninhas_PancakeHedgehog"]
 		});
 	}
 }
@@ -115,6 +123,14 @@ export class Spiffo extends Plushie {
 			player,
 			name:  "Spiffo"
 		});
+	}
+	update() {
+		super.update();
+		const {
+			setEndurance,
+			getEndurance,
+		} = this.player.getStats();
+		setEndurance(Math.min(1, getEndurance() + 0.1));
 	}
 }
 
@@ -134,8 +150,8 @@ export class SpiffoCherry extends Plushie {
 		super({
 			player,
 			name:  "SpiffoCherry",
-			traitsToAdd: ["LightEater"],
-			traitsToSuppress: ["HeartyAppitite"]
+			traitsToAdd: ["Organized"],
+			traitsToSuppress: ["Disorganized"]
 		});
 	}
 }
@@ -145,8 +161,8 @@ export class SpiffoGrey extends Plushie {
 		super({
 			player,
 			name:  "SpiffoGrey",
-			traitsToAdd: ["Brave"],
-			traitsToSuppress: ["Cowardly", "Agoraphobic", "Claustophobic"]
+			traitsToAdd: ["Brave", "Naninhas_SpiffoGray"],
+			traitsToSuppress: ["Brave", "Cowardly", "Agoraphobic", "Claustophobic"]
 		});
 	}
 }
@@ -155,7 +171,8 @@ export class SpiffoHeart extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
 			player,
-			name:  "SpiffoHeart"
+			name:  "SpiffoHeart",
+			traitsToAdd:["Naninhas_SpiffoHeart"]
 		});
 	}
 }
@@ -165,9 +182,21 @@ export class SpiffoPlushieRainbow extends Plushie {
 		super({
 			player,
 			name:  "SpiffoPlushieRainbow",
-			traitsToAdd: ["FastLearner"],
-			traitsToSuppress: ["SlowLearner"]
 		});
+	}
+	update() {
+		super.update();
+		const {
+			getBoredom,
+			setBoredom,
+			getEndurance,
+			setEndurance,
+			getFatigue,
+			setFatigue,
+		} = this.player.getStats();
+		setBoredom(Math.max(0, getBoredom() - 0.05));
+		setEndurance(Math.min(1, getEndurance() + 0.05));
+		setFatigue(Math.max(0, getFatigue() - 0.05));
 	}
 }
 
@@ -176,13 +205,15 @@ export class SpiffoSanta extends Plushie {
 		super({
 			player,
 			name:  "SpiffoSanta",
-			traitsToAdd: ["Outdoorsman"]
-			
 		});
 	}
 	public update() {
 		super.update();
-		print("SpiffoSanta buff should be applied");
+		const {
+			getBoredom,
+			setBoredom,
+		} = this.player.getStats();
+		setBoredom(Math.max(0, getBoredom() - 0.05));
 	}
 }
 
@@ -190,7 +221,8 @@ export class SpiffoShamrock extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
 			player,
-			name:  "SpiffoShamrock"
+			name:  "SpiffoShamrock",
+			traitsToAdd: ["Naninhas_SpiffoShamrock"]
 		});
 	}
 }
@@ -199,7 +231,9 @@ export class SubstitutionDoll extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
 			player,
-			name:  "SubstitutionDoll"
+			name:  "SubstitutionDoll",
+			traitsToAdd: ["Brave"],
+			traitsToSuppress: ["Desensitized", "Cowardly", "Agoraphobic", "Claustophobic"]
 		});
 	}
 }
@@ -211,6 +245,17 @@ export class ToyBear extends Plushie {
 			name:  "ToyBear"
 		});
 	}
+	update() {
+		super.update();
+		const {
+			getFear,
+			setFear,
+			getPanic,
+			setPanic
+		} = this.player.getStats();
+		setFear(Math.max(0, getFear() - 0.05));
+		setPanic(Math.max(0, getPanic() - 0.05));
+	}
 }
 
 export class ToyBearSmall extends Plushie {
@@ -220,31 +265,15 @@ export class ToyBearSmall extends Plushie {
 			name:  "ToyBearSmall"
 		});
 	}
+	update() {
+		super.update();
+		const {
+			getFear,
+			setFear,
+			getPanic,
+			setPanic
+		} = this.player.getStats();
+		setFear(Math.max(0, getFear() - 0.01));
+		setPanic(Math.max(0, getPanic() - 0.01));
+	}
 }
-
-/*
-	[
-		'BorisBadger',
-		'Doll',
-		'Flamingo',
-		'FluffyfootBunny',
-		'FreddyFox',
-		'FurbertSquirrel',
-		'GroguAZ',
-		'JacquesBeaver',
-		'MoleyMole',
-		'OtisPug',
-		'PancakeHedgehog',
-		'Spiffo',
-		'SpiffoBlueberry',
-		'SpiffoCherry',
-		'SpiffoGrey',
-		'SpiffoHeart',
-		'SpiffoPlushieRainbow',
-		'SpiffoSanta',
-		'SpiffoShamrock',
-		'SubstitutionDoll',
-		'ToyBear',
-		'ToyBearSmall'
-	];
-*/
