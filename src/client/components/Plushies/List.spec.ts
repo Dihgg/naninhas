@@ -1,4 +1,4 @@
-import { mock } from 'jest-mock-extended';
+import { mock } from "jest-mock-extended";
 import { IsoPlayer } from "@asledgehammer/pipewrench";
 import {
 	BorisBadger,
@@ -24,9 +24,9 @@ import {
 	ToyBear,
 	ToyBearSmall
 } from "./List";
-import { Plushie } from './Plushie';
+import { Plushie } from "./Plushie";
 
-jest.mock('./Plushie');
+jest.mock("./Plushie");
 
 describe("List.ts", () => {
 	const player = mock<IsoPlayer>({
@@ -40,7 +40,7 @@ describe("List.ts", () => {
 			setFear: jest.fn(),
 			getFear: jest.fn(),
 			setPanic: jest.fn(),
-			getPanic: jest.fn(),
+			getPanic: jest.fn()
 		}))
 	});
 	const PLUSHIES = [
@@ -133,13 +133,13 @@ describe("List.ts", () => {
 			instance: ToyBearSmall
 		}
 	];
-	describe.each(PLUSHIES)("For $name", ({name, instance}) => {
+	describe.each(PLUSHIES)("For $name", ({ name, instance }) => {
 		const plushie = new instance(player);
 		it(`Should instantiate ${name}`, () => {
 			expect(plushie).toBeInstanceOf(Plushie);
 		});
 		it(`Should call update for ${name}`, () => {
-			const spy = jest.spyOn(Plushie.prototype, 'update');
+			const spy = jest.spyOn(Plushie.prototype, "update");
 			plushie.update();
 			expect(spy).toHaveBeenCalled();
 		});

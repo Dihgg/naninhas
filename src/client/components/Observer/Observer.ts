@@ -1,4 +1,3 @@
-
 /**
  * This interface defines an Object that can be updated, subscibe or unsubscribed from a Subject
  * by using an Observer pattern

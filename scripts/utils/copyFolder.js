@@ -18,7 +18,7 @@ const optimizeImage = async (srcFilePath, destFilePath) => {
 };
 
 // Recursively gather all files first
-const gatherAllFiles = async (dir) => {
+const gatherAllFiles = async dir => {
 	const items = await fs.readdir(dir, { withFileTypes: true });
 	const filePaths = [];
 
@@ -61,7 +61,9 @@ const copyAndOptimizeRecursive = async (srcDir, destDir, progressBar) => {
 
 const copyFolder = async (srcPath, destPath) => {
 	const pipewrenchJsonPath = path.join(process.cwd(), "pipewrench.json");
-	const { modInfo: { name } } = JSON.parse(fs.readFileSync(pipewrenchJsonPath, "utf8"));
+	const {
+		modInfo: { name }
+	} = JSON.parse(fs.readFileSync(pipewrenchJsonPath, "utf8"));
 
 	const srcDir = path.join(process.cwd(), ...srcPath.split("/"));
 	const destDir = path.join(process.cwd(), "dist", name, "media", ...destPath.split("/"));

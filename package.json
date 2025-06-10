@@ -1,78 +1,78 @@
 {
-  "name": "naninhas",
-  "version": "0.0.1",
-  "scripts": {
-    "prebuild": "npm run clean",
-    "build": "tstl",
-    "postbuild": "node scripts/postbuild.js",
-    "clean": "rimraf dist",
-    "check": "prettier --check . && eslint .",
-    "lint": "prettier --write . && eslint .",
-    "watch": "tstl --watch --outDir ~/Zomboid/mods",
-    "release": "standard-version",
-    "postrelease": "npm run zip",
-    "zip": "node scripts/zipper.js",
-    "steam": "node scripts/steam.js",
-    "zipname": "node scripts/zipname.js",
-    "test": "jest --detectOpenHandles",
-    "coverage": "npm run test -- --coverage"
-  },
-  "watch": {
-    "build": {
-      "patterns": [
-        "src"
-      ],
-      "extensions": "ts,js,jsx,lua,json,png"
-    }
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/dihgg/naninhas.git"
-  },
-  "bugs": {
-    "url": "https://github.com/dihgg/naninhas/issues"
-  },
-  "homepage": "https://github.com/dihgg/naninhas.git#readme",
-  "keywords": [
-    "zomboid",
-    "mod",
-    "pipewrench"
-  ],
-  "author": "Diego Lopes <dihgg@dihgg.com>",
-  "license": "ISC",
-  "description": "A Zomboid mod to add Buffs when attaching plushies to backpacks",
-  "devDependencies": {
-    "@asledgehammer/pipewrench": "^41.78.18",
-    "@asledgehammer/pipewrench-events": "^41.73.0",
-    "@asledgehammer/tstl-pipewrench": "^41.78.19",
-    "@jest/globals": "^29.0.0",
-    "@types/fs-extra": "11.0.4",
-    "@types/jest": "^29.5.14",
-    "@typescript-eslint/eslint-plugin": "7.16.0",
-    "@typescript-eslint/parser": "7.16.0",
-    "archiver": "^7.0.1",
-    "cli-progress": "^3.12.0",
-    "eslint": "^8.56.0",
-    "eslint-config-prettier": "^8.5.0",
-    "eslint-import-resolver-typescript": "^3.5.0",
-    "eslint-plugin-import": "^2.26.0",
-    "eslint-plugin-prettier": "^4.2.1",
-    "fs-extra": "^11.3.0",
-    "jest": "^29.7.0",
-    "jest-mock-extended": "^4.0.0-beta1",
-    "latest": "^0.2.0",
-    "lua-types": "^2.13.1",
-    "micromatch": "^4.0.8",
-    "npm-watch": "^0.11.0",
-    "prettier": "3.3.2",
-    "prettier-eslint": "16.3.0",
-    "rimraf": "^6.0.1",
-    "sharp": "^0.34.2",
-    "standard-version": "^9.5.0",
-    "ts-jest": "^29.3.4",
-    "ts-jest-resolver": "^2.0.1",
-    "ts-node": "^10.9.1",
-    "typescript": "^5.5.2",
-    "typescript-to-lua": "^1.26.0"
-  }
+	"name": "naninhas",
+	"version": "0.0.1",
+	"scripts": {
+		"prebuild": "npm run clean",
+		"build": "tstl",
+		"postbuild": "node scripts/postbuild.js",
+		"clean": "rimraf dist",
+		"check": "prettier --check . && eslint .",
+		"lint": "prettier --write . && eslint .",
+		"watch": "tstl --watch --outDir ~/Zomboid/mods",
+		"release": "standard-version",
+		"postrelease": "npm run zip",
+		"zip": "node scripts/zipper.js",
+		"steam": "node scripts/steam.js",
+		"zipname": "node scripts/zipname.js",
+		"test": "jest --detectOpenHandles",
+		"coverage": "npm run test -- --coverage"
+	},
+	"watch": {
+		"build": {
+			"patterns": [
+				"src"
+			],
+			"extensions": "ts,js,jsx,lua,json,png"
+		}
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/dihgg/naninhas.git"
+	},
+	"bugs": {
+		"url": "https://github.com/dihgg/naninhas/issues"
+	},
+	"homepage": "https://github.com/dihgg/naninhas.git#readme",
+	"keywords": [
+		"zomboid",
+		"mod",
+		"pipewrench"
+	],
+	"author": "Diego Lopes <dihgg@dihgg.com>",
+	"license": "ISC",
+	"description": "A Zomboid mod to add Buffs when attaching plushies to backpacks",
+	"devDependencies": {
+		"@asledgehammer/pipewrench": "^41.78.18",
+		"@asledgehammer/pipewrench-events": "^41.73.0",
+		"@asledgehammer/tstl-pipewrench": "^41.78.19",
+		"@jest/globals": "^29.0.0",
+		"@types/fs-extra": "11.0.4",
+		"@types/jest": "^29.5.14",
+		"@typescript-eslint/eslint-plugin": "7.16.0",
+		"@typescript-eslint/parser": "7.16.0",
+		"archiver": "^7.0.1",
+		"cli-progress": "^3.12.0",
+		"eslint": "^8.56.0",
+		"eslint-config-prettier": "^8.5.0",
+		"eslint-import-resolver-typescript": "^3.5.0",
+		"eslint-plugin-import": "^2.26.0",
+		"eslint-plugin-prettier": "^4.2.1",
+		"fs-extra": "^11.3.0",
+		"jest": "^29.7.0",
+		"jest-mock-extended": "^4.0.0-beta1",
+		"latest": "^0.2.0",
+		"lua-types": "^2.13.1",
+		"micromatch": "^4.0.8",
+		"npm-watch": "^0.11.0",
+		"prettier": "3.3.2",
+		"prettier-eslint": "16.3.0",
+		"rimraf": "^6.0.1",
+		"sharp": "^0.34.2",
+		"standard-version": "^9.5.0",
+		"ts-jest": "^29.3.4",
+		"ts-jest-resolver": "^2.0.1",
+		"ts-node": "^10.9.1",
+		"typescript": "^5.5.2",
+		"typescript-to-lua": "^1.26.0"
+	}
 }

@@ -25,17 +25,19 @@ export abstract class Plushie implements Observer {
 	private addedTraits: string[];
 	/** List of traits that are suppressed by Plushies */
 	private suppressedTraits: string[];
-	
-	
+
 	/** The data from `player.getModData()` to ensure traits are not permanent */
-	private readonly playerData: PlayerData<{ addedTraits: string[], suppressedTraits: string[] }>;
+	private readonly playerData: PlayerData<{
+		addedTraits: string[];
+		suppressedTraits: string[];
+	}>;
 
 	/**
 	 * @param player Player object from PZ
 	 * @param name Plushie name
 	 * @param traitsNames A string with traits that this plushies gives when equipped
 	 */
-	constructor({player, name, traitsToAdd = [], traitsToSuppress = []}: PlushieProps) {
+	constructor({ player, name, traitsToAdd = [], traitsToSuppress = [] }: PlushieProps) {
 		this.name = name;
 		this.player = player;
 		this.traitsToAdd = traitsToAdd;

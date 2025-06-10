@@ -8,7 +8,7 @@ export class ISUIElement {
 	addToUIManager = jest.fn();
 	setVisible = jest.fn();
 	drawRect = jest.fn();
-	
+
 	constructor(x: number, y: number, width: number, height: number) {
 		this.x = x;
 		this.y = y;

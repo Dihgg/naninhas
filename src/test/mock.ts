@@ -1,4 +1,1 @@
-import { ISUIElement } from "@asledgehammer/pipewrench/client";
-import { mock } from "jest-mock-extended";
-
-global.print = jest.fn().mockImplementation(console.log);
+export const print = jest.fn();

@@ -3,17 +3,18 @@ import { Plushie } from "./Plushie";
 import { IsoPlayer } from "@asledgehammer/pipewrench";
 
 describe("Plushie", () => {
+	const mockPlayer = () =>
+		mock<IsoPlayer>({
+			getModData: jest
+				.fn()
+				.mockImplementationOnce(() => ({}))
+				.mockImplementation(() => ({
+					Naninhas: { addedTraits: [], suppressedTraits: [] }
+				}))
+		});
 
-	const mockPlayer = () => mock<IsoPlayer>({
-		getModData: jest.fn()
-			.mockImplementationOnce(() => ({}))
-			.mockImplementation(() => ({
-				Naninhas: { addedTraits: [], suppressedTraits: [] }
-			}))
-	});
-	
 	class ExamplePlushie extends Plushie {}
-	
+
 	it("Should instantiate a Plushie abstracted class", () => {
 		const player = mockPlayer();
 		const plushie = new ExamplePlushie({
@@ -46,10 +47,10 @@ describe("Plushie", () => {
 			HasTrait: jest.fn().mockReturnValue(hasTrait),
 			getTraits: jest.fn().mockImplementation(() => ({
 				add: mockedAddTraitsFn,
-				remove: mockedRemoveTraitsFn,
-			})),
+				remove: mockedRemoveTraitsFn
+			}))
 		});
-	
+
 		it("Should add trait if player does not have it", () => {
 			const player = playerWithTraits();
 			const plushie = new ExamplePlushie({
@@ -83,7 +84,7 @@ describe("Plushie", () => {
 			plushie.subscribe();
 			expect(mockedAddTraitsFn).toHaveBeenNthCalledWith(1, "mockedTrait");
 		});
-		
+
 		it("Should remove Plushie exclusive trait", () => {
 			const player = playerWithTraits();
 			const plushie = new ExamplePlushie({
@@ -95,7 +96,7 @@ describe("Plushie", () => {
 			plushie.unsubscribe();
 			expect(mockedRemoveTraitsFn).toHaveBeenNthCalledWith(1, "mockedTrait");
 		});
-		
+
 		it("Should restore suppressed traits on unsubscribe", () => {
 			const player = playerWithTraits(true);
 			const plushie = new ExamplePlushie({
@@ -111,7 +112,7 @@ describe("Plushie", () => {
 		it("Do not add Trait if Player has the Trait", () => {
 			const player = {
 				...playerWithTraits(),
-				HasTrait: jest.fn().mockReturnValue(true),
+				HasTrait: jest.fn().mockReturnValue(true)
 			};
 			const plushie = new ExamplePlushie({
 				player,

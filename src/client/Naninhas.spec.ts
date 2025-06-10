@@ -11,7 +11,6 @@ jest.mock("./components/NaninhasClass", () => ({
 }));
 
 describe("Naninhas event registration", () => {
-	
 	it("The Naninhas should be initialized", () => {
 		require("./Naninhas"); // triggers event registration
 		expect(spyNew).toHaveBeenCalled();

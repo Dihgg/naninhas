@@ -37,30 +37,33 @@ export class Naninhas {
 	constructor(player: IsoPlayer, plushies: Plushie[] = []) {
 		this.player = player;
 		this.subject = new Subject();
-		this.PLUSHIES = (plushies.length > 0) ? plushies : [
-			new BorisBadger(player),
-			new Doll(player),
-			new Flamingo(player),
-			new FluffyfootBunny(player),
-			new FreddyFox(player),
-			new FurbertSquirrel(player),
-			new GroguAZ(player),
-			new JacquesBeaver(player),
-			new MoleyMole(player),
-			new OtisPug(player),
-			new PancakeHedgehog(player),
-			new Spiffo(player),
-			new SpiffoBlueberry(player),
-			new SpiffoCherry(player),
-			new SpiffoGrey(player),
-			new SpiffoHeart(player),
-			new SpiffoPlushieRainbow(player),
-			new SpiffoSanta(player),
-			new SpiffoShamrock(player),
-			new SubstitutionDoll(player),
-			new ToyBear(player),
-			new ToyBearSmall(player),
-		];
+		this.PLUSHIES =
+			plushies.length > 0
+				? plushies
+				: [
+						new BorisBadger(player),
+						new Doll(player),
+						new Flamingo(player),
+						new FluffyfootBunny(player),
+						new FreddyFox(player),
+						new FurbertSquirrel(player),
+						new GroguAZ(player),
+						new JacquesBeaver(player),
+						new MoleyMole(player),
+						new OtisPug(player),
+						new PancakeHedgehog(player),
+						new Spiffo(player),
+						new SpiffoBlueberry(player),
+						new SpiffoCherry(player),
+						new SpiffoGrey(player),
+						new SpiffoHeart(player),
+						new SpiffoPlushieRainbow(player),
+						new SpiffoSanta(player),
+						new SpiffoShamrock(player),
+						new SubstitutionDoll(player),
+						new ToyBear(player),
+						new ToyBearSmall(player)
+					];
 		this.registerEvents();
 	}
 
@@ -97,7 +100,6 @@ export class Naninhas {
 		// Step 4: Update all active plushie effects
 		this.subject.update();
 	}
-
 
 	/**
 	 * Register events handlers for te class

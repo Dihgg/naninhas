@@ -1,9 +1,9 @@
-import { mock } from 'jest-mock-extended';
+import { mock } from "jest-mock-extended";
 import { Observer } from "./Observer";
 import { Subject } from "./Subject";
 
 describe("Subject", () => {
-	const observer = mock<Observer>({name: "mock"});
+	const observer = mock<Observer>({ name: "mock" });
 	const subject = new Subject();
 	it("Should subscribe", () => {
 		subject.subscribe(observer);
