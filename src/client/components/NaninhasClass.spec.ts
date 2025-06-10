@@ -1,5 +1,5 @@
 import { mock } from "jest-mock-extended";
-import { AttachedItem, InventoryItem, IsoPlayer } from "@asledgehammer/pipewrench";
+import { InventoryItem, IsoPlayer } from "@asledgehammer/pipewrench";
 import { Naninhas } from "./NaninhasClass";
 import { Subject } from "./Observer/Subject";
 import { Plushie } from "./Plushies/Plushie";

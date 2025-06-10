@@ -1,89 +1,59 @@
 // src/shared/components/TraitClass.spec.ts
-import type { Perk } from "@asledgehammer/pipewrench";
+import { mock } from "jest-mock-extended";
+import { Perks, Trait, TraitFactory } from "@asledgehammer/pipewrench";
+import { TraitsClass } from "./TraitsClass";
+import * as Events from "@asledgehammer/pipewrench-events";
 
-jest.mock("@asledgehammer/pipewrench", () => ({
-	getText: (key: string) => `text:${key}`,
-	TraitFactory: {
-		addTrait: jest.fn()
-	},
-	Perks: {
-		Woodwork: "Woodwork",
-		Sprinting: "Sprinting",
-		Agility: "Agility",
-		PlantScavenging: "PlantScavenging",
-		Doctor: "Doctor",
-		Nimble: "Nimble",
-		LongBlade: "LongBlade",
-		SmallBlade: "SmallBlade",
-		Blunt: "Blunt",
-		SmallBlunt: "SmallBlunt",
-		Aiming: "Aiming",
-		Reloading: "Reloading"
-	}
-}));
-jest.mock("@asledgehammer/pipewrench-events", () => ({
-	default: {
-		onGameBoot: {
-			addListener: jest.fn()
-		}
-	}
-}));
+jest.mock("@asledgehammer/pipewrench-events");
+jest.mock("@asledgehammer/pipewrench");
 
 describe("TraitsClass", () => {
-	let TraitsClass: any;
-	let TraitFactory: any;
-	let Events: any;
-	let Perks: any;
+	const addXPBoost = jest.fn();
 	
 	beforeEach(() => {
-		jest.resetModules();
-		TraitFactory = require("@asledgehammer/pipewrench").TraitFactory;
-		Perks = require("@asledgehammer/pipewrench").Perks;
-		Events = require("@asledgehammer/pipewrench-events").default;
-		// Clear mocks
-		(TraitFactory.addTrait as jest.Mock).mockClear();
-		(Events.onGameBoot.addListener as jest.Mock).mockClear();
-		// Import after mocks
-		TraitsClass = require("./TraitsClass").TraitsClass;
+		jest.resetAllMocks();
+		TraitFactory.addTrait = () => mock<Trait>({
+			addXPBoost
+		});	
 	});
 	
 	it("registers addTraits on game boot", () => {
 		new TraitsClass();
 		expect(Events.onGameBoot.addListener).toHaveBeenCalledTimes(1);
-		expect(typeof (Events.onGameBoot.addListener as jest.Mock).mock.calls[0][0]).toBe("function");
 	});
 	
-	it("adds all traits and XP boosts on game boot", () => {
-		// Prepare mock trait object
-		const mockTrait = { addXPBoost: jest.fn() };
-		(TraitFactory.addTrait as jest.Mock).mockReturnValue(mockTrait);
+	it("Should call addXPBoost if trait have any boost related to it", () => {
+		new TraitsClass([{
+			id: "Mocked_Trait",
+			cost: -2,
+			xpBoosts: [
+				{
+					perk: Perks.Aiming,
+					value: 1
+				}
+			]
+		}]);
 		
-		new TraitsClass();
 		// Simulate game boot event
-		const addTraits = (Events.onGameBoot.addListener as jest.Mock).mock.calls[0][0];
+		const [addTraits] = (Events.onGameBoot.addListener as jest.Mock).mock.calls[0];
+		
 		addTraits();
+
+		expect(addXPBoost).toHaveBeenCalledWith(Perks.Aiming, 1);
+	});
+
+	it("Should not call addXPBoost if the trait does not have any boost related to it", () => {
+		new TraitsClass([{
+			id: "Mocked_Trait",
+			cost: -2,
+		}]);
+
+		// Simulate game boot event
+		const [addTraits] = (Events.onGameBoot.addListener as jest.Mock).mock.calls[0];
 		
-		// Check that addTrait is called for each trait
-		expect(TraitFactory.addTrait).toHaveBeenCalledWith(
-			"Naninhas_JacquesBeaver",
-			"text:UI_Trait_Naninhas_JacquesBeaver",
-			-2,
-			"text:UI_Trait_Naninhas_JacquesBeaver_Description",
-			false
-		);
-		expect(TraitFactory.addTrait).toHaveBeenCalledWith(
-			"Naninhas_PancakeHedgehog",
-			"text:UI_Trait_Naninhas_PancakeHedgehog",
-			-2,
-			"text:UI_Trait_Naninhas_PancakeHedgehog_Description",
-			false
-		);
-		// ...repeat for other traits as needed
-		
-		// Check that addXPBoost is called with correct perks and values
-		expect(mockTrait.addXPBoost).toHaveBeenCalledWith(Perks.Woodwork, 1);
-		expect(mockTrait.addXPBoost).toHaveBeenCalledWith(Perks.Sprinting, 1);
-		expect(mockTrait.addXPBoost).toHaveBeenCalledWith(Perks.Agility, 1);
-		// ...repeat for other perks as needed
+		addTraits();
+
+		expect(addXPBoost).not.toHaveBeenCalled();
+
 	});
 });

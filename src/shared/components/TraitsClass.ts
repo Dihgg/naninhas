@@ -1,5 +1,5 @@
 import {getText, Perk, Perks, TraitFactory} from "@asledgehammer/pipewrench";
-import Events from "@asledgehammer/pipewrench-events";
+import * as Events from "@asledgehammer/pipewrench-events";
 
 type TraitType = {
 	id: string;
@@ -11,7 +11,8 @@ type TraitType = {
 };
 
 export class TraitsClass {
-	private readonly traits: TraitType[] = [
+	private readonly traits: TraitType[];
+	private readonly defaultTraits: TraitType[] = [
 		{
 			id: "Naninhas_JacquesBeaver",
 			cost: -2,
@@ -98,12 +99,13 @@ export class TraitsClass {
 		}
 	];
 	
-	constructor() {
+	constructor(traits?: TraitType[]) {
+		this.traits = traits || this.defaultTraits;
 		Events.onGameBoot.addListener(() => this.addTraits());
 	}
 	
 	private addTraits() {
-		for (const {id, cost, profession = false, xpBoosts = []} of this.traits) {
+		for (const { id, cost, profession = false, xpBoosts = [] } of this.traits) {
 			const name = getText(`UI_Trait_${id}`);
 			const description = getText(`UI_Trait_${id}_Description`);
 			const trait = TraitFactory.addTrait(
@@ -113,7 +115,7 @@ export class TraitsClass {
 				description,
 				profession
 			);
-			for (const {perk, value} of xpBoosts) {
+			for (const { perk, value } of xpBoosts) {
 				trait.addXPBoost(perk as Perk, value);
 			}
 		}
