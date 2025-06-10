@@ -4,7 +4,7 @@
   "scripts": {
     "prebuild":"npm run clean",
     "build": "tstl",
-    "postbuild": "node scripts/translations.js",
+    "postbuild": "node scripts/postbuild.js",
     "clean": "rimraf dist",
     "check": "prettier --check . && eslint .",
     "lint": "prettier --write . && eslint .",
