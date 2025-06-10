@@ -2,8 +2,6 @@
 
 ## Project Zomboid Plushie Buffs
 
-[![codecov](https://codecov.io/gh/dihgg/naninhas/branch/main/graph/badge.svg)](https://codecov.io/gh/dihgg/naninhas)
-
 <p align="center">
   <img src="./contents/preview.png">
 </p>
@@ -44,3 +42,28 @@ Each plushie grants a unique bonus when attached to your backpack. Only one plus
 ## Useful links
 
 - [Umbrella](https://github.com/asledgehammer/Umbrella) - Lua script code completion for Zomboid API
+
+## Stats
+### Code coverage
+<table>
+  <thead>
+    <tr>
+      <td><strong>MAIN</strong></td>
+      <td><strong>RELEASE</strong></td>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <a href="https://codecov.io/gh/dihgg/naninhas" target="_blank">
+          <img src="https://codecov.io/gh/dihgg/naninhas/branch/main/graph/badge.svg"/>
+        </a>
+      </td>
+      <td>
+        <a href="https://codecov.io/gh/dihgg/naninhas" target="_blank">
+          <img src="https://codecov.io/gh/dihgg/naninhas/branch/release/latest/graph/badge.svg"/>
+        </a>
+      </td>
+    </tr>
+  </tbody>
+</table>
