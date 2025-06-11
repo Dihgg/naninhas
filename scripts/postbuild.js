@@ -14,7 +14,7 @@ const srcPath = dirPath => path.join(process.cwd(), ...dirPath.split("/"));
  * @param {boolean} media should include the media folder in destPath ?
  * @returns {string}
  */
-const distPath = (dirPath, media = false) => {
+const distPath = (dirPath, media = true) => {
 	const { name } = getInfo();
 	return path.join(process.cwd(), "dist", name, media ? "media" : "", ...dirPath.split("/"));
 };
