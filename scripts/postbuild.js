@@ -15,7 +15,7 @@ const srcPath = dirPath => path.join(process.cwd(), ...dirPath.split("/"));
  */
 const distPath = dirPath => {
 	const { name } = getInfo();
-	path.join(process.cwd(), "dist", name, "media", ...dirPath.split("/"));
+	return path.join(process.cwd(), "dist", name, "media", ...dirPath.split("/"));
 };
 
 // Copy ui folder to dist
