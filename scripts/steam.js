@@ -17,16 +17,10 @@ async function prepareSteamZip() {
 	fs.ensureDirSync(modPath);
 
 	// Copy items from the source contents folder to the generated contents folder
-	await copyFolder(
-		path.join(process.cwd(), "contents"),
-		tempPath
-	);
+	await copyFolder(path.join(process.cwd(), "contents"), tempPath);
 
 	// Copy mod files to the expected modPath
-	await copyFolder(
-		path.join(process.cwd(), "dist"),
-		modPath
-	);
+	await copyFolder(path.join(process.cwd(), "dist"), modPath);
 
 	// Create zip
 	const finalZipName = zipname.replace(".zip", "-steam.zip");
@@ -44,7 +38,6 @@ async function prepareSteamZip() {
 	fs.removeSync(tempPath);
 }
 
-prepareSteamZip()
-.catch(err => {
+prepareSteamZip().catch(err => {
 	console.error("Error preparing Steam zip file:", err);
 });

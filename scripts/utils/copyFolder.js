@@ -7,14 +7,14 @@ const cliProgress = require("cli-progress");
  * Remove .DS_Store files recursively
  * @param {string} dir the folder to look for .DS_Store files
  */
-const removeDSStore = (dir) => {
+const removeDSStore = dir => {
 	fs.readdirSync(dir).forEach(file => {
 		const filePath = path.join(dir, file);
 		const stats = fs.statSync(filePath);
 
 		if (stats.isDirectory()) {
 			removeDSStore(filePath);
-		} else if (file === '.DS_Store') {
+		} else if (file === ".DS_Store") {
 			fs.unlinkSync(filePath);
 		}
 	});
@@ -22,7 +22,7 @@ const removeDSStore = (dir) => {
 
 /**
  * Optimize Images using sharp library
- * @param {string} srcFilePath image to optimize 
+ * @param {string} srcFilePath image to optimize
  * @param {string} destFilePath path to save the optimized image
  */
 const optimizeImage = async (srcFilePath, destFilePath) => {
@@ -44,7 +44,7 @@ const optimizeImage = async (srcFilePath, destFilePath) => {
  * @param {string} dir folder to look for files
  * @returns {Promise<string[]>} path with all the files
  */
-const gatherAllFiles = async (dir) => {
+const gatherAllFiles = async dir => {
 	const items = await fs.readdir(dir, { withFileTypes: true });
 	const filePaths = [];
 
@@ -61,7 +61,7 @@ const gatherAllFiles = async (dir) => {
 };
 
 /**
- * Recursively copy files while optimizing images 
+ * Recursively copy files while optimizing images
  * @param {string} srcDir Path to copy from
  * @param {string} destDir Path to copy to
  * @param {cliProgress} progressBar the progress bar from cli-progress library
@@ -97,14 +97,13 @@ const copyAndOptimizeRecursive = async (srcDir, destDir, progressBar) => {
  * @param {string} destPath Path to copy to
  */
 const copyFolder = async (srcPath, destPath) => {
-
 	if (!fs.existsSync(srcPath)) {
 		console.log(`📁 No files to copy from ${srcPath}...`);
 	} else {
 		console.log(`📁 Copying and optimizing files from ${srcPath} to ${destPath}`);
-	
+
 		const allFiles = await gatherAllFiles(srcPath);
-	
+
 		const progressBar = new cliProgress.SingleBar({
 			format: "Progress |{bar}| {percentage}% | {value}/{total} files",
 			barCompleteChar: "█",
@@ -112,15 +111,14 @@ const copyFolder = async (srcPath, destPath) => {
 			hideCursor: true
 		});
 		progressBar.start(allFiles.length, 0);
-	
+
 		await copyAndOptimizeRecursive(srcPath, destPath, progressBar);
-		
+
 		removeDSStore(destPath);
-	
+
 		progressBar.stop();
 		console.log("✅ Copy and optimization complete!");
 	}
-
 };
 
 module.exports = {

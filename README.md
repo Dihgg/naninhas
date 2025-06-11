@@ -41,10 +41,12 @@ Each plushie grants a unique bonus when attached to your backpack. Only one plus
 
 ## Useful links
 
-- [Umbrella](https://github.com/asledgehammer/Umbrella) - Lua script code completion for Zomboid API
+-   [Umbrella](https://github.com/asledgehammer/Umbrella) - Lua script code completion for Zomboid API
 
 ## Stats
+
 ### Code coverage
+
 <table>
   <thead>
     <tr>

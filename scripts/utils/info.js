@@ -1,5 +1,5 @@
-const { readFileSync } = require('fs-extra');
-const { join } = require('path');
+const { readFileSync } = require("fs-extra");
+const { join } = require("path");
 
 /**
  * Reads and parses `package.json` and `pipewrench.json` files from the current working directory,
@@ -12,10 +12,10 @@ const { join } = require('path');
  */
 const getInfo = () => {
 	/** @type {{ version: string }} */
-	const { version } = JSON.parse(readFileSync(join(process.cwd(), 'package.json'), 'utf-8'));
+	const { version } = JSON.parse(readFileSync(join(process.cwd(), "package.json"), "utf-8"));
 
 	/** @type {{ modInfo: { id: string } }} */
-	const { modInfo } = JSON.parse(readFileSync(join(process.cwd(), 'pipewrench.json'), 'utf-8'));
+	const { modInfo } = JSON.parse(readFileSync(join(process.cwd(), "pipewrench.json"), "utf-8"));
 
 	return {
 		name: modInfo.id,
