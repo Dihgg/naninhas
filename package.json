@@ -11,7 +11,7 @@
 		"watch": "tstl --watch --outDir ~/Zomboid/mods",
 		"release": "standard-version",
 		"postrelease": "npm run zip",
-		"zip": "node scripts/zipper.js",
+		"zip": "node scripts/zip.js",
 		"steam": "node scripts/steam.js",
 		"zipname": "node scripts/zipname.js",
 		"test": "jest",
