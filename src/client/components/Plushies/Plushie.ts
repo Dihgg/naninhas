@@ -25,9 +25,11 @@ export abstract class Plushie implements Observer {
 	name: string;
 	/** Zomboid player object */
 	protected readonly player: IsoPlayer;
+
 	/** List of traits that this Plushie should grant */
 	private readonly traitsToAdd: string[];
 	private readonly traitsToSuppress: string[] = [];
+
 	/** List of traits that are added by Plushies */
 	private addedTraits: Set<string>;
 	/** List of traits that are suppressed by Plushies */
@@ -83,6 +85,11 @@ export abstract class Plushie implements Observer {
 			}, []);
 	}
 
+	/**
+	 * For a given trait, apply a boost based on Naninhas traits
+	 * @param trait The trait to loof for in Naninhas traits
+	 * @param shouldApply Should the boost be applied or removed (set to 0) 
+	 */
 	private applyBoost(trait: string, shouldApply = true) {
 		const xp = this.player.getXp();
 		const perks = this.traitToPerkBoosts(trait);
@@ -91,6 +98,11 @@ export abstract class Plushie implements Observer {
 		}
 	}
 
+	/**
+	 * Calls `applyBoost` in each given trait
+	 * @param traits List of traits
+	 * @param shouldApply Should the boost be applied or removed (set to 0) 
+	 */
 	private applyBoosts(traits: string[], shouldApply = true) {
 		for (const trait of traits) {
 			this.applyBoost(trait, shouldApply);
@@ -102,15 +114,16 @@ export abstract class Plushie implements Observer {
 	 */
 	public subscribe() {
 
-		const traitsForAdd = this.traitsToAdd.filter(trait => !this.addedTraits.has(trait) && !this.player.HasTrait(trait))
-		traitsForAdd.forEach(this.addedTraits.add);
-		this.player.getTraits().addAll(traitsForAdd);
-		this.applyBoosts(traitsForAdd);
+		const toAdd = this.traitsToAdd.filter(trait => !this.addedTraits.has(trait) && !this.player.HasTrait(trait))
+		toAdd.forEach(this.addedTraits.add);
+		this.player.getTraits().addAll(toAdd);
+		this.applyBoosts(toAdd);
 
-		const traitsToSuppress = this.traitsToAdd.filter(trait => !this.suppressedTraits.has(trait) && this.player.HasTrait(trait));
-		traitsToSuppress.forEach(this.suppressedTraits.add);
-		this.player.getTraits().removeAll(traitsToSuppress);
-		this.applyBoosts(traitsToSuppress, false);
+		const toSuppress = this.traitsToAdd.filter(trait => !this.suppressedTraits.has(trait) && this.player.HasTrait(trait));
+		toSuppress.forEach(this.suppressedTraits.add);
+		this.player.getTraits().removeAll(toSuppress);
+		this.applyBoosts(toSuppress, false);
+
 		// Ensures the data is saved in the `player.getModData()` after the Plushie effect is applied
 		this.update();
 	}
@@ -120,16 +133,16 @@ export abstract class Plushie implements Observer {
 	 */
 	public unsubscribe() {
 		// Remove all the traits that are exclusive this Plushie
-		const traitsToRemove = this.traitsToAdd.filter(this.addedTraits.has);
-		this.player.getTraits().removeAll(traitsToRemove);
-		this.applyBoosts(traitsToRemove, false);
-		traitsToRemove.forEach(this.addedTraits.delete);
+		const toRemove = this.traitsToAdd.filter(this.addedTraits.has);
+		this.player.getTraits().removeAll(toRemove);
+		this.applyBoosts(toRemove, false);
+		toRemove.forEach(this.addedTraits.delete);
 
 		// Add back the traits that are suppressed by this Plushie
-		const traisToAddBack = this.traitsToSuppress.filter(this.addedTraits.has);
-		this.player.getTraits().addAll(traisToAddBack);
-		this.applyBoosts(traitsToRemove, false);
-		traisToAddBack.forEach(this.suppressedTraits.delete);
+		const toRestore = this.traitsToSuppress.filter(this.suppressedTraits.has);
+		this.player.getTraits().addAll(toRestore);
+		this.applyBoosts(toRemove, false);
+		toRestore.forEach(this.suppressedTraits.delete);
 
 		// Ensures the data is saved in the `player.getModData()` before the Plushie effect is no longer applied
 		this.update();
