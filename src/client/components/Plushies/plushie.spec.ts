@@ -46,8 +46,10 @@ describe("Plushie", () => {
 			...mockPlayer(),
 			HasTrait: jest.fn().mockReturnValue(hasTrait),
 			getTraits: jest.fn().mockImplementation(() => ({
+				// addAll: mockedAddTraitsFn,
 				add: mockedAddTraitsFn,
-				remove: mockedRemoveTraitsFn
+				remove: mockedRemoveTraitsFn,
+				// removeAll: mockedRemoveTraitsFn,
 			}))
 		});
 
