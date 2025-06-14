@@ -1,22 +1,16 @@
 /* @noSelfInFile */
-import { IsoPlayer, Perk, TraitFactory, XPMultiplier } from "@asledgehammer/pipewrench";
+import { IsoPlayer } from "@asledgehammer/pipewrench";
 import { Observer } from "../Observer/Observer";
 import { PlayerData } from "./PlayerData";
-import { NaninhasTraits } from "shared/components/TraitValues";
-import type { PerkBoost } from "types";
-import { TraitsClass } from "shared/components/TraitsClass";
+import { TraitsClass } from "@components/TraitsClass";
+import type { PlushieProps } from "types";
+
 // TODO: Apply the LuaEventManager to allow other mods to interact with this one
 // import { LuaEventManager } from "@asledgehammer/pipewrench"
 
-export type PlushieProps = {
-	player: IsoPlayer;
-	name: string;
-	traitsToAdd?: string[];
-	traitsToSuppress?: string[];
-};
 
 /**
- * This class control the Plushie behavior
+ * This class controls the Plushie behavior
  */
 export abstract class Plushie implements Observer {
 	name: string;
@@ -28,9 +22,9 @@ export abstract class Plushie implements Observer {
 	private readonly traitsToSuppress: string[] = [];
 
 	/** List of traits that are added by Plushies */
-	private addedTraits: Set<string>;
+	private readonly addedTraits: Set<string>;
 	/** List of traits that are suppressed by Plushies */
-	private suppressedTraits: Set<string>;
+	private readonly suppressedTraits: Set<string>;
 
 	/** The data from `player.getModData()` to ensure traits are not permanent */
 	private readonly playerData: PlayerData<{
@@ -62,7 +56,7 @@ export abstract class Plushie implements Observer {
 
 	/**
 	 * Method that should be called periodically to apply the Plushie effect.
-	 * This ensure the traits data are saved in the `player.getModData()`
+	 * This ensures the traits data are saved in the `player.getModData()`
 	 */
 	update() {
 		// This ensures the data is saved in the `player.getModData()`
@@ -84,7 +78,7 @@ export abstract class Plushie implements Observer {
 
 	/**
 	 * For a given trait, apply a boost based on Naninhas traits
-	 * @param trait The trait to loof for in Naninhas traits
+	 * @param trait The trait to look for in Naninhas traits
 	 * @param shouldApply Should the boost be applied or removed (set to 0) 
 	 */
 	private applyBoost(trait: string, shouldApply = true) {
@@ -112,12 +106,12 @@ export abstract class Plushie implements Observer {
 	public subscribe() {
 
 		const toAdd = this.traitsToAdd.filter(trait => !this.addedTraits.has(trait) && !this.player.HasTrait(trait))
-		toAdd.forEach(this.addedTraits.add);
+		toAdd.forEach((trait) => this.addedTraits.add(trait));
 		this.player.getTraits().addAll(toAdd);
 		this.applyBoosts(toAdd);
 
-		const toSuppress = this.traitsToAdd.filter(trait => !this.suppressedTraits.has(trait) && this.player.HasTrait(trait));
-		toSuppress.forEach(this.suppressedTraits.add);
+		const toSuppress = this.traitsToSuppress.filter(trait => !this.suppressedTraits.has(trait) && this.player.HasTrait(trait));
+		toSuppress.forEach( (trait) => this.suppressedTraits.add(trait));
 		this.player.getTraits().removeAll(toSuppress);
 		this.applyBoosts(toSuppress, false);
 
@@ -130,16 +124,18 @@ export abstract class Plushie implements Observer {
 	 */
 	public unsubscribe() {
 		// Remove all the traits that are exclusive this Plushie
-		const toRemove = this.traitsToAdd.filter(this.addedTraits.has);
+		const toRemove = this.traitsToAdd
+			.filter((trait) => this.addedTraits.has(trait));
 		this.player.getTraits().removeAll(toRemove);
 		this.applyBoosts(toRemove, false);
-		toRemove.forEach(this.addedTraits.delete);
+		toRemove.forEach((trait) => this.addedTraits.delete(trait));
 
 		// Add back the traits that are suppressed by this Plushie
-		const toRestore = this.traitsToSuppress.filter(this.suppressedTraits.has);
+		const toRestore = this.traitsToSuppress
+			.filter((trait) => this.suppressedTraits.has(trait));
 		this.player.getTraits().addAll(toRestore);
 		this.applyBoosts(toRemove, false);
-		toRestore.forEach(this.suppressedTraits.delete);
+		toRestore.forEach((trait) => this.suppressedTraits.delete(trait));
 
 		// Ensures the data is saved in the `player.getModData()` before the Plushie effect is no longer applied
 		this.update();

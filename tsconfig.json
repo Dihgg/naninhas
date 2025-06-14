@@ -17,8 +17,11 @@
 			"jest"
 		],
 		"paths": {
-			"components/*": ["components/*"],
-			"components": ["components/index.ts"]
+			"@components/*": [
+				"shared/components/*",
+				"server/components/*",
+				"client/components/*"
+			]
 		}
 	},
 	"tstl": {

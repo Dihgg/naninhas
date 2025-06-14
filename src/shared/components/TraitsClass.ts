@@ -12,6 +12,9 @@ export class TraitsClass {
 		Events.onGameBoot.addListener(() => this.addTraits());
 	}
 
+	/**
+	 * For each Plushie trait, register it and it's boosts, if any;
+	 */
 	private addTraits() {
 		for (const { id, cost, profession = false, xpBoosts = [] } of this.traits) {
 			const name = getText(`UI_Trait_${id}`);
@@ -23,13 +26,22 @@ export class TraitsClass {
 		}
 	}
 
+	/**
+	 * Return an Array of Perks and values for a given trait
+	 * Cache this value in a Map so the lookup is done only once
+	 * @param trait the trait name for the lookup
+	 */
 	public static getPerkBoostsForTrait(trait: string): PerkBoost[] {
 		if(!this.cache) {
 			this.cache = new Map(
-				NaninhasTraits.map((({id, xpBoosts = []}) => {
-					return [id,xpBoosts.map(({perk, value}) => ({perk, value}))]
-				}))
-			)
+				NaninhasTraits
+					.map((({ id, xpBoosts = [] }) =>
+						[
+							id,
+							xpBoosts.map(({ perk, value }) => ({ perk, value }))
+						]
+				))
+			);
 		}
 		return this.cache.get(trait) ?? [];
 	} 

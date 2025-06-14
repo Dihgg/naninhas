@@ -1,4 +1,4 @@
-import type { Perk } from "@asledgehammer/pipewrench";
+import type { IsoPlayer, Perk } from "@asledgehammer/pipewrench";
 
 type PerkBoost = {
 	perk: Perk;
@@ -10,4 +10,11 @@ type TraitType = {
 	cost: number;
 	profession?: boolean;
 	xpBoosts?: PerkBoost[];
+};
+
+type PlushieProps = {
+	player: IsoPlayer;
+	name: string;
+	traitsToAdd?: string[];
+	traitsToSuppress?: string[];
 };

@@ -5,6 +5,9 @@ import { IsoPlayer } from "@asledgehammer/pipewrench";
 describe("Plushie", () => {
 	const mockPlayer = () =>
 		mock<IsoPlayer>({
+			getXp: jest.fn().mockImplementation(() => ({
+				AddXPNoMultiplier: jest.fn()
+			})),
 			getModData: jest
 				.fn()
 				.mockImplementationOnce(() => ({}))
@@ -46,10 +49,8 @@ describe("Plushie", () => {
 			...mockPlayer(),
 			HasTrait: jest.fn().mockReturnValue(hasTrait),
 			getTraits: jest.fn().mockImplementation(() => ({
-				// addAll: mockedAddTraitsFn,
-				add: mockedAddTraitsFn,
-				remove: mockedRemoveTraitsFn,
-				// removeAll: mockedRemoveTraitsFn,
+				addAll: mockedAddTraitsFn,
+				removeAll: mockedRemoveTraitsFn,
 			}))
 		});
 
@@ -61,7 +62,7 @@ describe("Plushie", () => {
 				traitsToAdd: ["mockedTrait"]
 			});
 			plushie.subscribe();
-			expect(mockedAddTraitsFn).toHaveBeenCalledWith("mockedTrait");
+			expect(mockedAddTraitsFn).toHaveBeenCalledWith(["mockedTrait"]);
 		});
 
 		it("Should suppress trait if player has it", () => {
@@ -72,7 +73,7 @@ describe("Plushie", () => {
 				traitsToSuppress: ["mockedTrait"]
 			});
 			plushie.subscribe();
-			expect(mockedRemoveTraitsFn).toHaveBeenCalledWith("mockedTrait");
+			expect(mockedRemoveTraitsFn).toHaveBeenCalledWith(["mockedTrait"]);
 		});
 
 		it("Should add Plushie exclusive trait only once", () => {
@@ -84,7 +85,7 @@ describe("Plushie", () => {
 			});
 			plushie.subscribe();
 			plushie.subscribe();
-			expect(mockedAddTraitsFn).toHaveBeenNthCalledWith(1, "mockedTrait");
+			expect(mockedAddTraitsFn).toHaveBeenNthCalledWith(1, ["mockedTrait"]);
 		});
 
 		it("Should remove Plushie exclusive trait", () => {
@@ -96,7 +97,7 @@ describe("Plushie", () => {
 			});
 			plushie.subscribe();
 			plushie.unsubscribe();
-			expect(mockedRemoveTraitsFn).toHaveBeenNthCalledWith(1, "mockedTrait");
+			expect(mockedRemoveTraitsFn).toHaveBeenNthCalledWith(2, ["mockedTrait"]);
 		});
 
 		it("Should restore suppressed traits on unsubscribe", () => {
@@ -108,21 +109,18 @@ describe("Plushie", () => {
 			});
 			plushie.subscribe();
 			plushie.unsubscribe();
-			expect(mockedAddTraitsFn).toHaveBeenNthCalledWith(1, "mockedTrait");
+			expect(mockedAddTraitsFn).toHaveBeenNthCalledWith(2, ["mockedTrait"]);
 		});
 
 		it("Do not add Trait if Player has the Trait", () => {
-			const player = {
-				...playerWithTraits(),
-				HasTrait: jest.fn().mockReturnValue(true)
-			};
+			const player = playerWithTraits(true);
 			const plushie = new ExamplePlushie({
 				player,
 				name: "mocked",
 				traitsToAdd: ["mockedTrait"]
 			});
 			plushie.subscribe();
-			expect(mockedAddTraitsFn).not.toHaveBeenCalled();
+			expect(mockedAddTraitsFn).toHaveBeenCalledWith([]);
 		});
 	});
 });
