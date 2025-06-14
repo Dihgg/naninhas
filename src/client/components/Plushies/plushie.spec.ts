@@ -1,12 +1,29 @@
 import { mock } from "jest-mock-extended";
 import { Plushie } from "./Plushie";
-import { IsoPlayer } from "@asledgehammer/pipewrench";
+import {IsoPlayer, Perks} from "@asledgehammer/pipewrench";
+
+jest.mock("@components/TraitsClass", () => ({
+	TraitsClass: {
+		getPerkBoostsForTrait: jest.fn(() => [
+			{ perk: Perks.Woodwork, value: 1 }
+		])
+	}
+}));
 
 describe("Plushie", () => {
-	const mockPlayer = () =>
+	const AddXPNoMultiplier = jest.fn();
+	const mockedAddTraitsFn = jest.fn();
+	const mockedRemoveTraitsFn = jest.fn();
+	
+	const mockPlayer = (hasTrait = false) =>
 		mock<IsoPlayer>({
+			HasTrait: jest.fn().mockReturnValue(hasTrait),
+			getTraits: jest.fn().mockImplementation(() => ({
+				addAll: mockedAddTraitsFn,
+				removeAll: mockedRemoveTraitsFn,
+			})),
 			getXp: jest.fn().mockImplementation(() => ({
-				AddXPNoMultiplier: jest.fn()
+				AddXPNoMultiplier
 			})),
 			getModData: jest
 				.fn()
@@ -16,20 +33,32 @@ describe("Plushie", () => {
 				}))
 		});
 
-	class ExamplePlushie extends Plushie {}
+	class TestPlushie extends Plushie {}
 
 	it("Should instantiate a Plushie abstracted class", () => {
 		const player = mockPlayer();
-		const plushie = new ExamplePlushie({
+		const plushie = new TestPlushie({
 			player,
 			name: "mocked"
 		});
-		expect(plushie).toBeInstanceOf(ExamplePlushie);
+		expect(plushie).toBeInstanceOf(TestPlushie);
 	});
 
+	it("Should call AddXPNoMultiplier when applying a trait boost", () => {
+		const player = mockPlayer();
+		const plushie = new TestPlushie({
+			player,
+			name: "mocked",
+			traitsToAdd: ["mockedTrait"]
+		});
+		
+		plushie.subscribe();
+		expect(AddXPNoMultiplier).toHaveBeenCalledWith(Perks.Woodwork, 1);
+	});
+	
 	it("When updating, the getModData should be called", () => {
 		const player = mockPlayer();
-		const plushie = new ExamplePlushie({
+		const plushie = new TestPlushie({
 			player,
 			name: "mocked"
 		});
@@ -38,25 +67,15 @@ describe("Plushie", () => {
 	});
 
 	describe("Player does not have the Trait", () => {
-		const mockedAddTraitsFn = jest.fn();
-		const mockedRemoveTraitsFn = jest.fn();
+		
 		afterEach(() => {
 			mockedAddTraitsFn.mockReset();
 			mockedRemoveTraitsFn.mockReset();
 		});
 
-		const playerWithTraits = (hasTrait: boolean = false) => ({
-			...mockPlayer(),
-			HasTrait: jest.fn().mockReturnValue(hasTrait),
-			getTraits: jest.fn().mockImplementation(() => ({
-				addAll: mockedAddTraitsFn,
-				removeAll: mockedRemoveTraitsFn,
-			}))
-		});
-
 		it("Should add trait if player does not have it", () => {
-			const player = playerWithTraits();
-			const plushie = new ExamplePlushie({
+			const player = mockPlayer(false);
+			const plushie = new TestPlushie({
 				player,
 				name: "mocked",
 				traitsToAdd: ["mockedTrait"]
@@ -66,8 +85,8 @@ describe("Plushie", () => {
 		});
 
 		it("Should suppress trait if player has it", () => {
-			const player = playerWithTraits(true);
-			const plushie = new ExamplePlushie({
+			const player = mockPlayer(true);
+			const plushie = new TestPlushie({
 				player,
 				name: "mocked",
 				traitsToSuppress: ["mockedTrait"]
@@ -77,8 +96,8 @@ describe("Plushie", () => {
 		});
 
 		it("Should add Plushie exclusive trait only once", () => {
-			const player = playerWithTraits();
-			const plushie = new ExamplePlushie({
+			const player = mockPlayer(false);
+			const plushie = new TestPlushie({
 				player,
 				name: "mocked",
 				traitsToAdd: ["mockedTrait"]
@@ -89,8 +108,8 @@ describe("Plushie", () => {
 		});
 
 		it("Should remove Plushie exclusive trait", () => {
-			const player = playerWithTraits();
-			const plushie = new ExamplePlushie({
+			const player = mockPlayer(false);
+			const plushie = new TestPlushie({
 				player,
 				name: "mocked",
 				traitsToAdd: ["mockedTrait"]
@@ -101,8 +120,8 @@ describe("Plushie", () => {
 		});
 
 		it("Should restore suppressed traits on unsubscribe", () => {
-			const player = playerWithTraits(true);
-			const plushie = new ExamplePlushie({
+			const player = mockPlayer(true);
+			const plushie = new TestPlushie({
 				player,
 				name: "mocked",
 				traitsToSuppress: ["mockedTrait"]
@@ -113,8 +132,8 @@ describe("Plushie", () => {
 		});
 
 		it("Do not add Trait if Player has the Trait", () => {
-			const player = playerWithTraits(true);
-			const plushie = new ExamplePlushie({
+			const player = mockPlayer(true);
+			const plushie = new TestPlushie({
 				player,
 				name: "mocked",
 				traitsToAdd: ["mockedTrait"]
@@ -123,4 +142,5 @@ describe("Plushie", () => {
 			expect(mockedAddTraitsFn).toHaveBeenCalledWith([]);
 		});
 	});
+	
 });

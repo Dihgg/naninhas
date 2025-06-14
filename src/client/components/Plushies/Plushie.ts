@@ -79,7 +79,7 @@ export abstract class Plushie implements Observer {
 	/**
 	 * For a given trait, apply a boost based on Naninhas traits
 	 * @param trait The trait to look for in Naninhas traits
-	 * @param shouldApply Should the boost be applied or removed (set to 0) 
+	 * @param shouldApply Should the boost be applied or removed (set to 0)
 	 */
 	private applyBoost(trait: string, shouldApply = true) {
 		const xp = this.player.getXp();
@@ -92,9 +92,9 @@ export abstract class Plushie implements Observer {
 	/**
 	 * Calls `applyBoost` in each given trait
 	 * @param traits List of traits
-	 * @param shouldApply Should the boost be applied or removed (set to 0) 
+	 * @param shouldApply Should the boost be applied or removed (set to 0)
 	 */
-	private applyBoosts(traits: string[], shouldApply = true) {
+	private applyBoosts(traits: string[], shouldApply?: boolean) {
 		for (const trait of traits) {
 			this.applyBoost(trait, shouldApply);
 		}

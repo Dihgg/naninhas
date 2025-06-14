@@ -30,6 +30,9 @@ jest.mock("./Plushie");
 
 describe("List.ts", () => {
 	const player = mock<IsoPlayer>({
+		getTraits: jest.fn().mockImplementation(() => ({
+			addAll: jest.fn(),
+		})),
 		getStats: jest.fn().mockImplementation(() => ({
 			setEndurance: jest.fn(),
 			getEndurance: jest.fn(),
