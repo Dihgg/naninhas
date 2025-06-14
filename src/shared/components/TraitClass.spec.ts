@@ -1,31 +1,27 @@
-// src/shared/components/TraitClass.spec.ts
-import { mock } from "jest-mock-extended";
+let addXPBoost: jest.Mock;
+let addTrait: jest.Mock;
 
-const addListener = jest.fn();
-const addXPBoost = jest.fn();
+jest.mock("@asledgehammer/pipewrench", () => {
+  addXPBoost = jest.fn();
+  addTrait = jest.fn(() => ({ addXPBoost }));
+  return {
+    getText: jest.fn((...args: string[]) => args.join()),
+    Perks: { Aiming: "Aiming" },
+    TraitFactory: { addTrait }
+  };
+});
 
-const Perks = { Aiming: "Aiming" };
-const TraitFactory = {
-  addTrait: jest.fn(() => ({ addXPBoost }))
-};
-
-jest.mock("@asledgehammer/pipewrench-events", () => ({
-  __esModule: true,
-  onGameBoot: { addListener }
-}));
-
-jest.mock("@asledgehammer/pipewrench", () => ({
-  TraitFactory,
-  Perks,
-  getText: (key: string) => key
-}));
+jest.mock("@asledgehammer/pipewrench-events", () => {
+  const addListenerMock = jest.fn();
+  return {
+    onGameBoot: { addListener: addListenerMock }
+  };
+});
 
 describe("TraitsClass", () => {
   beforeEach(() => {
     jest.resetModules();
-    addListener.mockClear();
-    addXPBoost.mockClear();
-    TraitFactory.addTrait.mockClear();
+    jest.clearAllMocks();
   });
   
   it("registers addTraits on game boot", async () => {
@@ -33,10 +29,12 @@ describe("TraitsClass", () => {
       NaninhasTraits: []
     }));
     
-    const { TraitsClass } = await import("./TraitsClass");
-    new TraitsClass();
-    
-    expect(addListener).toHaveBeenCalledTimes(1);
+    await jest.isolateModulesAsync(async () => {
+      const { onGameBoot } = await import("@asledgehammer/pipewrench-events");
+      const { TraitsClass } = await import("./TraitsClass");
+      new TraitsClass();
+      expect(onGameBoot.addListener).toHaveBeenCalledTimes(1);
+    });
   });
   
   it("calls addXPBoost if trait has XP boosts", async () => {
@@ -46,19 +44,20 @@ describe("TraitsClass", () => {
           id: "Mocked_Trait",
           cost: -2,
           xpBoosts: [
-            { perk: Perks.Aiming, value: 1 }
+            { perk: "Aiming", value: 1 }
           ]
         }
       ]
     }));
     
-    const { onGameBoot } = await import("@asledgehammer/pipewrench-events");
-    const { TraitsClass } = await import("./TraitsClass");
-    new TraitsClass();
-    const [addTraits] = (onGameBoot.addListener as jest.Mock).mock.calls[0];
-    addTraits();
-    
-    expect(addXPBoost).toHaveBeenCalledWith(Perks.Aiming, 1);
+    await jest.isolateModulesAsync(async () => {
+      const { onGameBoot } = await import("@asledgehammer/pipewrench-events");
+      const { TraitsClass } = await import("./TraitsClass");
+      new TraitsClass();
+      const [addTraits] = (onGameBoot.addListener as jest.Mock).mock.calls[0];
+      addTraits();
+      expect(addXPBoost).toHaveBeenCalledWith("Aiming", 1);
+    });
   });
   
   it("does not call addXPBoost if trait has no boosts", async () => {
@@ -71,13 +70,13 @@ describe("TraitsClass", () => {
       ]
     }));
     
-    const { TraitsClass } = await import("./TraitsClass");
-    new TraitsClass();
-    
-    const { onGameBoot } = await import("@asledgehammer/pipewrench-events");
-    const [addTraits] = (onGameBoot.addListener as jest.Mock).mock.calls[0];
-    addTraits();
-    
-    expect(addXPBoost).not.toHaveBeenCalled();
+    await jest.isolateModulesAsync(async () => {
+      const { onGameBoot } = await import("@asledgehammer/pipewrench-events");
+      const { TraitsClass } = await import("./TraitsClass");
+      new TraitsClass();
+      const [addTraits] = (onGameBoot.addListener as jest.Mock).mock.calls[0];
+      addTraits();
+      expect(addXPBoost).not.toHaveBeenCalled();
+    });
   });
 });

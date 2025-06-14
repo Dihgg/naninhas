@@ -21,6 +21,9 @@
 				"shared/components/*",
 				"server/components/*",
 				"client/components/*"
+			],
+			"@test/*": [
+				"test/*"
 			]
 		}
 	},
