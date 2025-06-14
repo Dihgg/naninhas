@@ -79,4 +79,30 @@ describe("TraitsClass", () => {
       expect(addXPBoost).not.toHaveBeenCalled();
     });
   });
+  
+  it("returns perk boosts for a given trait", async () => {
+    jest.doMock("./TraitValues", () => ({
+      NaninhasTraits: [
+        {
+          id: "TestTrait",
+          xpBoosts: [
+            { perk: "Aiming", value: 2 }
+          ]
+        },
+        {
+          id: "NoBoost"
+        }
+      ]
+    }));
+    
+    await jest.isolateModulesAsync(async () => {
+      const { TraitsClass } = await import("./TraitsClass");
+      expect(TraitsClass.getPerkBoostsForTrait("TestTrait")).toEqual([
+        { perk: "Aiming", value: 2 }
+      ]);
+      expect(TraitsClass.getPerkBoostsForTrait("NoBoost")).toEqual([]);
+      expect(TraitsClass.getPerkBoostsForTrait("Unknown")).toEqual([]);
+    });
+  });
+
 });
