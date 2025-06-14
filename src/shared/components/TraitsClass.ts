@@ -1,107 +1,14 @@
-import { getText, Perk, Perks, TraitFactory } from "@asledgehammer/pipewrench";
+import { getText, Perk, TraitFactory } from "@asledgehammer/pipewrench";
 import * as Events from "@asledgehammer/pipewrench-events";
-import { xpUpdate } from "@asledgehammer/pipewrench/server";
-
-type TraitType = {
-	id: string;
-	cost: number;
-	profession?: boolean;
-	xpBoosts?: { perk?: Perk; value: number }[];
-};
-
-export const NaninhasTraits: TraitType[] = [
-	{
-		id: "Naninhas_JacquesBeaver",
-		cost: 2,
-		xpBoosts: [
-			{
-				perk: Perks.Woodwork,
-				value: 1
-			}
-		]
-	},
-	{
-		id: "Naninhas_PancakeHedgehog",
-		cost: 2,
-		xpBoosts: [
-			{
-				perk: Perks.Sprinting,
-				value: 1
-			},
-			{
-				perk: Perks.Agility,
-				value: 1
-			}
-		]
-	},
-	{
-		id: "Naninhas_MoleyMole",
-		cost: 2,
-		xpBoosts: [
-			{
-				perk: Perks.PlantScavenging,
-				value: 2
-			}
-		]
-	},
-	{
-		id: "Naninhas_SpiffoHeart",
-		cost: 2,
-		xpBoosts: [
-			{
-				perk: Perks.Doctor,
-				value: 2
-			}
-		]
-	},
-	{
-		id: "Naninhas_SpiffoGray",
-		cost: 6,
-		xpBoosts: [
-			{
-				perk: Perks.Nimble,
-				value: 1
-			},
-			{
-				perk: Perks.LongBlade,
-				value: 1
-			},
-			{
-				perk: Perks.SmallBlade,
-				value: 1
-			},
-			{
-				perk: Perks.Blunt,
-				value: 1
-			},
-			{
-				perk: Perks.SmallBlunt,
-				value: 1
-			}
-		]
-	},
-	{
-		id: "Naninhas_SpiffoShamrock",
-		cost: 2,
-		xpBoosts: [
-			{
-				perk: Perks.Aiming,
-				value: 1
-			},
-			{
-				perk: Perks.Reloading,
-				value: 1
-			}
-		]
-	}
-]
+import type { PerkBoost, TraitType } from "types";
+import { NaninhasTraits } from "./TraitValues";
 
 export class TraitsClass {
 	private readonly traits: TraitType[];
-	private readonly defaultTraits: TraitType[] = NaninhasTraits;
 
-	constructor(traits?: TraitType[]) {
-		this.traits = traits || this.defaultTraits;
+	private static cache: Map<string,PerkBoost[]>;
+	constructor() {
+		this.traits = NaninhasTraits;
 		Events.onGameBoot.addListener(() => this.addTraits());
 	}
 
@@ -115,4 +22,15 @@ export class TraitsClass {
 			}
 		}
 	}
+
+	public static getPerkBoostsForTrait(trait: string): PerkBoost[] {
+		if(!this.cache) {
+			this.cache = new Map(
+				NaninhasTraits.map((({id, xpBoosts = []}) => {
+					return [id,xpBoosts.map(({perk, value}) => ({perk, value}))]
+				}))
+			)
+		}
+		return this.cache.get(trait) ?? [];
+	} 
 }

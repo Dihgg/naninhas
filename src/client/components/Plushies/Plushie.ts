@@ -2,7 +2,9 @@
 import { IsoPlayer, Perk, TraitFactory, XPMultiplier } from "@asledgehammer/pipewrench";
 import { Observer } from "../Observer/Observer";
 import { PlayerData } from "./PlayerData";
-import { NaninhasTraits } from "shared/components/TraitsClass";
+import { NaninhasTraits } from "shared/components/TraitValues";
+import type { PerkBoost } from "types";
+import { TraitsClass } from "shared/components/TraitsClass";
 // TODO: Apply the LuaEventManager to allow other mods to interact with this one
 // import { LuaEventManager } from "@asledgehammer/pipewrench"
 
@@ -11,11 +13,6 @@ export type PlushieProps = {
 	name: string;
 	traitsToAdd?: string[];
 	traitsToSuppress?: string[];
-};
-
-type PerkBoost = {
-	perk: Perk;
-	value: number
 };
 
 /**
@@ -74,7 +71,7 @@ export abstract class Plushie implements Observer {
 		data.suppressedTraits = [...this.suppressedTraits];
 	}
 
-	private traitToPerkBoosts(trait: string): PerkBoost[] {
+	/* private traitToPerkBoosts(trait: string): PerkBoost[] {
 		return NaninhasTraits
 			.reduce<PerkBoost[]>((acc, { id, xpBoosts = [] }) => {
 				if (id === trait) {
@@ -83,7 +80,7 @@ export abstract class Plushie implements Observer {
 				}
 				return acc;
 			}, []);
-	}
+	} */
 
 	/**
 	 * For a given trait, apply a boost based on Naninhas traits
@@ -92,7 +89,7 @@ export abstract class Plushie implements Observer {
 	 */
 	private applyBoost(trait: string, shouldApply = true) {
 		const xp = this.player.getXp();
-		const perks = this.traitToPerkBoosts(trait);
+		const perks = TraitsClass.getPerkBoostsForTrait(trait);
 		for (const { perk, value } of perks) {
 			xp.AddXPNoMultiplier(perk, shouldApply ? value : 0);
 		}

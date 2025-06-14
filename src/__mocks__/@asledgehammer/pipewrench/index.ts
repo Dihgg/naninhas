@@ -13,4 +13,5 @@ export class TraitFactory {
 
 export class Perks {
 	static Woodwork = "Woodwork";
+	static Aiming = "Aiming";
 }
