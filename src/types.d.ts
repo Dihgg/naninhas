@@ -1,4 +1,4 @@
-import type { IsoPlayer, Perk } from "@asledgehammer/pipewrench";
+import type { IsoPlayer, KahluaTable, Perk } from "@asledgehammer/pipewrench";
 
 type PerkBoost = {
 	perk: Perk;
@@ -17,4 +17,13 @@ type PlushieProps = {
 	name: string;
 	traitsToAdd?: string[];
 	traitsToSuppress?: string[];
+};
+
+type ModDataProps<T> = {
+	/** The player object from PZ */
+	object: { getModData(): KahluaTable };
+	/** The key to be used in `getModData()` */
+	modKey: string;
+	/** The data that shall be returned by default */
+	defaultData: T;
 };

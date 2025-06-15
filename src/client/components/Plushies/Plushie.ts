@@ -1,7 +1,7 @@
 /* @noSelfInFile */
 import { IsoPlayer } from "@asledgehammer/pipewrench";
 import { Observer } from "../Observer/Observer";
-import { PlayerData } from "./PlayerData";
+import { ModData } from "./ModData";
 import { TraitsClass } from "@components/TraitsClass";
 import type { PlushieProps } from "types";
 
@@ -27,7 +27,7 @@ export abstract class Plushie implements Observer {
 	private readonly suppressedTraits: Set<string>;
 
 	/** The data from `player.getModData()` to ensure traits are not permanent */
-	private readonly playerData: PlayerData<{
+	private readonly playerData: ModData<{
 		addedTraits: string[];
 		suppressedTraits: string[];
 	}>;
@@ -42,8 +42,8 @@ export abstract class Plushie implements Observer {
 		this.player = player;
 		this.traitsToAdd = traitsToAdd;
 		this.traitsToSuppress = traitsToSuppress;
-		this.playerData = new PlayerData({
-			player: this.player,
+		this.playerData = new ModData({
+			object: this.player,
 			modKey: "Naninhas",
 			defaultData: { addedTraits: [], suppressedTraits: [] }
 		});
@@ -107,11 +107,13 @@ export abstract class Plushie implements Observer {
 
 		const toAdd = this.traitsToAdd.filter(trait => !this.addedTraits.has(trait) && !this.player.HasTrait(trait))
 		toAdd.forEach((trait) => this.addedTraits.add(trait));
+		// TODO: this is not working right now
 		this.player.getTraits().addAll(toAdd);
 		this.applyBoosts(toAdd);
 
 		const toSuppress = this.traitsToSuppress.filter(trait => !this.suppressedTraits.has(trait) && this.player.HasTrait(trait));
 		toSuppress.forEach( (trait) => this.suppressedTraits.add(trait));
+		// TODO: this is not working right now
 		this.player.getTraits().removeAll(toSuppress);
 		this.applyBoosts(toSuppress, false);
 
@@ -126,6 +128,8 @@ export abstract class Plushie implements Observer {
 		// Remove all the traits that are exclusive this Plushie
 		const toRemove = this.traitsToAdd
 			.filter((trait) => this.addedTraits.has(trait));
+			
+		// TODO: this is not working right now
 		this.player.getTraits().removeAll(toRemove);
 		this.applyBoosts(toRemove, false);
 		toRemove.forEach((trait) => this.addedTraits.delete(trait));
@@ -133,6 +137,7 @@ export abstract class Plushie implements Observer {
 		// Add back the traits that are suppressed by this Plushie
 		const toRestore = this.traitsToSuppress
 			.filter((trait) => this.suppressedTraits.has(trait));
+		// TODO: this is not working right now
 		this.player.getTraits().addAll(toRestore);
 		this.applyBoosts(toRemove, false);
 		toRestore.forEach((trait) => this.suppressedTraits.delete(trait));

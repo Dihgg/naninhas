@@ -1,24 +1,21 @@
 import { mock } from "jest-mock-extended";
-import { PlayerData } from "./PlayerData";
-import { IsoPlayer } from "@asledgehammer/pipewrench";
+import { ModData } from "./ModData";;
 
-// PlayerData.test.ts
-
-describe("PlayerData", () => {
-	let mockPlayer: IsoPlayer;
+describe("ModData", () => {
+	let mockObject: ModData<unknown>['object'];
 	let modData: Record<string, unknown>;
 
 	beforeEach(() => {
 		modData = {};
-		mockPlayer = mock<IsoPlayer>({
+		mockObject = mock({
 			getModData: jest.fn(() => modData)
 		});
 	});
 
 	it("returns defaultData if modKey is not present", () => {
 		const defaultData = { foo: "bar" };
-		const pd = new PlayerData({
-			player: mockPlayer,
+		const pd = new ModData({
+			object: mockObject,
 			modKey: "testKey",
 			defaultData
 		});
@@ -29,8 +26,8 @@ describe("PlayerData", () => {
 	it("returns existing data if modKey is present", () => {
 		const existingData = { foo: "baz" };
 		modData["testKey"] = existingData;
-		const pd = new PlayerData({
-			player: mockPlayer,
+		const pd = new ModData({
+			object: mockObject,
 			modKey: "testKey",
 			defaultData: { foo: "bar" }
 		});
@@ -39,8 +36,8 @@ describe("PlayerData", () => {
 
 	it("sets defaultData only once if accessed multiple times", () => {
 		const defaultData = { foo: "bar" };
-		const pd = new PlayerData({
-			player: mockPlayer,
+		const pd = new ModData({
+			object: mockObject,
 			modKey: "testKey",
 			defaultData
 		});
@@ -51,8 +48,8 @@ describe("PlayerData", () => {
 	});
 
 	it("works with primitive types as defaultData", () => {
-		const pd = new PlayerData({
-			player: mockPlayer,
+		const pd = new ModData({
+			object: mockObject,
 			modKey: "numKey",
 			defaultData: 42
 		});
@@ -61,8 +58,8 @@ describe("PlayerData", () => {
 
 	it("does not overwrite existing data with defaultData", () => {
 		modData["testKey"] = "existing";
-		const pd = new PlayerData({
-			player: mockPlayer,
+		const pd = new ModData({
+			object: mockObject,
 			modKey: "testKey",
 			defaultData: "default"
 		});
