@@ -1,5 +1,5 @@
 /* @noSelfInFile */
-import { IsoPlayer, java, Trait, transformIntoKahluaTable } from "@asledgehammer/pipewrench";
+import { IsoPlayer, java, Perk, Trait, transformIntoKahluaTable } from "@asledgehammer/pipewrench";
 import { TraitsClass } from "@components/TraitsClass";
 import { ModData } from "./ModData";
 import { Observer } from "../Observer/Observer";
@@ -7,7 +7,6 @@ import type { PlushieProps } from "types";
 
 // TODO: Apply the LuaEventManager to allow other mods to interact with this one
 // import { LuaEventManager } from "@asledgehammer/pipewrench"
-
 
 /**
  * This class controls the Plushie behavior
@@ -22,14 +21,14 @@ export abstract class Plushie implements Observer {
 	private readonly traitsToSuppress: string[] = [];
 
 	/** List of traits that are added by Plushies */
-	private readonly addedTraits: Set<string>;
+	private readonly addedTraits: Map<string, Map<Perk, number>>;
 	/** List of traits that are suppressed by Plushies */
-	private readonly suppressedTraits: Set<string>;
+	private readonly suppressedTraits: Map<string, Map<Perk, number>>;
 
 	/** The data from `player.getModData()` to ensure traits are not permanent */
 	private readonly playerData: ModData<{
-		addedTraits: string[];
-		suppressedTraits: string[];
+		addedTraits: Map<string, Map<Perk, number>>;
+		suppressedTraits: Map<string, Map<Perk, number>>;
 	}>;
 
 	/**
@@ -45,13 +44,13 @@ export abstract class Plushie implements Observer {
 		this.playerData = new ModData({
 			object: this.player,
 			modKey: "Naninhas",
-			defaultData: { addedTraits: [], suppressedTraits: [] }
+			defaultData: { addedTraits: new Map(), suppressedTraits: new Map() }
 		});
 
 		// Load the data from `player.getModData()`
 		//const { data } = this.playerData;
-		this.addedTraits = new Set(this.data.addedTraits);
-		this.suppressedTraits = new Set(this.data.suppressedTraits);
+		this.addedTraits = this.data.addedTraits
+		this.suppressedTraits = this.data.suppressedTraits;
 	}
 
 	/**
@@ -60,9 +59,10 @@ export abstract class Plushie implements Observer {
 	 */
 	update() {
 		// This ensures the data is saved in the `player.getModData()`
+		// TODO: this might not be needed
 		const { data } = this.playerData;
-		data.addedTraits = [...this.addedTraits];
-		data.suppressedTraits = [...this.suppressedTraits];
+		data.addedTraits = this.addedTraits;
+		data.suppressedTraits = this.suppressedTraits;
 	}
 
 	/**
@@ -70,7 +70,7 @@ export abstract class Plushie implements Observer {
 	 * @param trait The trait to look for in Naninhas traits
 	 * @param shouldApply Should the boost be applied or removed (set to 0)
 	 */
-	private applyBoost(trait: string, shouldApply = true) {
+	private applyBoost(trait: string, shouldApply = true, perksMap?: Map<Perk, number>) {
 		const perks = TraitsClass.getPerkBoostsForTrait(trait);
 		
 		// const descriptor = this.player.getDescriptor();
@@ -81,8 +81,10 @@ export abstract class Plushie implements Observer {
 		
 		for (const { perk, value } of perks) {
 			print(`Applying boost for ${trait} to ${perk} with value ${value}`);
+
+			const defaultValue = (!shouldApply) ? (perksMap?.get(perk) ?? 0) : 0;
 			
-			xp.addXpMultiplier(perk, shouldApply ? value : 0, 0, 0);
+			xp.addXpMultiplier(perk, shouldApply ? value : defaultValue, 0, 0);
 		}
 	}
 
@@ -97,14 +99,27 @@ export abstract class Plushie implements Observer {
 		}
 	}
 
+	private getPerksMapMultiplier(trait: string): Map<Perk, number> {
+		const perks = TraitsClass.getPerkBoostsForTrait(trait);
+		const perkMap = new Map<Perk, number>();
+		const xp = this.player.getXp();
+		for (const { perk } of perks) {
+			perkMap.set(perk, xp.getMultiplier(perk));
+		}
+		return perkMap;
+	}
+
 	/**
 	 * Method that should be called when the Plushie is equipped
 	 */
 	public subscribe() {
 
+		const xp = this.player.getXp();
+
 		const toAdd = this.traitsToAdd.filter(trait => !this.addedTraits.has(trait) && !this.player.HasTrait(trait))
 		for(const trait of toAdd) {
-			this.addedTraits.add(trait);
+			const perkMap = this.getPerksMapMultiplier(trait);
+			this.addedTraits.set(trait, perkMap);
 			this.player.getTraits().add(trait);
 			this.applyBoost(trait, true);
 		}
@@ -116,9 +131,10 @@ export abstract class Plushie implements Observer {
 
 		const toSuppress = this.traitsToSuppress.filter(trait => !this.suppressedTraits.has(trait) && this.player.HasTrait(trait));
 		for (const trait of toSuppress) {
-			this.suppressedTraits.add(trait);
+			const perkMap = this.getPerksMapMultiplier(trait);
+			this.suppressedTraits.set(trait, perkMap);
 			this.player.getTraits().remove(trait);
-			this.applyBoost(trait, false);
+			this.applyBoost(trait, false, this.suppressedTraits.get(trait));
 		}
 		/*
 			toSuppress.forEach( (trait) => this.suppressedTraits.add(trait));
