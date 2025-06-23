@@ -1,8 +1,8 @@
 /* @noSelfInFile */
-import { IsoPlayer } from "@asledgehammer/pipewrench";
-import { Observer } from "../Observer/Observer";
-import { ModData } from "./ModData";
+import { IsoPlayer, java, Trait, transformIntoKahluaTable } from "@asledgehammer/pipewrench";
 import { TraitsClass } from "@components/TraitsClass";
+import { ModData } from "./ModData";
+import { Observer } from "../Observer/Observer";
 import type { PlushieProps } from "types";
 
 // TODO: Apply the LuaEventManager to allow other mods to interact with this one
@@ -49,9 +49,9 @@ export abstract class Plushie implements Observer {
 		});
 
 		// Load the data from `player.getModData()`
-		const { data } = this.playerData;
-		this.addedTraits = new Set(data.addedTraits);
-		this.suppressedTraits = new Set(data.suppressedTraits);
+		//const { data } = this.playerData;
+		this.addedTraits = new Set(this.data.addedTraits);
+		this.suppressedTraits = new Set(this.data.suppressedTraits);
 	}
 
 	/**
@@ -65,27 +65,24 @@ export abstract class Plushie implements Observer {
 		data.suppressedTraits = [...this.suppressedTraits];
 	}
 
-	/* private traitToPerkBoosts(trait: string): PerkBoost[] {
-		return NaninhasTraits
-			.reduce<PerkBoost[]>((acc, { id, xpBoosts = [] }) => {
-				if (id === trait) {
-					const perks = xpBoosts.map(({ perk, value }) => ({ perk: perk as Perk, value }));
-					return [...acc, ...perks];
-				}
-				return acc;
-			}, []);
-	} */
-
 	/**
 	 * For a given trait, apply a boost based on Naninhas traits
 	 * @param trait The trait to look for in Naninhas traits
 	 * @param shouldApply Should the boost be applied or removed (set to 0)
 	 */
 	private applyBoost(trait: string, shouldApply = true) {
-		const xp = this.player.getXp();
 		const perks = TraitsClass.getPerkBoostsForTrait(trait);
+		
+		// const descriptor = this.player.getDescriptor();
+		// const boostMap = descriptor.getXPBoostMap();
+		// const boost = transformIntoKahluaTable(boostMap);
+
+		const xp = this.player.getXp();
+		
 		for (const { perk, value } of perks) {
-			xp.AddXPNoMultiplier(perk, shouldApply ? value : 0);
+			print(`Applying boost for ${trait} to ${perk} with value ${value}`);
+			
+			xp.addXpMultiplier(perk, shouldApply ? value : 0, 0, 0);
 		}
 	}
 
@@ -106,16 +103,29 @@ export abstract class Plushie implements Observer {
 	public subscribe() {
 
 		const toAdd = this.traitsToAdd.filter(trait => !this.addedTraits.has(trait) && !this.player.HasTrait(trait))
-		toAdd.forEach((trait) => this.addedTraits.add(trait));
-		// TODO: this is not working right now
-		this.player.getTraits().addAll(toAdd);
-		this.applyBoosts(toAdd);
+		for(const trait of toAdd) {
+			this.addedTraits.add(trait);
+			this.player.getTraits().add(trait);
+			this.applyBoost(trait, true);
+		}
+		/*
+			toAdd.forEach((trait) => this.addedTraits.add(trait));
+			this.player.getTraits().addAll(toAdd);
+			this.applyBoosts(toAdd);
+		 */
 
 		const toSuppress = this.traitsToSuppress.filter(trait => !this.suppressedTraits.has(trait) && this.player.HasTrait(trait));
-		toSuppress.forEach( (trait) => this.suppressedTraits.add(trait));
-		// TODO: this is not working right now
-		this.player.getTraits().removeAll(toSuppress);
-		this.applyBoosts(toSuppress, false);
+		for (const trait of toSuppress) {
+			this.suppressedTraits.add(trait);
+			this.player.getTraits().remove(trait);
+			this.applyBoost(trait, false);
+		}
+		/*
+			toSuppress.forEach( (trait) => this.suppressedTraits.add(trait));
+			// TODO: this is not working right now
+			this.player.getTraits().removeAll(toSuppress);
+			this.applyBoosts(toSuppress, false);
+		*/
 
 		// Ensures the data is saved in the `player.getModData()` after the Plushie effect is applied
 		this.update();
@@ -128,21 +138,39 @@ export abstract class Plushie implements Observer {
 		// Remove all the traits that are exclusive this Plushie
 		const toRemove = this.traitsToAdd
 			.filter((trait) => this.addedTraits.has(trait));
-			
-		// TODO: this is not working right now
-		this.player.getTraits().removeAll(toRemove);
-		this.applyBoosts(toRemove, false);
-		toRemove.forEach((trait) => this.addedTraits.delete(trait));
+		
+		for (const trait of toRemove) {
+			this.addedTraits.delete(trait);
+			this.player.getTraits().remove(trait);
+			this.applyBoost(trait, false);
+		}
+		/*
+			// TODO: this is not working right now
+			this.player.getTraits().removeAll(toRemove);
+			this.applyBoosts(toRemove, false);
+			toRemove.forEach((trait) => this.addedTraits.delete(trait));
+		 */
 
 		// Add back the traits that are suppressed by this Plushie
 		const toRestore = this.traitsToSuppress
 			.filter((trait) => this.suppressedTraits.has(trait));
-		// TODO: this is not working right now
-		this.player.getTraits().addAll(toRestore);
-		this.applyBoosts(toRemove, false);
-		toRestore.forEach((trait) => this.suppressedTraits.delete(trait));
+		for (const trait of toRestore) {
+			this.suppressedTraits.delete(trait);
+			this.player.getTraits().add(trait);
+			this.applyBoost(trait, true);
+		}
+		/*
+			// TODO: this is not working right now
+			this.player.getTraits().addAll(toRestore);
+			this.applyBoosts(toRemove, false);
+			toRestore.forEach((trait) => this.suppressedTraits.delete(trait));
+		 */
 
 		// Ensures the data is saved in the `player.getModData()` before the Plushie effect is no longer applied
 		this.update();
+	}
+
+	get data() {
+		return this.playerData.data;
 	}
 }

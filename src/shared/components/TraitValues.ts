@@ -79,11 +79,11 @@ export const NaninhasTraits: TraitType[] = [
 		xpBoosts: [
 			{
 				perk: Perks.Aiming as Perk,
-				value: 1
+				value: 5
 			},
 			{
 				perk: Perks.Reloading as Perk,
-				value: 1
+				value: 5
 			}
 		]
 	}

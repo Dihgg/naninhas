@@ -184,11 +184,10 @@ export class SpiffoPlushieRainbow extends Plushie {
 	}
 	update() {
 		super.update();
-		const { getBoredom, setBoredom, getEndurance, setEndurance, getFatigue, setFatigue } =
-			this.player.getStats();
-		setBoredom(Math.max(0, getBoredom() - 0.05));
-		setEndurance(Math.min(1, getEndurance() + 0.05));
-		setFatigue(Math.max(0, getFatigue() - 0.05));
+		const stats = this.player.getStats();
+		stats.setBoredom(Math.max(0, stats.getBoredom() - 0.5));
+		stats.setEndurance(Math.min(1, stats.getEndurance() + 0.5));
+		stats.setFatigue(Math.max(0, stats.getFatigue() - 0.5));
 	}
 }
 
@@ -201,8 +200,8 @@ export class SpiffoSanta extends Plushie {
 	}
 	public update() {
 		super.update();
-		const { getBoredom, setBoredom } = this.player.getStats();
-		setBoredom(Math.max(0, getBoredom() - 0.05));
+		const stats = this.player.getStats();
+		stats.setBoredom(Math.max(0, stats.getBoredom() - 0.5));
 	}
 }
 
@@ -236,9 +235,9 @@ export class ToyBear extends Plushie {
 	}
 	update() {
 		super.update();
-		const { getFear, setFear, getPanic, setPanic } = this.player.getStats();
-		setFear(Math.max(0, getFear() - 0.05));
-		setPanic(Math.max(0, getPanic() - 0.05));
+		const stats = this.player.getStats();
+		stats.setFear(Math.max(0, stats.getFear() - 0.5));
+		stats.setPanic(Math.max(0, stats.getPanic() - 0.5));
 	}
 }
 
@@ -251,8 +250,8 @@ export class ToyBearSmall extends Plushie {
 	}
 	update() {
 		super.update();
-		const { getFear, setFear, getPanic, setPanic } = this.player.getStats();
-		setFear(Math.max(0, getFear() - 0.01));
-		setPanic(Math.max(0, getPanic() - 0.01));
+		const stats = this.player.getStats();
+		stats.setFear(Math.max(0, stats.getFear() - 0.1));
+		stats.setPanic(Math.max(0, stats.getPanic() - 0.1));
 	}
 }
