@@ -2,20 +2,20 @@ UI_EN = {
 	/* Traits */
 	UI_Trait_Naninhas_JacquesBeaver = "(Naninhas) Jaques the Beaver",
 	UI_Trait_Naninhas_JacquesBeaver_Description = "You can work with wood like a Beaver <br>-Bosts Carpentry XP gains",
-	
+
 	UI_Trait_Naninhas_PancakeHedgehog = "(Naninhas) Pancake the Hedgehog",
 	UI_Trait_Naninhas_PancakeHedgehog_Description = "Inspired by a particurlar blue Hedgehog <br>-boosts in Agility and Sprinting XP gains",
-	
-	UI_Trait_NaninhasMoleyMole = "(Naninhas) Moley the Mole",
-	UI_Trait_NaninhasMoleyMole_Description = "Inspired by Moley the Mole<br>-Boosts Foraging XP gains",
-	
+
+	UI_Trait_Naninhas_MoleyMole = "(Naninhas) Moley the Mole",
+	UI_Trait_Naninhas_MoleyMole_Description = "Inspired by Moley the Mole<br>-Boosts Foraging XP gains",
+
 	UI_Trait_Naninhas_SpiffoHeart = "(Naninhas) Spiffo Heart",
 	UI_Trait_Naninhas_SpiffoHeart_Description = "Inspired by Heart Spiffo<br>-Boots Firt Aid XP gains",
-	
-	UI_Trait_Naninhas_SpiffoGrey = "(Naninhas) Spiffo PAWS",
-	UI_Trait_Naninhas_SpiffoGrey_Description = "Inspired by PAWS Spiffo. You are a killing machine!<br>-Boots Nimble, Blades & Blunt XP gains",
+
+	UI_Trait_Naninhas_SpiffoGray = "(Naninhas) Spiffo PAWS",
+	UI_Trait_Naninhas_SpiffoGray_Description = "Inspired by PAWS Spiffo. You are a killing machine!<br>-Boots Nimble, Blades & Blunt XP gains",
 
 	UI_Trait_Naninhas_SpiffoShamrock = "(Naninhas) Spiffo Shamrock",
 	UI_Trait_Naninhas_SpiffoShamrock_Description = "Inspired by Sharmrock Spiffo<br>-Boots Aiming & Reloading XP gains",
-	
+
 }

@@ -1,3 +1,4 @@
+/* @noSelfInFile */
 import { IsoPlayer } from "@asledgehammer/pipewrench";
 import { Plushie } from "./Plushie";
 

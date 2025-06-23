@@ -1,3 +1,4 @@
+/* @noSelfInFile */
 import * as Events from "@asledgehammer/pipewrench-events";
 
 import { Naninhas } from "./components/NaninhasClass";

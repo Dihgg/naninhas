@@ -1,3 +1,4 @@
+/* @noSelfInFile */
 import { getText, Perk, TraitFactory } from "@asledgehammer/pipewrench";
 import * as Events from "@asledgehammer/pipewrench-events";
 import type { PerkBoost, TraitType } from "types";
@@ -44,5 +45,5 @@ export class TraitsClass {
 			);
 		}
 		return this.cache.get(trait) ?? [];
-	} 
+	}
 }
