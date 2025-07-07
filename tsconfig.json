@@ -36,6 +36,5 @@
 				"name": "@asledgehammer/tstl-pipewrench"
 			}
 		]
-	},
-	"exclude": ["**/*.spec.*", "**/__mocks__/**/*.ts", "src/test/**/*.ts","src/root/"]
+	}
 }
