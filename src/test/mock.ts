@@ -1,1 +1,1 @@
-export const print = jest.fn();
+globalThis.print = jest.fn();

@@ -3,13 +3,35 @@ const path = require("path");
 const sharp = require("sharp");
 const cliProgress = require("cli-progress");
 
+/**
+ * Remove .DS_Store files recursively
+ * @param {string} dir the folder to look for .DS_Store files
+ */
+const removeDSStore = dir => {
+	fs.readdirSync(dir).forEach(file => {
+		const filePath = path.join(dir, file);
+		const stats = fs.statSync(filePath);
+
+		if (stats.isDirectory()) {
+			removeDSStore(filePath);
+		} else if (file === ".DS_Store") {
+			fs.unlinkSync(filePath);
+		}
+	});
+};
+
+/**
+ * Optimize Images using sharp library
+ * @param {string} srcFilePath image to optimize
+ * @param {string} destFilePath path to save the optimized image
+ */
 const optimizeImage = async (srcFilePath, destFilePath) => {
 	try {
 		const ext = path.extname(srcFilePath).toLowerCase();
 		const image = sharp(srcFilePath);
 		if (ext === ".png") {
 			await image.png({ quality: 80, compressionLevel: 9 }).toFile(destFilePath);
-		} else if (ext === ".jpg" || ext === ".jpeg") {
+		} else if ([".jpg", ".jpeg"].includes(ext)) {
 			await image.jpeg({ quality: 80 }).toFile(destFilePath);
 		}
 	} catch (error) {
@@ -17,7 +39,11 @@ const optimizeImage = async (srcFilePath, destFilePath) => {
 	}
 };
 
-// Recursively gather all files first
+/**
+ * Recursively all files paths
+ * @param {string} dir folder to look for files
+ * @returns {Promise<string[]>} path with all the files
+ */
 const gatherAllFiles = async dir => {
 	const items = await fs.readdir(dir, { withFileTypes: true });
 	const filePaths = [];
@@ -34,6 +60,12 @@ const gatherAllFiles = async dir => {
 	return filePaths;
 };
 
+/**
+ * Recursively copy files while optimizing images
+ * @param {string} srcDir Path to copy from
+ * @param {string} destDir Path to copy to
+ * @param {cliProgress} progressBar the progress bar from cli-progress library
+ */
 const copyAndOptimizeRecursive = async (srcDir, destDir, progressBar) => {
 	const items = await fs.readdir(srcDir, { withFileTypes: true });
 	await fs.ensureDir(destDir);
@@ -59,34 +91,36 @@ const copyAndOptimizeRecursive = async (srcDir, destDir, progressBar) => {
 	}
 };
 
+/**
+ * Copy folder, while recursively optimize images
+ * @param {string} srcPath Path to copy from
+ * @param {string} destPath Path to copy to
+ */
 const copyFolder = async (srcPath, destPath) => {
-	const pipewrenchJsonPath = path.join(process.cwd(), "pipewrench.json");
-	const {
-		modInfo: { name }
-	} = JSON.parse(fs.readFileSync(pipewrenchJsonPath, "utf8"));
+	if (!fs.existsSync(srcPath)) {
+		console.log(`📁 No files to copy from ${srcPath}...`);
+	} else {
+		console.log(`📁 Copying and optimizing files from ${srcPath} to ${destPath}`);
 
-	const srcDir = path.join(process.cwd(), ...srcPath.split("/"));
-	const destDir = path.join(process.cwd(), "dist", name, "media", ...destPath.split("/"));
+		const allFiles = await gatherAllFiles(srcPath);
 
-	if (!fs.existsSync(srcDir)) return;
+		const progressBar = new cliProgress.SingleBar({
+			format: "Progress |{bar}| {percentage}% | {value}/{total} files",
+			barCompleteChar: "█",
+			barIncompleteChar: "░",
+			hideCursor: true
+		});
+		progressBar.start(allFiles.length, 0);
 
-	console.log(`📁 Copying and optimizing files from ${srcDir} to ${destDir}...`);
+		await copyAndOptimizeRecursive(srcPath, destPath, progressBar);
 
-	const allFiles = await gatherAllFiles(srcDir);
+		removeDSStore(destPath);
 
-	// Initialize progress bar
-	const progressBar = new cliProgress.SingleBar({
-		format: "Progress |{bar}| {percentage}% | {value}/{total} files",
-		barCompleteChar: "█",
-		barIncompleteChar: "░",
-		hideCursor: true
-	});
-	progressBar.start(allFiles.length, 0);
-
-	await copyAndOptimizeRecursive(srcDir, destDir, progressBar);
-
-	progressBar.stop();
-	console.log("✅ Copy and optimization complete!");
+		progressBar.stop();
+		console.log("✅ Copy and optimization complete!");
+	}
 };
 
-exports.copyFolder = copyFolder;
+module.exports = {
+	copyFolder
+};

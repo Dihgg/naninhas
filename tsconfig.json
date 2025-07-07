@@ -31,5 +31,5 @@
 			}
 		]
 	},
-	"exclude": ["**/*.spec.*", "src/__mocks__/**/*.ts", "src/test/**/*.ts"]
+	"exclude": ["**/*.spec.*", "**/__mocks__/**/*.ts", "src/test/**/*.ts","src/root/"]
 }

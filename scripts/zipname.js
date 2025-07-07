@@ -1,3 +1,3 @@
-const { getZipName } = require("./utils");
+const { getInfo } = require("./utils");
 
-console.log(getZipName());
+console.log(getInfo().zipname);

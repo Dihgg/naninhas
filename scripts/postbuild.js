@@ -1,17 +1,46 @@
-const { copyFolder } = require("./utils");
+const path = require("path");
+const { copyFolder, getInfo } = require("./utils");
 
-copyFolder("src/ui", "ui")
+/**
+ * returns the src Path for this operation
+ * @param {string} dirPath
+ * @returns {string}
+ */
+const srcPath = dirPath => path.join(process.cwd(), ...dirPath.split("/"));
+
+/**
+ * returns the dist path (inside media) for this operation
+ * @param {string} dirPath
+ * @param {boolean} media should include the media folder in destPath ?
+ * @returns {string}
+ */
+const distPath = (dirPath, media = true) => {
+	const { name } = getInfo();
+	return path.join(process.cwd(), "dist", name, media ? "media" : "", ...dirPath.split("/"));
+};
+
+// Copy media folder to dist
+copyFolder(srcPath("src/media"), distPath(""))
 	.then(() => {
-		console.info("ui folder copied successfully.");
+		console.info("media folder copied successfully.");
 	})
 	.catch(err => {
-		console.error("Error copying ui folder:", err);
+		console.error("Error copying media folder:", err);
 	});
 
-copyFolder("src/translations", "lua/shared/Translate")
+// Copy translations to dist
+copyFolder(srcPath("src/translations"), distPath("lua/shared/Translate"))
 	.then(() => {
 		console.info("Translations folder copied successfully.");
 	})
 	.catch(err => {
 		console.error("Error copying translations folder:", err);
+	});
+
+copyFolder(srcPath("src/root"), distPath("", false))
+	.then(() => {
+		console.info("copy root folder copied successfully.");
+	})
+	.catch(err => {
+		console.error("Error copying root folder:", err);
 	});
