@@ -1,10 +1,10 @@
-import { TraitsClass } from "../components/TraitsClass";
-jest.mock("../components/TraitsClass");
+import { Traits } from "../components/Traits";
+jest.mock("../components/Traits");
 
 describe("TraitClass event registration", () => {
 	it("The TraitClass should be initialized", () => {
 		// triggers event registration
 		require("./Traits");
-		expect(TraitsClass).toHaveBeenCalled();
+		expect(Traits).toHaveBeenCalled();
 	});
 });

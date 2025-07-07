@@ -1,6 +1,6 @@
 
 import { IsoPlayer, java, Perk, Trait, transformIntoKahluaTable } from "@asledgehammer/pipewrench";
-import { TraitsClass } from "@components/TraitsClass";
+import { Traits } from "@shared/components/Traits";
 import { ModData } from "./ModData";
 import { Observer } from "../Observer/Observer";
 import type { PlushieProps } from "types";
@@ -71,7 +71,7 @@ export abstract class Plushie implements Observer {
 	 * @param shouldApply Should the boost be applied or removed (set to 0)
 	 */
 	private applyBoost(trait: string, shouldApply = true) {
-		const perks = TraitsClass.getPerkBoostsForTrait(trait);
+		const perks = Traits.getPerkBoostsForTrait(trait);
 		
 		// const descriptor = this.player.getDescriptor();
 		// const boostMap = descriptor.getXPBoostMap();
@@ -91,11 +91,11 @@ export abstract class Plushie implements Observer {
 	 * @param traits List of traits
 	 * @param shouldApply Should the boost be applied or removed (set to 0)
 	 */
-	private applyBoosts(traits: string[], shouldApply?: boolean) {
+	/* private applyBoosts(traits: string[], shouldApply?: boolean) {
 		for (const trait of traits) {
 			this.applyBoost(trait, shouldApply);
 		}
-	}
+	} */
 
 	/**
 	 * Method that should be called when the Plushie is equipped

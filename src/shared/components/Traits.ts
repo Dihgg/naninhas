@@ -4,7 +4,7 @@ import * as Events from "@asledgehammer/pipewrench-events";
 import type { PerkBoost, TraitType } from "types";
 import { NaninhasTraits } from "./TraitValues";
 
-export class TraitsClass {
+export class Traits {
 	private readonly traits: TraitType[];
 
 	private static cache: Map<string,PerkBoost[]>;

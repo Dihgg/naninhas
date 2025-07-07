@@ -1,4 +1,4 @@
 
-import { TraitsClass } from "../components/TraitsClass";
+import { Traits } from "@shared/components/Traits";
 
-new TraitsClass();
+new Traits();

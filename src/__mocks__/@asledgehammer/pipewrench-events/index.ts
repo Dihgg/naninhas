@@ -8,7 +8,7 @@ export const everyOneMinute = {
 	addListener: addListenerMock
 };
 export const onCreatePlayer = {
-	addListener: addListenerMock
+	addListener: jest.fn()
 };
 
 export const onGameBoot = {

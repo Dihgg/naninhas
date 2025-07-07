@@ -18,7 +18,7 @@ jest.mock("@asledgehammer/pipewrench-events", () => {
   };
 });
 
-describe("TraitsClass", () => {
+describe("Traitss", () => {
   beforeEach(() => {
     jest.resetModules();
     jest.clearAllMocks();
@@ -31,8 +31,8 @@ describe("TraitsClass", () => {
     
     await jest.isolateModulesAsync(async () => {
       const { onGameBoot } = await import("@asledgehammer/pipewrench-events");
-      const { TraitsClass } = await import("./TraitsClass");
-      new TraitsClass();
+      const { Traits } = await import("@shared/components/Traits");
+      new Traits();
       expect(onGameBoot.addListener).toHaveBeenCalledTimes(1);
     });
   });
@@ -52,8 +52,8 @@ describe("TraitsClass", () => {
     
     await jest.isolateModulesAsync(async () => {
       const { onGameBoot } = await import("@asledgehammer/pipewrench-events");
-      const { TraitsClass } = await import("./TraitsClass");
-      new TraitsClass();
+      const { Traits } = await import("@shared/components/Traits");
+      new Traits();
       const [addTraits] = (onGameBoot.addListener as jest.Mock).mock.calls[0];
       addTraits();
       expect(addXPBoost).toHaveBeenCalledWith("Aiming", 1);
@@ -72,8 +72,8 @@ describe("TraitsClass", () => {
     
     await jest.isolateModulesAsync(async () => {
       const { onGameBoot } = await import("@asledgehammer/pipewrench-events");
-      const { TraitsClass } = await import("./TraitsClass");
-      new TraitsClass();
+      const { Traits } = await import("@shared/components/Traits");
+      new Traits();
       const [addTraits] = (onGameBoot.addListener as jest.Mock).mock.calls[0];
       addTraits();
       expect(addXPBoost).not.toHaveBeenCalled();
@@ -96,12 +96,12 @@ describe("TraitsClass", () => {
     }));
     
     await jest.isolateModulesAsync(async () => {
-      const { TraitsClass } = await import("./TraitsClass");
-      expect(TraitsClass.getPerkBoostsForTrait("TestTrait")).toEqual([
+      const { Traits } = await import("@shared/components/Traits");
+      expect(Traits.getPerkBoostsForTrait("TestTrait")).toEqual([
         { perk: "Aiming", value: 2 }
       ]);
-      expect(TraitsClass.getPerkBoostsForTrait("NoBoost")).toEqual([]);
-      expect(TraitsClass.getPerkBoostsForTrait("Unknown")).toEqual([]);
+      expect(Traits.getPerkBoostsForTrait("NoBoost")).toEqual([]);
+      expect(Traits.getPerkBoostsForTrait("Unknown")).toEqual([]);
     });
   });
 
