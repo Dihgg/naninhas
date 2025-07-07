@@ -1,4 +1,4 @@
-/* @noSelfInFile */
+
 import { ModDataProps } from "types";
 
 /**

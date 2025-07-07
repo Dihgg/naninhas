@@ -1,4 +1,4 @@
-/* @noSelfInFile */
+
 import { Perk, Perks } from "@asledgehammer/pipewrench";
 import type { TraitType } from "types";
 

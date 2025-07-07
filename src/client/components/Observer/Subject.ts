@@ -1,4 +1,4 @@
-/* @noSelfInFile */
+
 import { Observer } from "./Observer";
 
 /**

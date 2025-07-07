@@ -1,4 +1,4 @@
-/* @noSelfInFile */
+
 /**
  * Defines an Object that can be updated, subscribed or unsubscribed from a Subject
  * by using an Observer pattern
