@@ -58,7 +58,7 @@ export abstract class Plushie implements Observer {
 	 * Method that should be called periodically to apply the Plushie effect.
 	 * This ensures the traits data are saved in the `player.getModData()`
 	 */
-	// abstract update(): void;
+	update() {}
 
 	/**
 	 * For a given trait, apply a boost based on Naninhas traits

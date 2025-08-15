@@ -23,7 +23,7 @@ export class Subject {
 
 	/** Update all the observed objects */
 	update() {
-		this.observers.forEach(observer => observer.update?.());
+		this.observers.forEach(observer => observer.update());
 	}
 
 	/** Method to find an observer by its name */

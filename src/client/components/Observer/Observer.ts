@@ -8,7 +8,7 @@ export interface Observer {
 	name: string;
 
 	/** This method will be called periodically by this Observer Subject */
-	update?(): void;
+	update(): void;
 
 	/** This method will be called when this Observer is subscribed */
 	subscribe(): void;
