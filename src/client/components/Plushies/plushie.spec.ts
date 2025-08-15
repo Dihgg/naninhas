@@ -57,16 +57,6 @@ describe("Plushie", () => {
 		plushie.subscribe();
 		expect(addXpMultiplier).toHaveBeenCalledWith(Perks.Woodwork, 1, 0, 0);
 	});
-	
-	it("When updating, the getModData should be called", () => {
-		const player = mockPlayer();
-		const plushie = new TestPlushie({
-			player,
-			name: "mocked"
-		});
-		plushie.update();
-		expect(player.getModData).toHaveBeenCalled();
-	});
 
 	describe("Player does not have the Trait", () => {
 		
