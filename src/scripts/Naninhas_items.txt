@@ -12,7 +12,8 @@ module AuthenticZClothing {
 		Icon					=	FlamingoPlushie,
 		WorldStaticModel 		= 	WorldItem_FlamingoPlushie,
 		AttachmentType  		= 	SpiffoPlushie,
-		StaticModel 			= 	WorldItem_FlamingoPlushie,		
+		StaticModel 			= 	WorldItem_FlamingoPlushie,
+		Tooltip					=	Tooltip_Flamingo,		
 	}
 
    item GroguAZ
@@ -24,7 +25,8 @@ module AuthenticZClothing {
 		Icon					=	GroguAZ,
 		WorldStaticModel 		= 	WorldItem_GroguAZ,
 		AttachmentType  		= 	SpiffoPlushie,
-		StaticModel 			= 	GroguPlushie,		
+		StaticModel 			= 	GroguPlushie,
+		Tooltip					=	Tooltip_GroguAZ,		
 	}
 
    item OtisPug
@@ -36,7 +38,8 @@ module AuthenticZClothing {
 		Icon					=	PugPlushieOtis,
 		WorldStaticModel 		= 	WorldItem_PugOtisPlushie,
 		AttachmentType  		= 	SpiffoPlushie,
-		StaticModel 			= 	PugOtisPlushie,		
+		StaticModel 			= 	PugOtisPlushie,
+		Tooltip					=	Tooltip_OtisPug,		
 	}
 		
    item Spiffo
@@ -48,7 +51,8 @@ module AuthenticZClothing {
 		Icon					=	PlushSpiffo,
 		WorldStaticModel 		= 	SpiffoPlushie,
 		AttachmentType  		= 	SpiffoPlushie,
-		StaticModel 			= 	SpiffoPlushieAZ,		
+		StaticModel 			= 	SpiffoPlushieAZ,
+		Tooltip					=	Tooltip_Spiffo,		
 	}
 	
 	item SpiffoGrey
@@ -60,7 +64,8 @@ module AuthenticZClothing {
 		Icon					=	PlushSpiffoGrey,
 		WorldStaticModel 		= 	SpiffoPlushieGrey,
 		AttachmentType  		= 	SpiffoPlushie,
-		StaticModel 			= 	SpiffoPlushieGrey,		
+		StaticModel 			= 	SpiffoPlushieGrey,
+		Tooltip					=	Tooltip_SpiffoGrey,		
 	}	
 
 	item SpiffoHeart
@@ -72,7 +77,8 @@ module AuthenticZClothing {
 		Icon					=	SpiffoPink,
 		WorldStaticModel 		= 	SpiffoPlushieHeart,
 		AttachmentType  		= 	SpiffoPlushie,
-		StaticModel 			= 	SpiffoPlushieHeart,		
+		StaticModel 			= 	SpiffoPlushieHeart,
+		Tooltip					=	Tooltip_SpiffoHeart,		
 	}
 	
 	item SpiffoBlueberry
@@ -84,7 +90,8 @@ module AuthenticZClothing {
 		Icon					=	SpiffoBlue,
 		WorldStaticModel 		= 	SpiffoPlushieBlueberry,
 		AttachmentType  		= 	SpiffoPlushie,
-		StaticModel 			= 	SpiffoPlushieBlueberry,		
+		StaticModel 			= 	SpiffoPlushieBlueberry,
+		Tooltip					=	Tooltip_SpiffoBlueberry,		
 	}
 
 	item SpiffoCherry
@@ -96,7 +103,8 @@ module AuthenticZClothing {
 		Icon					=	PlushSpiffoCherry,
 		WorldStaticModel 		= 	SpiffoPlushieCherry,
 		AttachmentType  		= 	SpiffoPlushie,
-		StaticModel 			= 	SpiffoPlushieCherry,	
+		StaticModel 			= 	SpiffoPlushieCherry,
+		Tooltip					=	Tooltip_SpiffoCherry,	
 	}
 
 	item SpiffoShamrock
@@ -108,7 +116,8 @@ module AuthenticZClothing {
 		Icon					=	SpiffoGreen,
 		WorldStaticModel 		= 	SpiffoPlushieShamrock,
 		AttachmentType  		= 	SpiffoPlushie,
-		StaticModel 			= 	SpiffoPlushieShamrock,		
+		StaticModel 			= 	SpiffoPlushieShamrock,
+		Tooltip					=	Tooltip_SpiffoShamrock,		
 	}
 
 	item SpiffoPlushieRainbow
@@ -120,7 +129,8 @@ module AuthenticZClothing {
 		Icon					=	SpiffoRainbow,
 		WorldStaticModel 		= 	SpiffoPlushieRainbow,
 		AttachmentType  		= 	SpiffoPlushie,
-		StaticModel 			= 	SpiffoPlushieRainbow,		
+		StaticModel 			= 	SpiffoPlushieRainbow,
+		Tooltip					=	Tooltip_SpiffoPlushieRainbow,		
 	}	
 
 	item SpiffoSanta
@@ -158,7 +168,8 @@ module AuthenticZClothing {
 		Weight				=			0.1,
 		WorldStaticModel 	= 			Doll,
 		AttachmentType  	= 			Doll,
-		StaticModel 		= 			Doll,				
+		StaticModel 		= 			Doll,
+		Tooltip				=			Tooltip_Doll,				
 	}
 	
 	item ToyBear
@@ -170,7 +181,8 @@ module AuthenticZClothing {
 		Icon				=	ToyBear,
 		WorldStaticModel 	= 	ToyBear,
 		AttachmentType  	= 	TeddyBear,		
-		StaticModel 		= 	ToyBear,	
+		StaticModel 		= 	ToyBear,
+		Tooltip				=	Tooltip_ToyBear,	
 	}
 
 	item ToyBearSmall
@@ -182,7 +194,8 @@ module AuthenticZClothing {
 		Icon				=	ToyBear,
 		WorldStaticModel 	= 	ToyBearSmall,
 		AttachmentType  	= 	SpiffoPlushie,		
-		StaticModel 		= 	ToyBearSmall,	
+		StaticModel 		= 	ToyBearSmall,
+		Tooltip				=	Tooltip_ToyBearSmall,	
 	}			
 
 	item BorisBadger
@@ -195,6 +208,7 @@ module AuthenticZClothing {
 		AttachmentType   = 	SpiffoPlushie,
 		StaticModel 	 = 	PlushieBadger_Static,			
 		WorldStaticModel = 	PlushieBadger_Ground,
+		Tooltip			 = 	Tooltip_BorisBadger,
 	}
 
 	item JacquesBeaver
@@ -207,6 +221,7 @@ module AuthenticZClothing {
 		AttachmentType   = 	SpiffoPlushie,
 		StaticModel 	 = 	PlushieBeaver_Static,			
 		WorldStaticModel = 	PlushieBeaver_Ground,
+		Tooltip			 = 	Tooltip_JacquesBeaver,
 	}
 
 	item FreddyFox
@@ -219,6 +234,7 @@ module AuthenticZClothing {
 		AttachmentType   = 	SpiffoPlushie,
 		StaticModel 	 = 	PlushieFox_Static,			
 		WorldStaticModel = 	PlushieFox_Ground,
+		Tooltip			 = 	Tooltip_FreddyFox,
 	}
 
 	item PancakeHedgehog
@@ -231,6 +247,7 @@ module AuthenticZClothing {
 		AttachmentType   = 	SpiffoPlushie,
 		StaticModel 	 = 	PlushieHedgehog_Static,			
 		WorldStaticModel = 	PlushieHedgehog_Ground,
+		Tooltip			 = 	Tooltip_PancakeHedgehog,
 	}
 
 	item MoleyMole
@@ -243,6 +260,7 @@ module AuthenticZClothing {
 		AttachmentType   = 	SpiffoPlushie,
 		StaticModel 	 = 	PlushieMole_Static,			
 		WorldStaticModel = 	PlushieMole_Ground,
+		Tooltip			 = 	Tooltip_MoleyMole,
 	}
 
 	item FluffyfootBunny
@@ -255,6 +273,7 @@ module AuthenticZClothing {
 		AttachmentType   = 	SpiffoPlushie,
 		StaticModel 	 = 	PlushieRabbit_Static,			
 		WorldStaticModel = 	PlushieRabbit_Ground,
+		Tooltip			 = 	Tooltip_FluffyfootBunny,
 	}
 
 	item FurbertSquirrel
@@ -267,5 +286,6 @@ module AuthenticZClothing {
 		AttachmentType   = 	SpiffoPlushie,
 		StaticModel 	 = 	PlushieSquirrel_Static,			
 		WorldStaticModel = 	PlushieSquirrel_Ground,
+		Tooltip			 = 	Tooltip_FurbertSquirrel,
 	}
 }

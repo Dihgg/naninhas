@@ -1,0 +1,21 @@
+UI_PTBR = {
+	/* Traits */
+	UI_Trait_Naninhas_JacquesBeaver = "(Naninhas) Jacques the Beaver",
+	UI_Trait_Naninhas_JacquesBeaver_Description = "Jacques the Beaver mantém você focado em projetos de carpintaria.<br>- Concede +1 de XP em Carpintaria enquanto ativo.",
+
+	UI_Trait_Naninhas_PancakeHedgehog = "(Naninhas) Pancake the Hedgehog",
+	UI_Trait_Naninhas_PancakeHedgehog_Description = "Pancake the Hedgehog incentiva você a ganhar velocidade.<br>- Fornece +1 de XP em Corrida e +1 de XP em Agilidade.",
+
+	UI_Trait_Naninhas_MoleyMole = "(Naninhas) Moley the Mole",
+	UI_Trait_Naninhas_MoleyMole_Description = "Moley the Mole afia seus sentidos durante a coleta.<br>- Adiciona +2 de XP em Forrageio.",
+
+	UI_Trait_Naninhas_SpiffoHeart = "(Naninhas) Spiffo Heart",
+	UI_Trait_Naninhas_SpiffoHeart_Description = "Spiffo Heart lembra você de cuidar dos outros.<br>- Concede +2 de XP em Primeiros Socorros.",
+
+	UI_Trait_Naninhas_SpiffoGray = "(Naninhas) Spiffo PAWS",
+	UI_Trait_Naninhas_SpiffoGray_Description = "PAWS Spiffo transforma você em uma máquina disciplinada.<br>- Garante +1 de XP em Agilidade, Espada Longa, Faca, Contusão e Contusão Leve.",
+
+	UI_Trait_Naninhas_SpiffoShamrock = "(Naninhas) Spiffo Shamrock",
+	UI_Trait_Naninhas_SpiffoShamrock_Description = "Spiffo Shamrock traz tiros de sorte.<br>- Concede +5 de XP em Mira e +5 de XP em Recarga.",
+
+}

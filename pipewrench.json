@@ -2,10 +2,12 @@
 	"modInfo": {
 		"id": "Naninhas",
 		"name": "Naninhas",
-		"description": "this is a zomboid example (using pipewrench)",
+		"authors": ["Diego Lopes"],
+		"description": "This mod introduces the concept of \"naninhas\" to AuthenticZ attachable plushies!<br>Each plushie will give a different bonus when attached to the backpack!",
 		"url": "https://github.com/Dihgg/naninhas",
 		"poster": "./poster.png",
-		"require": ["Authentic Z - Current"]
+		"require": ["Authentic Z - Current"],
+		"tags": ["items"]
 	},
 	"modelsDir": "./src/models",
 	"texturesDir": "./src/textures",
