@@ -64,6 +64,28 @@ describe("Plushie", () => {
 		expect(addXpMultiplier).toHaveBeenCalledWith(Perks.Woodwork, 3, 0, 0);
 	});
 
+	it("Allows calling update directly without throwing", () => {
+		const player = mockPlayer();
+		const plushie = new TestPlushie({
+			player,
+			name: "mocked"
+		});
+
+		expect(() => plushie.update()).not.toThrow();
+	});
+
+	it("Uses the default boost behavior when 'shouldApply' argument is omitted", () => {
+		const player = mockPlayer();
+		const plushie = new TestPlushie({
+			player,
+			name: "mocked"
+		});
+
+		(plushie as unknown as { applyBoost: (trait: string) => void }).applyBoost("mockedTrait");
+
+		expect(addXpMultiplier).toHaveBeenCalledWith(Perks.Woodwork, 1, 0, 0);
+	});
+
 	it("Should keep existing multipliers when removing the Plushie bonus", () => {
 		getMultiplier.mockReturnValueOnce(2).mockReturnValueOnce(3);
 		const player = mockPlayer();
