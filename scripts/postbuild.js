@@ -20,6 +20,48 @@ const distPath = (dirPath, media = true) => {
 	return path.join(process.cwd(), "dist", name, media ? "media" : "", ...dirPath.split("/"));
 };
 
+/**
+ * Parses a .info file (key=value per line)
+ * @param {string} content
+ * @returns {Record<string, string>}
+ */
+const parseInfoFile = content => {
+	return content
+		.split(/\r?\n/)
+		.filter(Boolean)
+		.reduce((acc, line) => {
+			const [key, ...rest] = line.split("=");
+			acc[key.trim()] = rest.join("=").trim();
+			return acc;
+		}, {});
+};
+
+/**
+ * Converts info object back to .info format
+ * @param {Record<string, string>}
+ * @returns {string}
+ */
+const stringifyInfoFile = info =>
+	Object.entries(info)
+		.map(([key, value]) => `${key}=${value}`)
+		.join("\n");
+
+/**
+ * Applies Build 42-specific changes
+ * @param {Record<string, string>}
+ * @returns {Record<string, string>}
+ */
+const transformInfoForBuild42 = info => {
+	return {
+		...info,
+
+		// format: \modID,\modID2
+		require: info.require ? `\\${info.require.replace(/\s*,\s*/g, ",\\")}` : undefined,
+
+		version: "42"
+	};
+};
+
 const generateBuild42Files = async () => {
 	const { name } = getInfo();
 	const basePath = path.join(process.cwd(), "dist", name);
@@ -27,7 +69,8 @@ const generateBuild42Files = async () => {
 
 	await fs.ensureDir(build42Path);
 
-	const filesToMirror = ["logo.png", "poster.png", "mod.info"];
+	// Copy static files
+	const filesToMirror = ["logo.png", "poster.png"];
 	await Promise.all(
 		filesToMirror.map(async file => {
 			const source = path.join(basePath, file);
@@ -38,9 +81,22 @@ const generateBuild42Files = async () => {
 		})
 	);
 
-	if (await fs.pathExists(path.join(basePath, "media"))) {
+	// Read, transform and write mod.info
+	const infoPath = path.join(basePath, "mod.info");
+	if (await fs.pathExists(infoPath)) {
+		const raw = await fs.readFile(infoPath, "utf8");
+		const parsed = parseInfoFile(raw);
+		const transformed = transformInfoForBuild42(parsed);
+		const output = stringifyInfoFile(transformed);
+
+		await fs.writeFile(path.join(build42Path, "mod.info"), output);
+	}
+
+	// Copy media folder
+	const mediaPath = path.join(basePath, "media");
+	if (await fs.pathExists(mediaPath)) {
 		await fs.remove(path.join(build42Path, "media"));
-		await fs.copy(path.join(basePath, "media"), path.join(build42Path, "media"));
+		await fs.copy(mediaPath, path.join(build42Path, "media"));
 	}
 };
 
@@ -53,7 +109,7 @@ const run = async () => {
 		console.info("Translations folder copied successfully.");
 
 		await copyFolder(srcPath("src/root"), distPath("", false));
-		console.info("copy root folder copied successfully.");
+		console.info("Root folder copied successfully.");
 
 		await generateBuild42Files();
 		console.info("Build 42 folder structure ready.");
