@@ -14,7 +14,7 @@ export class Subject {
 		this.observers.push(observer);
 	}
 
-	/** Unsusbscribe the observer by its name */
+	/** Unsubscribe the observer by its name */
 	unsubscribe(observerName: string) {
 		const observer = this.find(observerName);
 		observer?.unsubscribe();
