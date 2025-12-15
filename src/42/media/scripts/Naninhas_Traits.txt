@@ -9,7 +9,62 @@ module Naninhas {
         CharacterTrait = Naninhas:Naninhas_JacquesBeaver,
         Cost = 2,
         UIName = UI_Trait_Naninhas_JacquesBeaver,
-        UIDescription = UI_Trait_Naninhas_JacquesBeaver,
+        UIDescription = UI_Trait_Naninhas_JacquesBeaver_Description,
         XPBoosts = Woodwork=1,
+    }
+
+    character_trait_definition Naninhas:Naninhas_PancakeHedgehog
+    {
+        IsProfessionTrait = false,
+        DisabledInMultiplayer = false,
+        CharacterTrait = Naninhas:Naninhas_PancakeHedgehog,
+        Cost = 2,
+        UIName = UI_Trait_Naninhas_PancakeHedgehog,
+        UIDescription = UI_Trait_Naninhas_PancakeHedgehog_Description,
+        XPBoosts = Sprinting=1;Agility=1,
+    }
+
+    character_trait_definition Naninhas:Naninhas_MoleyMole
+    {
+        IsProfessionTrait = false,
+        DisabledInMultiplayer = false,
+        CharacterTrait = Naninhas:Naninhas_MoleyMole,
+        Cost = 2,
+        UIName = UI_Trait_Naninhas_MoleyMole,
+        UIDescription = UI_Trait_Naninhas_MoleyMole_Description,
+        XPBoosts = PlantScavenging=2,
+    }
+
+    character_trait_definition Naninhas:Naninhas_SpiffoHeart
+    {
+        IsProfessionTrait = false,
+        DisabledInMultiplayer = false,
+        CharacterTrait = Naninhas:Naninhas_SpiffoHeart,
+        Cost = 2,
+        UIName = UI_Trait_Naninhas_SpiffoHeart,
+        UIDescription = UI_Trait_Naninhas_SpiffoHeart_Description,
+        XPBoosts = Doctor=2,
+    }
+
+    character_trait_definition Naninhas:Naninhas_SpiffoGray
+    {
+        IsProfessionTrait = false,
+        DisabledInMultiplayer = false,
+        CharacterTrait = Naninhas:Naninhas_SpiffoGray,
+        Cost = 6,
+        UIName = UI_Trait_Naninhas_SpiffoGray,
+        UIDescription = UI_Trait_Naninhas_SpiffoGray_Description,
+        XPBoosts = Nimble=1;LongBlade=1;SmallBlade=1;Blunt=1;SmallBlunt=1,
+    }
+
+    character_trait_definition Naninhas:Naninhas_SpiffoShamrock
+    {
+        IsProfessionTrait = false,
+        DisabledInMultiplayer = false,
+        CharacterTrait = Naninhas:Naninhas_SpiffoShamrock,
+        Cost = 2,
+        UIName = UI_Trait_Naninhas_SpiffoShamrock,
+        UIDescription = UI_Trait_Naninhas_SpiffoShamrock_Description,
+        XPBoosts = Aiming=5;Reloading=5,
     }
 }
