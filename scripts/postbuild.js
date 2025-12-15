@@ -51,16 +51,11 @@ const stringifyInfoFile = info =>
  * @param {Record<string, string>}
  * @returns {Record<string, string>}
  */
-const transformInfoForBuild42 = info => {
-	return {
-		...info,
-
-		// format: \modID,\modID2
-		require: info.require ? `\\${info.require.replace(/\s*,\s*/g, ",\\")}` : undefined,
-
-		version: "42"
-	};
-};
+const transformInfoForBuild42 = info => ({
+	...info,
+	require: info.require ? `\\${info.require.replace(/\s*,\s*/g, ",\\")}` : undefined,
+	version: "42"
+});
 
 const generateBuild42Files = async () => {
 	const { name } = getInfo();
@@ -69,19 +64,29 @@ const generateBuild42Files = async () => {
 
 	await fs.ensureDir(build42Path);
 
-	// Copy static files
-	const filesToMirror = ["logo.png", "poster.png"];
+	/* ----------------------------
+	   1. Copy legacy artifacts
+	   ---------------------------- */
+	const legacyFiles = ["logo.png", "poster.png"];
 	await Promise.all(
-		filesToMirror.map(async file => {
-			const source = path.join(basePath, file);
-			const destination = path.join(build42Path, file);
-			if (await fs.pathExists(source)) {
-				await fs.copy(source, destination);
+		legacyFiles.map(async file => {
+			const src = path.join(basePath, file);
+			const dest = path.join(build42Path, file);
+			if (await fs.pathExists(src)) {
+				await fs.copy(src, dest);
 			}
 		})
 	);
 
-	// Read, transform and write mod.info
+	const legacyMedia = path.join(basePath, "media");
+	if (await fs.pathExists(legacyMedia)) {
+		await fs.remove(path.join(build42Path, "media"));
+		await fs.copy(legacyMedia, path.join(build42Path, "media"));
+	}
+
+	/* ----------------------------
+	   2. Rewrite mod.info
+	   ---------------------------- */
 	const infoPath = path.join(basePath, "mod.info");
 	if (await fs.pathExists(infoPath)) {
 		const raw = await fs.readFile(infoPath, "utf8");
@@ -92,11 +97,12 @@ const generateBuild42Files = async () => {
 		await fs.writeFile(path.join(build42Path, "mod.info"), output);
 	}
 
-	// Copy media folder
-	const mediaPath = path.join(basePath, "media");
-	if (await fs.pathExists(mediaPath)) {
-		await fs.remove(path.join(build42Path, "media"));
-		await fs.copy(mediaPath, path.join(build42Path, "media"));
+	/* ----------------------------
+	   3. Overlay src/42 (override)
+	   ---------------------------- */
+	const src42Path = srcPath("src/42");
+	if (await fs.pathExists(src42Path)) {
+		await fs.copy(src42Path, build42Path, { overwrite: true });
 	}
 };
 
