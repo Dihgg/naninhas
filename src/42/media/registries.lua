@@ -1,0 +1,1 @@
+CharacterTrait.register("Naninhas:Naninhas_JacquesBeaver")

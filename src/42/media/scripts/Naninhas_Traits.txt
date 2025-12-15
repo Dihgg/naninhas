@@ -1,0 +1,15 @@
+module Naninhas {
+    imports {
+        Base
+    }
+    character_trait_definition Naninhas:Naninhas_JacquesBeaver
+    {
+        IsProfessionTrait = false,
+        DisabledInMultiplayer = false,
+        CharacterTrait = Naninhas:Naninhas_JacquesBeaver,
+        Cost = 2,
+        UIName = UI_Trait_Naninhas_JacquesBeaver,
+        UIDescription = UI_Trait_Naninhas_JacquesBeaver,
+        XPBoosts = Woodwork=1,
+    }
+}
