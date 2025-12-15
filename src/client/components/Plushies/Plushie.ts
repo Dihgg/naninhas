@@ -1,5 +1,5 @@
 
-import { IsoPlayer, java, Perk, Trait, transformIntoKahluaTable } from "@asledgehammer/pipewrench";
+import { IsoPlayer } from "@asledgehammer/pipewrench";
 import { Traits } from "@shared/components/Traits";
 import { ModData } from "./ModData";
 import { Observer } from "../Observer/Observer";
