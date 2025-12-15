@@ -17,6 +17,7 @@
 			"jest"
 		],
 		"paths": {
+			"@shared/utils": ["shared/utils/Utils.ts"],
 			"@shared/components/*": ["shared/components/*"],
 			"@server/components/*": ["server/components/*"],
 			"@client/components/*": ["client/components/*"],

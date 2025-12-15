@@ -14,13 +14,22 @@ export const TraitFactory = {
 	),
 };
 
+export const getCore = jest.fn().mockImplementation(() => ({
+	getVersionNumber: jest.fn()
+}));
+
 export const Perks = {
 	Woodwork: "Woodwork",
 	Aiming: "Aiming",
+};
+
+(globalThis as any).string = {
+	match: (version: string, pattern: string) => version.match(pattern)
 };
 
 export default {
 	TraitFactory,
 	Perks,
 	getText,
+	getCore,
 };

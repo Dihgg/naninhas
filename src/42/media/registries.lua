@@ -1,0 +1,6 @@
+CharacterTrait.register("Naninhas:Naninhas_JacquesBeaver")
+CharacterTrait.register("Naninhas:Naninhas_PancakeHedgehog")
+CharacterTrait.register("Naninhas:Naninhas_MoleyMole")
+CharacterTrait.register("Naninhas:Naninhas_SpiffoHeart")
+CharacterTrait.register("Naninhas:Naninhas_SpiffoGray")
+CharacterTrait.register("Naninhas:Naninhas_SpiffoShamrock")
