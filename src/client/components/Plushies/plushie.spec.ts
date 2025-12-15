@@ -15,9 +15,18 @@ describe("Plushie", () => {
 	const getMultiplier = jest.fn();
 	const addTraitFn = jest.fn();
 	const removeTraitFn = jest.fn();
+
+	beforeEach(() => {
+		addXpMultiplier.mockReset();
+		getMultiplier.mockReset();
+		getMultiplier.mockReturnValue(0);
+		addTraitFn.mockReset();
+		removeTraitFn.mockReset();
+	});
 	
-	const mockPlayer = (hasTrait = false) =>
-		mock<IsoPlayer>({
+	const mockPlayer = (hasTrait = false) => {
+		const modData: Record<string, unknown> = {};
+		return mock<IsoPlayer>({
 			HasTrait: jest.fn().mockReturnValue(hasTrait),
 			getTraits: jest.fn().mockImplementation(() => ({
 				add: addTraitFn,
@@ -27,13 +36,9 @@ describe("Plushie", () => {
 				addXpMultiplier,
 				getMultiplier
 			})),
-			getModData: jest
-				.fn()
-				.mockImplementationOnce(() => ({}))
-				.mockImplementation(() => ({
-					Naninhas: { addedTraits: new Map(), suppressedTraits: new Map() }
-				}))
+			getModData: jest.fn(() => modData)
 		});
+	};
 
 	class TestPlushie extends Plushie {}
 
@@ -46,7 +51,8 @@ describe("Plushie", () => {
 		expect(plushie).toBeInstanceOf(TestPlushie);
 	});
 
-	it("Should call addXpMultiplier when applying a trait boost", () => {
+	it("Should add the Plushie bonus on top of existing multipliers", () => {
+		getMultiplier.mockReturnValue(2);
 		const player = mockPlayer();
 		const plushie = new TestPlushie({
 			player,
@@ -55,15 +61,24 @@ describe("Plushie", () => {
 		});
 		
 		plushie.subscribe();
-		expect(addXpMultiplier).toHaveBeenCalledWith(Perks.Woodwork, 1, 0, 0);
+		expect(addXpMultiplier).toHaveBeenCalledWith(Perks.Woodwork, 3, 0, 0);
+	});
+
+	it("Should keep existing multipliers when removing the Plushie bonus", () => {
+		getMultiplier.mockReturnValueOnce(2).mockReturnValueOnce(3);
+		const player = mockPlayer();
+		const plushie = new TestPlushie({
+			player,
+			name: "mocked",
+			traitsToAdd: ["mockedTrait"]
+		});
+		
+		plushie.subscribe();
+		plushie.unsubscribe();
+		expect(addXpMultiplier).toHaveBeenNthCalledWith(2, Perks.Woodwork, 2, 0, 0);
 	});
 
 	describe("Player does not have the Trait", () => {
-		
-		afterEach(() => {
-			addTraitFn.mockReset();
-			removeTraitFn.mockReset();
-		});
 
 		it("Should add trait if player does not have it", () => {
 			const player = mockPlayer(false);

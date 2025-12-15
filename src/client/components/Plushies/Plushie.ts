@@ -3,7 +3,7 @@ import { IsoPlayer, java, Perk, Trait, transformIntoKahluaTable } from "@asledge
 import { Traits } from "@shared/components/Traits";
 import { ModData } from "./ModData";
 import { Observer } from "../Observer/Observer";
-import type { PlushieProps } from "types";
+import type { PlayerModData, PlushieProps } from "types";
 
 // TODO: Apply the LuaEventManager to allow other mods to interact with this one
 // import { LuaEventManager } from "@asledgehammer/pipewrench"
@@ -27,10 +27,7 @@ export abstract class Plushie implements Observer {
 	// private readonly suppressedTraits: Set<string>;
 
 	/** The data from `player.getModData()` to ensure traits are not permanent */
-	private readonly playerData: ModData<{
-		addedTraits: string[];
-		suppressedTraits: string[];
-	}>;
+	private readonly playerData: ModData<PlayerModData>;
 
 	/**
 	 * @param player Player object from PZ
@@ -45,7 +42,7 @@ export abstract class Plushie implements Observer {
 		this.playerData = new ModData({
 			object: this.player,
 			modKey: "Naninhas",
-			defaultData: { addedTraits: [], suppressedTraits: [] }
+			defaultData: { addedTraits: [], suppressedTraits: [], xpBoosts: {} }
 		});
 
 		// Load the data from `player.getModData()`
@@ -71,9 +68,20 @@ export abstract class Plushie implements Observer {
 		const xp = this.player.getXp();
 		
 		for (const { perk, value } of perks) {
-			print(`Applying boost for ${trait} to ${perk} with value ${value}`);
-			
-			xp.addXpMultiplier(perk, shouldApply ? value : 0, 0, 0);
+			const key = `${trait}:${perk}`;
+			const appliedValue = this.data.xpBoosts[key] ?? 0;
+			const targetValue = shouldApply ? value : 0;
+			const delta = targetValue - appliedValue;
+
+			if (delta === 0) {
+				continue;
+			}
+
+			const currentMultiplier = xp.getMultiplier(perk);
+			const newMultiplier = Math.max(currentMultiplier + delta, 0);
+
+			xp.addXpMultiplier(perk, newMultiplier, 0, 0);
+			this.data.xpBoosts[key] = targetValue;
 		}
 	}
 
