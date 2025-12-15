@@ -1,4 +1,5 @@
 const path = require("path");
+const fs = require("fs-extra");
 const { copyFolder, getInfo } = require("./utils");
 
 /**
@@ -19,28 +20,47 @@ const distPath = (dirPath, media = true) => {
 	return path.join(process.cwd(), "dist", name, media ? "media" : "", ...dirPath.split("/"));
 };
 
-// Copy media folder to dist
-copyFolder(srcPath("src/media"), distPath(""))
-	.then(() => {
+const generateBuild42Files = async () => {
+	const { name } = getInfo();
+	const basePath = path.join(process.cwd(), "dist", name);
+	const build42Path = path.join(basePath, "42");
+
+	await fs.ensureDir(build42Path);
+
+	const filesToMirror = ["logo.png", "poster.png", "mod.info"];
+	await Promise.all(
+		filesToMirror.map(async file => {
+			const source = path.join(basePath, file);
+			const destination = path.join(build42Path, file);
+			if (await fs.pathExists(source)) {
+				await fs.copy(source, destination);
+			}
+		})
+	);
+
+	if (await fs.pathExists(path.join(basePath, "media"))) {
+		await fs.remove(path.join(build42Path, "media"));
+		await fs.copy(path.join(basePath, "media"), path.join(build42Path, "media"));
+	}
+};
+
+const run = async () => {
+	try {
+		await copyFolder(srcPath("src/media"), distPath(""));
 		console.info("media folder copied successfully.");
-	})
-	.catch(err => {
-		console.error("Error copying media folder:", err);
-	});
 
-// Copy translations to dist
-copyFolder(srcPath("src/translations"), distPath("lua/shared/Translate"))
-	.then(() => {
+		await copyFolder(srcPath("src/translations"), distPath("lua/shared/Translate"));
 		console.info("Translations folder copied successfully.");
-	})
-	.catch(err => {
-		console.error("Error copying translations folder:", err);
-	});
 
-copyFolder(srcPath("src/root"), distPath("", false))
-	.then(() => {
+		await copyFolder(srcPath("src/root"), distPath("", false));
 		console.info("copy root folder copied successfully.");
-	})
-	.catch(err => {
-		console.error("Error copying root folder:", err);
-	});
+
+		await generateBuild42Files();
+		console.info("Build 42 folder structure ready.");
+	} catch (err) {
+		console.error("Error copying files:", err);
+		process.exitCode = 1;
+	}
+};
+
+run();
