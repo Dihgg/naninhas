@@ -1,16 +1,26 @@
+// src/__mocks__/@asledgehammer/pipewrench/index.ts
 import { mock } from "jest-mock-extended";
-import { Trait } from "@asledgehammer/pipewrench";
+import type { Trait } from "@asledgehammer/pipewrench";
 
-export const getText = jest.fn().mockImplementation((...args: string[]) => args.join());
+export const getText = jest.fn((...args: string[]) => args.join());
 
-export class TraitFactory {
-	static addTrait() {
-		return mock<Trait>({
-			addXPBoost: jest.fn()
-		});
-	}
-}
+export const addXPBoost = jest.fn();
 
-export class Perks {
-	static Woodwork = "Woodwork";
-}
+export const TraitFactory = {
+	addTrait: jest.fn(() =>
+		mock<Trait>({
+			addXPBoost,
+		})
+	),
+};
+
+export const Perks = {
+	Woodwork: "Woodwork",
+	Aiming: "Aiming",
+};
+
+export default {
+	TraitFactory,
+	Perks,
+	getText,
+};

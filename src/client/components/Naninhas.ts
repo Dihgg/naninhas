@@ -1,4 +1,5 @@
-import { AttachedItem, IsoPlayer } from "@asledgehammer/pipewrench";
+/* @noSelfInFile */
+import { AttachedItem, InventoryItem, IsoPlayer } from "@asledgehammer/pipewrench";
 import * as Events from "@asledgehammer/pipewrench-events";
 import { Subject } from "./Observer/Subject";
 import { Plushie } from "./Plushies/Plushie";

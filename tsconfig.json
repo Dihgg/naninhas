@@ -17,8 +17,12 @@
 			"jest"
 		],
 		"paths": {
-			"components/*": ["components/*"],
-			"components": ["components/index.ts"]
+			"@shared/components/*": ["shared/components/*"],
+			"@server/components/*": ["server/components/*"],
+			"@client/components/*": ["client/components/*"],
+			"@test/*": [
+				"test/*"
+			]
 		}
 	},
 	"tstl": {
@@ -30,6 +34,5 @@
 				"name": "@asledgehammer/tstl-pipewrench"
 			}
 		]
-	},
-	"exclude": ["**/*.spec.*", "**/__mocks__/**/*.ts", "src/test/**/*.ts","src/root/"]
+	}
 }
