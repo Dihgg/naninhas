@@ -1,0 +1,21 @@
+UI_EN = {
+	/* Traits */
+	UI_Trait_Naninhas_JacquesBeaver = "(Naninhas) Jacques the Beaver",
+	UI_Trait_Naninhas_JacquesBeaver_Description = "Jacques keeps you laser-focused on carpentry projects.<br>- Grants a +1 Carpentry XP boost while active.",
+
+	UI_Trait_Naninhas_PancakeHedgehog = "(Naninhas) Pancake the Hedgehog",
+	UI_Trait_Naninhas_PancakeHedgehog_Description = "Pancake urges you to pick up the pace.<br>- Provides +1 Sprinting and +1 Agility XP boosts.",
+
+	UI_Trait_Naninhas_MoleyMole = "(Naninhas) Moley the Mole",
+	UI_Trait_Naninhas_MoleyMole_Description = "Moley tunes your senses for scavenging.<br>- Adds a +2 Foraging XP boost.",
+
+	UI_Trait_Naninhas_SpiffoHeart = "(Naninhas) Spiffo Heart",
+	UI_Trait_Naninhas_SpiffoHeart_Description = "Heart Spiffo reminds you to care for others.<br>- Grants a +2 First Aid XP boost.",
+
+	UI_Trait_Naninhas_SpiffoGray = "(Naninhas) Spiffo PAWS",
+	UI_Trait_Naninhas_SpiffoGray_Description = "PAWS Spiffo turns you into a disciplined fighter.<br>- Provides +1 Nimble, Long Blade, Small Blade, Blunt, and Small Blunt XP boosts.",
+
+	UI_Trait_Naninhas_SpiffoShamrock = "(Naninhas) Spiffo Shamrock",
+	UI_Trait_Naninhas_SpiffoShamrock_Description = "Shamrock Spiffo brings lucky shots.<br>- Grants +5 Aiming and +5 Reloading XP boosts.",
+
+}

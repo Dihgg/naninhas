@@ -1,0 +1,17 @@
+{
+	"modInfo": {
+		"id": "Naninhas",
+		"name": "Naninhas",
+		"authors": ["Diego Lopes"],
+		"description": "This mod introduces the concept of \"naninhas\" to AuthenticZ attachable plushies!<br> Each plushie will give a different bonus when attached to the backpack!",
+		"url": "https://github.com/Dihgg/naninhas",
+		"logo": "./logo.png",
+		"poster": "./poster.png",
+		"require": ["Authentic Z - Current"],
+		"tags": ["items"]
+	},
+	"modelsDir": "./src/models",
+	"texturesDir": "./src/textures",
+	"soundDir": "./src/sound",
+	"scriptsDir": "./src/scripts"
+}

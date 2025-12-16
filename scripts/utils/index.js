@@ -1,7 +1,7 @@
-const { generateZippedFiles } = require('./zipper');
-const { getZipName } = require('./zipname');
+const { copyFolder } = require("./copyFolder");
+const { getInfo } = require("./info");
 
 module.exports = {
-    generateZippedFiles,
-    getZipName
+	copyFolder,
+	getInfo
 };

@@ -1,0 +1,6 @@
+version=1
+id=3624617298
+title=Naninhas
+description=This mod introduces the concept of "naninhas" to AuthenticZ attachable plushies!<br> Each plushie will give a different bonus when attached to the backpack!
+tags=Build 41;Build 42;Items;Silly/Fun;Textures
+visibility=public
