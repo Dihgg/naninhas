@@ -1,6 +1,6 @@
 {
 	"name": "naninhas",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"scripts": {
 		"prebuild": "npm run clean",
 		"build": "tstl -p ./tsconfig.build.json",
@@ -20,7 +20,9 @@
 	},
 	"watch": {
 		"watch:build": {
-			"patterns": ["src"],
+			"patterns": [
+				"src"
+			],
 			"extensions": "ts,js,jsx,lua,json,png",
 			"postbuild": "postbuild"
 		}
