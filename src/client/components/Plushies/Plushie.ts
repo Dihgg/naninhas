@@ -1,5 +1,6 @@
 
 import { IsoPlayer } from "@asledgehammer/pipewrench";
+import { CharacterTraitApi } from "@shared/components/CharacterTraitApi";
 import { Traits } from "@shared/components/Traits";
 import { ModData } from "./ModData";
 import { Observer } from "../Observer/Observer";
@@ -63,13 +64,14 @@ export abstract class Plushie implements Observer {
 	 * @param shouldApply Should the boost be applied or removed (set to 0)
 	 */
 	private applyBoost(trait: string, shouldApply = true) {
+		const data = this.ensureData();
 		const perks = Traits.getPerkBoostsForTrait(trait);
 
 		const xp = this.player.getXp();
 		
 		for (const { perk, value } of perks) {
 			const key = `${trait}:${perk}`;
-			const appliedValue = this.data.xpBoosts[key] ?? 0;
+			const appliedValue = data.xpBoosts[key] ?? 0;
 			const targetValue = shouldApply ? value : 0;
 			const delta = targetValue - appliedValue;
 
@@ -81,7 +83,7 @@ export abstract class Plushie implements Observer {
 			const newMultiplier = Math.max(currentMultiplier + delta, 0);
 
 			xp.addXpMultiplier(perk, newMultiplier, 0, 0);
-			this.data.xpBoosts[key] = targetValue;
+			data.xpBoosts[key] = targetValue;
 		}
 	}
 
@@ -89,22 +91,23 @@ export abstract class Plushie implements Observer {
 	 * Method that should be called when the Plushie is equipped
 	 */
 	public subscribe() {
+		const data = this.ensureData();
 
 		const toAdd = this.traitsToAdd
-			.filter(trait => !this.data.addedTraits.includes(trait) && !this.player.HasTrait(trait))
+			.filter((trait) => !data.addedTraits.includes(trait) && !this.hasTrait(trait))
 		
 		for (const trait of toAdd) {
-			this.data.addedTraits.push(trait);
-			this.player.getTraits().add(trait);
+			data.addedTraits.push(trait);
+			CharacterTraitApi.addTrait(this.player, trait);
 			this.applyBoost(trait, true);
 		}
 
 		const toSuppress = this.traitsToSuppress
-			.filter(trait => !this.data.suppressedTraits.includes(trait) && this.player.HasTrait(trait));
+			.filter((trait) => !data.suppressedTraits.includes(trait) && this.hasTrait(trait));
 		
 		for (const trait of toSuppress) {
-			this.data.suppressedTraits.push(trait);
-			this.player.getTraits().remove(trait);
+			data.suppressedTraits.push(trait);
+			CharacterTraitApi.removeTrait(this.player, trait);
 			this.applyBoost(trait, false);
 		}
 	}
@@ -113,24 +116,47 @@ export abstract class Plushie implements Observer {
 	 * Method that should be called when Plushie is unequipped
 	 */
 	public unsubscribe() {
+		const data = this.ensureData();
 		// Remove all the traits that are exclusive this Plushie
 		const toRemove = this.traitsToAdd
-			.filter((trait) => this.data.addedTraits.includes(trait));
+			.filter((trait) => data.addedTraits.includes(trait));
 
 		for (const trait of toRemove) {
-			this.data.addedTraits = this.data.addedTraits.filter(t => t !== trait);
-			this.player.getTraits().remove(trait);
+			data.addedTraits = data.addedTraits.filter((t) => t !== trait);
+			CharacterTraitApi.removeTrait(this.player, trait);
 			this.applyBoost(trait, false);
 		}
 
 		// Add back the traits that are suppressed by this Plushie
 		const toRestore = this.traitsToSuppress
-			.filter((trait) => this.data.suppressedTraits.includes(trait));
+			.filter((trait) => data.suppressedTraits.includes(trait));
 		for (const trait of toRestore) {
-			this.data.suppressedTraits = this.data.suppressedTraits.filter(t => t !== trait);
-			this.player.getTraits().add(trait);
+			data.suppressedTraits = data.suppressedTraits.filter((t) => t !== trait);
+			CharacterTraitApi.addTrait(this.player, trait);
 			this.applyBoost(trait, true);
 		}
+	}
+
+	private hasTrait(trait: string): boolean {
+		return CharacterTraitApi.hasTrait(this.player, trait);
+	}
+
+	private ensureData(): PlayerModData {
+		const data = this.playerData.data as Partial<PlayerModData>;
+
+		if (!data.addedTraits) {
+			data.addedTraits = [];
+		}
+
+		if (!data.suppressedTraits) {
+			data.suppressedTraits = [];
+		}
+
+		if (!data.xpBoosts || typeof data.xpBoosts !== "object") {
+			data.xpBoosts = {};
+		}
+
+		return data as PlayerModData;
 	}
 
 	get data() {

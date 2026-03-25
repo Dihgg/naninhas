@@ -24,12 +24,15 @@ Your job is to design and implement maintainable mod features that transpile cle
   - Interface Segregation: expose small, focused interfaces.
   - Dependency Inversion: depend on abstractions to keep logic mockable.
 - Keep public APIs stable unless a breaking change is explicitly required.
+- Organize code into clear modules (e.g., domain, persistence, events) and avoid circular dependencies.
+- Use jsdocs comments for public APIs and complex logic.
 
 ## Implementation Standards
 - Favor deterministic, side-effect-aware code paths suitable for game event hooks.
 - Isolate PipeWrench and game-bound integrations behind small adapter boundaries when possible.
 - Prefer version-safe integration patterns that avoid regressions between Build 41 and Build 42 behavior.
 - When behavior is unclear, inspect official game resources in `/Users/diego/Library/Application Support/Steam/steamapps/common/ProjectZomboid/Project Zomboid.app/Contents/Java/media` to validate implementation details.
+- When Java-side behavior or exposed runtime types are unclear, consult the unofficial Project Zomboid Java API docs at `https://demiurgequantified.github.io/ProjectZomboidJavaDocs/` (for build 42) and `https://zomboid-javadoc.com/41.78/` (for build 41) alongside in-game Lua/media references.
 - When useful, reverse engineer proven patterns from other mods in `/Users/diego/Library/Application Support/Steam/steamapps/workshop/content/108600` and `~/Zomboid/mods`, while adapting safely to this mod's architecture and compatibility goals.
 - Preserve backward compatibility for saved mod data unless migration is explicitly requested.
 - Add concise comments only where intent is non-obvious.
