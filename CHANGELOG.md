@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.0](https://github.com/dihgg/naninhas/compare/v1.1.0...v1.2.0) (2026-03-25)
+
+
+### Features
+
+* **ai:** adding agent instructions ([8f46802](https://github.com/dihgg/naninhas/commit/8f4680240abc230b1d9fc6e08ac20076ad9b4f09))
+* **tooling:** build 42 override capability ([d0ede95](https://github.com/dihgg/naninhas/commit/d0ede95ec2277841c71d91a685a5067b57506ff0))
+* **tooling:** new images ([3428946](https://github.com/dihgg/naninhas/commit/3428946dead513c727f2de0d46c7385d790ffc9c))
+* **traits:** revamping traits for build 42 compatibility ([2550bba](https://github.com/dihgg/naninhas/commit/2550bba5b691fb031ca31c22c805764aebb297d3))
+* **translations:** revamping translation generation for build 42 compatibility ([56e1417](https://github.com/dihgg/naninhas/commit/56e14177223219ab1a598b543705fdb2ece972cf))
+
+
+### Bug Fixes
+
+* **traits:** fixed trait plushies ([a5f791c](https://github.com/dihgg/naninhas/commit/a5f791c76b19d4b957fb6a7c6a62828ca488e0d4))
+* **traits:** fixed xp boost plushies ([5e22e4a](https://github.com/dihgg/naninhas/commit/5e22e4a4478c61984b7c46b4ff0823c0344582bc))
+
 ## [1.1.0](https://github.com/dihgg/naninhas/compare/v0.0.2...v1.1.0) (2025-12-16)
 
 
