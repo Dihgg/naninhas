@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.2.1](https://github.com/dihgg/naninhas/compare/v1.2.0...v1.2.1) (2026-03-25)
+
+
+### Bug Fixes
+
+* **effects:** fix the stats changing plushies behavior ([46efb91](https://github.com/dihgg/naninhas/commit/46efb914171c3ddadf9d3be788ec438fe294c034))
+* **effects:** fixed stats plushies effect ([8826c4f](https://github.com/dihgg/naninhas/commit/8826c4fbe0e48571ed7bf1f4533c5f3f39cf328f))
+
 ## [1.2.0](https://github.com/dihgg/naninhas/compare/v1.1.0...v1.2.0) (2026-03-25)
 
 
