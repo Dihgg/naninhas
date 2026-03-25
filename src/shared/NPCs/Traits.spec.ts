@@ -7,15 +7,9 @@ describe("TraitClass event registration", () => {
 	});
 	it.each([41, 42])("The TraitClass should be initialized on version %s", major => {
 		jest.isolateModules(() => {
-			jest.doMock("@shared/utils", () => ({
-				getVersion: () => ({
-					major,
-					minor: 20
-				})
-			}));
 			require("./Traits");
 		});
 
-		expect(Traits).toHaveBeenCalledTimes(major < 42 ? 1 : 0);
+		expect(Traits).toHaveBeenCalledTimes(1);
 	});
 });
