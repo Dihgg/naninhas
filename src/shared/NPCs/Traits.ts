@@ -1,14 +1,10 @@
 
 import { Traits } from "@shared/components/Traits";
-import { getVersion } from "@shared/utils";
-
-const { major } = getVersion();
-
-print(`[Naninhas] Game version is: ${major}`);
-
 
 /**
- * In Build 42 the way of creating Traits is different, so we only need to call the Traits
- * on build 41
+ * Initialize Traits for both Build 41 and Build 42
+ * The Traits class uses TraitRegister which gracefully handles both builds:
+ * - Build 41: Registers traits dynamically
+ * - Build 42: Uses trait definitions from .txt files (no-op in register)
  */
-if (major < 42) new Traits();
+new Traits();

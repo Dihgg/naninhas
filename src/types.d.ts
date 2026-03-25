@@ -10,6 +10,7 @@ export type TraitType = {
 	cost: number;
 	profession?: boolean;
 	xpBoosts?: PerkBoost[];
+	exclusives?: string[];
 };
 
 export type PlushieProps = {
