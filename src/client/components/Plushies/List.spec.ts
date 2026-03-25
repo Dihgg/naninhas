@@ -34,16 +34,10 @@ describe("List.ts", () => {
 			addAll: jest.fn(),
 		})),
 		getStats: jest.fn().mockImplementation(() => ({
-			setEndurance: jest.fn(),
-			getEndurance: jest.fn(),
-			getBoredom: jest.fn(),
-			setBoredom: jest.fn(),
-			setFatigue: jest.fn(),
-			getFatigue: jest.fn(),
-			setFear: jest.fn(),
-			getFear: jest.fn(),
-			setPanic: jest.fn(),
-			getPanic: jest.fn()
+			add: jest.fn(),
+			remove: jest.fn(),
+			get: jest.fn(),
+			set: jest.fn(),
 		}))
 	});
 	const PLUSHIES = [
