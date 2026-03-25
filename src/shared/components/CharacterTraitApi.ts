@@ -57,24 +57,20 @@ export class CharacterTraitApi {
 
 	private static resolveTrait(traitId: string): RuntimeCharacterTrait | undefined {
 		const runtimeCharacterTraitApi = this.getRuntimeCharacterTraitApi();
+		const resourceLocationOf = this.getRuntimeResourceLocationApi()?.of;
 
-		if (!runtimeCharacterTraitApi) {
+		if (!runtimeCharacterTraitApi || !resourceLocationOf) {
 			return undefined;
 		}
 
 		const get = runtimeCharacterTraitApi.get;
 		if (get) {
-			const resourceLocationOf = this.getRuntimeResourceLocationApi()?.of;
-			if (resourceLocationOf) {
-				const traitLocation = resourceLocationOf(this.normalizeTraitId(traitId));
-				const traitByLocation = get(traitLocation);
+			const traitLocation = resourceLocationOf(this.normalizeTraitId(traitId));
+			const traitByLocation = get(traitLocation);
 
-				if (traitByLocation !== undefined) {
-					return traitByLocation;
-				}
+			if (traitByLocation !== undefined) {
+				return traitByLocation;
 			}
-
-			return get(this.normalizeTraitId(traitId));
 		}
 
 		return undefined;
