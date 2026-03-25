@@ -10,6 +10,16 @@ This mod introduces the concept of "naninhas" to AuthenticZ attachable plushies!
 
 Each plushie will give a different bonus when attached to the backpack!
 
+## Translations
+
+Translations are maintained in JSON under [src/translations-json](src/translations-json).
+
+During `npm run postbuild`:
+- Build 41 output is generated as `.txt` files in `media/lua/shared/Translate/<LANG>/<NAMESPACE>_<LANG>.txt`
+- Build 42 output is generated as `.json` files in `42/media/lua/shared/Translate/<LANG>/<NAMESPACE>.json`
+
+If `src/translations-json` is missing, the script falls back to legacy `src/translations` for both builds.
+
 ## Buffs
 
 Each plushie grants a unique bonus when attached to your backpack. Only one plushie can be equipped at a time, and buffs are active while equipped.

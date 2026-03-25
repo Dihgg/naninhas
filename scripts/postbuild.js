@@ -1,6 +1,7 @@
 const path = require("path");
 const fs = require("fs-extra");
 const { copyFolder, getInfo } = require("./utils");
+const { generateTranslations } = require("./utils/translations");
 
 /**
  * returns the src Path for this operation
@@ -113,11 +114,7 @@ const transformInfoForBuild42 = info => {
 	};
 };
 
-const generateBuild42Files = async () => {
-	const { name } = getInfo();
-	const basePath = path.join(process.cwd(), "dist", name);
-	const build42Path = path.join(basePath, "42");
-
+const generateBuild42Files = async ({ basePath, build42Path }) => {
 	await fs.ensureDir(build42Path);
 
 	/* ----------------------------
@@ -137,7 +134,10 @@ const generateBuild42Files = async () => {
 	const legacyMedia = path.join(basePath, "media");
 	if (await fs.pathExists(legacyMedia)) {
 		await fs.remove(path.join(build42Path, "media"));
-		await fs.copy(legacyMedia, path.join(build42Path, "media"));
+		// Exclude lua/shared/Translate folder since Build 42 uses separate .json translations
+		await fs.copy(legacyMedia, path.join(build42Path, "media"), {
+			filter: filePath => !filePath.includes("lua/shared/Translate") && !filePath.includes("lua\\shared\\Translate")
+		});
 	}
 
 	/* ----------------------------
@@ -164,17 +164,35 @@ const generateBuild42Files = async () => {
 
 const run = async () => {
 	try {
+		const { name } = getInfo();
+		const basePath = path.join(process.cwd(), "dist", name);
+		const build42Path = path.join(basePath, "42");
+
 		await copyFolder(srcPath("src/media"), distPath(""));
 		console.info("media folder copied successfully.");
-
-		await copyFolder(srcPath("src/translations"), distPath("lua/shared/Translate"));
-		console.info("Translations folder copied successfully.");
 
 		await copyFolder(srcPath("src/root"), distPath("", false));
 		console.info("Root folder copied successfully.");
 
-		await generateBuild42Files();
+		await generateBuild42Files({ basePath, build42Path });
 		console.info("Build 42 folder structure ready.");
+
+		const translationResult = await generateTranslations({
+			sourceRoot: srcPath("src/translations-json"),
+			build41TranslateRoot: distPath("lua/shared/Translate"),
+			build42TranslateRoot: path.join(build42Path, "media", "lua", "shared", "Translate")
+		});
+
+		if (translationResult.generated) {
+			console.info(`Translations generated for Build 41 (.txt) and Build 42 (.json): ${translationResult.fileCount} files.`);
+		} else {
+			await copyFolder(srcPath("src/translations"), distPath("lua/shared/Translate"));
+			await copyFolder(
+				srcPath("src/translations"),
+				path.join(build42Path, "media", "lua", "shared", "Translate")
+			);
+			console.info("No src/translations-json found; fallback copy from src/translations completed for Build 41 and Build 42.");
+		}
 	} catch (err) {
 		console.error("Error copying files:", err);
 		process.exitCode = 1;
