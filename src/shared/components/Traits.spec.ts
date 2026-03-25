@@ -1,20 +1,14 @@
-let addXPBoost: jest.Mock;
-let addTrait: jest.Mock;
+const getTextMock = jest.fn((...args: string[]) => args.join());
 
-jest.mock("@asledgehammer/pipewrench", () => {
-  addXPBoost = jest.fn();
-  addTrait = jest.fn(() => ({ addXPBoost }));
-  return {
-    getText: jest.fn((...args: string[]) => args.join()),
-    Perks: { Aiming: "Aiming" },
-    TraitFactory: { addTrait }
-  };
-});
+jest.mock("@asledgehammer/pipewrench", () => ({
+  getText: getTextMock,
+  TraitFactory: {}
+}));
 
 jest.mock("@asledgehammer/pipewrench-events", () => {
   const addListenerMock = jest.fn();
   return {
-    onGameBoot: { addListener: addListenerMock }
+		onCreateLivingCharacter: { addListener: addListenerMock }
   };
 });
 
@@ -22,45 +16,67 @@ describe("Traitss", () => {
   beforeEach(() => {
     jest.resetModules();
     jest.clearAllMocks();
+		getTextMock.mockClear();
   });
   
-  it("registers addTraits on game boot", async () => {
+  it("registers addTraits on character creation", async () => {
     jest.doMock("./TraitValues", () => ({
       NaninhasTraits: []
     }));
     
     await jest.isolateModulesAsync(async () => {
-      const { onGameBoot } = await import("@asledgehammer/pipewrench-events");
+      const { onCreateLivingCharacter } = await import("@asledgehammer/pipewrench-events");
       const { Traits } = await import("@shared/components/Traits");
       new Traits();
-      expect(onGameBoot.addListener).toHaveBeenCalledTimes(1);
+      expect(onCreateLivingCharacter.addListener).toHaveBeenCalledTimes(1);
     });
   });
   
-  it("calls addXPBoost if trait has XP boosts", async () => {
+  it("registers configured traits when trait register is available", async () => {
+    const addTrait = jest.fn();
+    const setMutualExclusive = jest.fn();
+
     jest.doMock("./TraitValues", () => ({
       NaninhasTraits: [
         {
           id: "Mocked_Trait",
           cost: -2,
-          xpBoosts: [
-            { perk: "Aiming", value: 1 }
-          ]
+          profession: true
         }
       ]
     }));
+
+    jest.doMock("./TraitRegister", () => ({
+      TraitRegister: {
+        create: () => ({
+          isAvailable: () => true,
+          addTrait,
+          setMutualExclusive,
+        }),
+      },
+    }));
     
     await jest.isolateModulesAsync(async () => {
-      const { onGameBoot } = await import("@asledgehammer/pipewrench-events");
+      const { onCreateLivingCharacter } = await import("@asledgehammer/pipewrench-events");
       const { Traits } = await import("@shared/components/Traits");
       new Traits();
-      const [addTraits] = (onGameBoot.addListener as jest.Mock).mock.calls[0];
+      const [addTraits] = (onCreateLivingCharacter.addListener as jest.Mock).mock.calls[0];
       addTraits();
-      expect(addXPBoost).toHaveBeenCalledWith("Aiming", 1);
+      expect(addTrait).toHaveBeenCalledWith(
+        "Mocked_Trait",
+        "UI_Trait_Mocked_Trait",
+        -2,
+        "UI_Trait_Mocked_Trait_Description",
+        true
+      );
+      expect(setMutualExclusive).not.toHaveBeenCalled();
     });
   });
   
-  it("does not call addXPBoost if trait has no boosts", async () => {
+  it("does nothing when trait register is unavailable", async () => {
+    const addTrait = jest.fn();
+    const setMutualExclusive = jest.fn();
+
     jest.doMock("./TraitValues", () => ({
       NaninhasTraits: [
         {
@@ -69,14 +85,25 @@ describe("Traitss", () => {
         }
       ]
     }));
+
+    jest.doMock("./TraitRegister", () => ({
+      TraitRegister: {
+        create: () => ({
+          isAvailable: () => false,
+          addTrait,
+          setMutualExclusive,
+        }),
+      },
+    }));
     
     await jest.isolateModulesAsync(async () => {
-      const { onGameBoot } = await import("@asledgehammer/pipewrench-events");
+      const { onCreateLivingCharacter } = await import("@asledgehammer/pipewrench-events");
       const { Traits } = await import("@shared/components/Traits");
       new Traits();
-      const [addTraits] = (onGameBoot.addListener as jest.Mock).mock.calls[0];
+      const [addTraits] = (onCreateLivingCharacter.addListener as jest.Mock).mock.calls[0];
       addTraits();
-      expect(addXPBoost).not.toHaveBeenCalled();
+      expect(addTrait).not.toHaveBeenCalled();
+      expect(setMutualExclusive).not.toHaveBeenCalled();
     });
   });
   
