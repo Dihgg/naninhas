@@ -24,8 +24,11 @@ describe("Plushie", () => {
 		removeTraitFn.mockReset();
 	});
 	
-	const mockPlayer = (hasTrait = false) => {
+	const mockPlayer = (hasTrait = false, initialNaninhasData?: Record<string, unknown>) => {
 		const modData: Record<string, unknown> = {};
+		if (initialNaninhasData !== undefined) {
+			modData.Naninhas = initialNaninhasData;
+		}
 		return mock<IsoPlayer>({
 			HasTrait: jest.fn().mockReturnValue(hasTrait),
 			getTraits: jest.fn().mockImplementation(() => ({
@@ -84,6 +87,31 @@ describe("Plushie", () => {
 		(plushie as unknown as { applyBoost: (trait: string) => void }).applyBoost("mockedTrait");
 
 		expect(addXpMultiplier).toHaveBeenCalledWith(Perks.Woodwork, 1, 0, 0);
+	});
+
+	it("initializes missing modData fields through ensureData", () => {
+		const player = mockPlayer(false, {});
+		const plushie = new TestPlushie({
+			player,
+			name: "mocked"
+		});
+
+		const data = (plushie as unknown as { ensureData: () => Record<string, unknown> }).ensureData();
+
+		expect(data.addedTraits).toEqual([]);
+		expect(data.suppressedTraits).toEqual([]);
+		expect(data.xpBoosts).toEqual({});
+	});
+
+	it("exposes player data through getter", () => {
+		const initial = { addedTraits: ["a"], suppressedTraits: [], xpBoosts: {} };
+		const player = mockPlayer(false, initial);
+		const plushie = new TestPlushie({
+			player,
+			name: "mocked"
+		});
+
+		expect(plushie.data).toBe(initial);
 	});
 
 	it("Should keep existing multipliers when removing the Plushie bonus", () => {
