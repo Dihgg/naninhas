@@ -1,6 +1,5 @@
 
 import { IsoPlayer } from "@asledgehammer/pipewrench";
-import { CharacterTraitApi } from "@shared/components/CharacterTraitApi";
 import { PlayerApi } from "@shared/components/PlayerApi";
 import { Traits } from "@shared/components/Traits";
 import { ModData } from "./ModData";

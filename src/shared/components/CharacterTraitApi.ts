@@ -1,4 +1,5 @@
 import type { IsoPlayer } from "@asledgehammer/pipewrench";
+import { getVersion } from "@shared/utils";
 
 type RuntimeCharacterTrait = {
 	getName?: () => string;
@@ -40,6 +41,10 @@ type RuntimePlayer = {
 export class CharacterTraitApi {
 	private static getRuntimePlayer(player: IsoPlayer): RuntimePlayer {
 		return player as unknown as RuntimePlayer;
+	}
+
+	private static isB42(): boolean {
+		return getVersion().major >= 42;
 	}
 
 	private static getRuntimeCharacterTraitApi(): RuntimeCharacterTraitStatic | undefined {
@@ -128,50 +133,52 @@ export class CharacterTraitApi {
 
 	public static hasTrait(player: IsoPlayer, traitId: string): boolean {
 		const runtimePlayer = this.getRuntimePlayer(player);
-		const characterTraits = this.getCharacterTraits(player);
 
-		if (characterTraits) {
+		if (this.isB42()) {
+			const characterTraits = this.getCharacterTraits(player);
 			const runtimeTrait = this.resolveTrait(traitId);
 
-			if (runtimeTrait && characterTraits.get) {
+			if (runtimeTrait && characterTraits?.get) {
 				return characterTraits.get(runtimeTrait);
 			}
 
-			return this.hasKnownTrait(characterTraits.getKnownTraits?.(), traitId);
+			if (runtimeTrait && runtimePlayer.hasTrait) {
+				return runtimePlayer.hasTrait(runtimeTrait);
+			}
+
+			if (runtimePlayer.HasTrait) {
+				return runtimePlayer.HasTrait(traitId);
+			}
+
+			return this.hasKnownTrait(characterTraits?.getKnownTraits?.(), traitId);
 		}
 
-		const runtimeTrait = this.resolveTrait(traitId);
-
-		if (runtimeTrait && runtimePlayer.hasTrait) {
-			return runtimePlayer.hasTrait(runtimeTrait);
-		}
-
-		if (runtimePlayer.HasTrait) {
-			return runtimePlayer.HasTrait(traitId);
-		}
-
-		return false;
+		return runtimePlayer.HasTrait?.(traitId) ?? false;
 	}
 
 	public static addTrait(player: IsoPlayer, traitId: string): void {
-		const characterTraits = this.getCharacterTraits(player);
-		const runtimeTrait = this.resolveTrait(traitId);
+		if (this.isB42()) {
+			const characterTraits = this.getCharacterTraits(player);
+			const runtimeTrait = this.resolveTrait(traitId);
 
-		if (characterTraits && runtimeTrait) {
-			characterTraits.add?.(runtimeTrait);
-			return;
+			if (characterTraits && runtimeTrait) {
+				characterTraits.add?.(runtimeTrait);
+				return;
+			}
 		}
 
 		this.getTraitCollection(player)?.add?.(traitId);
 	}
 
 	public static removeTrait(player: IsoPlayer, traitId: string): void {
-		const characterTraits = this.getCharacterTraits(player);
-		const runtimeTrait = this.resolveTrait(traitId);
+		if (this.isB42()) {
+			const characterTraits = this.getCharacterTraits(player);
+			const runtimeTrait = this.resolveTrait(traitId);
 
-		if (characterTraits && runtimeTrait) {
-			characterTraits.remove?.(runtimeTrait);
-			return;
+			if (characterTraits && runtimeTrait) {
+				characterTraits.remove?.(runtimeTrait);
+				return;
+			}
 		}
 
 		this.getTraitCollection(player)?.remove?.(traitId);

@@ -1,5 +1,12 @@
 import type { IsoPlayer } from "@asledgehammer/pipewrench";
+import { getVersion } from "@shared/utils";
 import { CharacterTraitApi } from "./CharacterTraitApi";
+
+jest.mock("@shared/utils", () => ({
+	getVersion: jest.fn()
+}));
+
+const mockedGetVersion = getVersion as jest.MockedFunction<typeof getVersion>;
 
 describe("CharacterTraitApi", () => {
 	const runtimeTrait = {
@@ -8,6 +15,7 @@ describe("CharacterTraitApi", () => {
 	};
 
 	beforeEach(() => {
+		mockedGetVersion.mockReturnValue({ major: 42, minor: 0 });
 		runtimeTrait.getName.mockClear();
 		runtimeTrait.toString.mockClear();
 
@@ -70,16 +78,17 @@ describe("CharacterTraitApi", () => {
 	});
 
 	it("falls back to runtimePlayer.hasTrait when CharacterTraits is unavailable", () => {
-		const hasTrait = jest.fn(() => true);
+		mockedGetVersion.mockReturnValue({ major: 41, minor: 78 });
 		const player = {
-			hasTrait,
+			HasTrait: jest.fn(() => true),
 		} as unknown as IsoPlayer;
 
 		expect(CharacterTraitApi.hasTrait(player, "Naninhas:mockedTrait")).toBe(true);
-		expect(hasTrait).toHaveBeenCalledWith(runtimeTrait);
+		expect(player.HasTrait).toHaveBeenCalledWith("Naninhas:mockedTrait");
 	});
 
 	it("falls back to legacy HasTrait when runtime trait resolution fails", () => {
+		mockedGetVersion.mockReturnValue({ major: 41, minor: 78 });
 		(globalThis as unknown as {
 			CharacterTrait?: { get: (id: unknown) => undefined };
 		}).CharacterTrait = {
@@ -96,6 +105,7 @@ describe("CharacterTraitApi", () => {
 	});
 
 	it("returns false when no trait APIs are available", () => {
+		mockedGetVersion.mockReturnValue({ major: 41, minor: 78 });
 		(globalThis as unknown as {
 			CharacterTrait?: { get: (id: unknown) => undefined };
 		}).CharacterTrait = {
@@ -132,6 +142,7 @@ describe("CharacterTraitApi", () => {
 	});
 
 	it("uses legacy trait collection when runtime trait object cannot be resolved", () => {
+		mockedGetVersion.mockReturnValue({ major: 41, minor: 78 });
 		(globalThis as unknown as {
 			CharacterTrait?: { get: (id: unknown) => undefined };
 		}).CharacterTrait = {
