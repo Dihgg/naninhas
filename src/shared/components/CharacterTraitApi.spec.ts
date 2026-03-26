@@ -1,5 +1,5 @@
 import type { IsoPlayer } from "@asledgehammer/pipewrench";
-import { CharacterTraitApi } from "./CharacterTraitApi";
+import { CharacterTraitApi } from "@shared/components/CharacterTraitApi";
 
 describe("CharacterTraitApi", () => {
 	const runtimeTrait = {

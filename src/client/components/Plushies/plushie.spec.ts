@@ -1,5 +1,5 @@
 import { mock } from "jest-mock-extended";
-import { Plushie } from "./Plushie";
+import { Plushie } from "@client/components/Plushies/Plushie";
 import { IsoPlayer, Perks } from "@asledgehammer/pipewrench";
 import type { Perk } from "@asledgehammer/pipewrench";
 

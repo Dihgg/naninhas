@@ -23,10 +23,10 @@ import {
 	SubstitutionDoll,
 	ToyBear,
 	ToyBearSmall
-} from "./List";
-import { Plushie } from "./Plushie";
+} from "@client/components/Plushies/List";
+import { Plushie } from "@client/components/Plushies/Plushie";
 
-jest.mock("./Plushie");
+jest.mock("@client/components/Plushies/Plushie");
 
 describe("List.ts", () => {
 	const player = mock<IsoPlayer>({

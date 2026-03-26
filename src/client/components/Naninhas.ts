@@ -1,8 +1,8 @@
 /* @noSelfInFile */
 import { AttachedItem, InventoryItem, IsoPlayer } from "@asledgehammer/pipewrench";
 import * as Events from "@asledgehammer/pipewrench-events";
-import { Subject } from "./Observer/Subject";
-import { Plushie } from "./Plushies/Plushie";
+import { Subject } from "@client/components/Observer/Subject";
+import { Plushie } from "@client/components/Plushies/Plushie";
 import {
 	BorisBadger,
 	Doll,
@@ -26,7 +26,7 @@ import {
 	SubstitutionDoll,
 	ToyBear,
 	ToyBearSmall
-} from "./Plushies/List";
+} from "@client/components/Plushies/List";
 
 export class Naninhas {
 	private player: IsoPlayer;

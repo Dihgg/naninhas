@@ -1,12 +1,12 @@
 import { mock } from "jest-mock-extended";
 import { InventoryItem, IsoPlayer } from "@asledgehammer/pipewrench";
-import { Naninhas } from "./Naninhas";
-import { Subject } from "./Observer/Subject";
-import { Plushie } from "./Plushies/Plushie";
+import { Naninhas } from "@client/components/Naninhas";
+import { Subject } from "@client/components/Observer/Subject";
+import { Plushie } from "@client/components/Plushies/Plushie";
 
 jest.mock("@asledgehammer/pipewrench-events");
-jest.mock("./Plushies/List");
-jest.mock("./Observer/Subject");
+jest.mock("@client/components/Plushies/List");
+jest.mock("@client/components/Observer/Subject");
 
 describe("Naninhas.class", () => {
 	it("Should instantiate", () => {

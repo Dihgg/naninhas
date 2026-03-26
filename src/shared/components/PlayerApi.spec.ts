@@ -1,5 +1,5 @@
 import type { IsoPlayer } from "@asledgehammer/pipewrench";
-import { PlayerApi } from "./PlayerApi";
+import { PlayerApi } from "@shared/components/PlayerApi";
 
 const buildMockStats = () => ({
 	add: jest.fn(),

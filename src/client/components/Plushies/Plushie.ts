@@ -1,8 +1,8 @@
 
 import { IsoPlayer } from "@asledgehammer/pipewrench";
 import { PlayerApi } from "@shared/components/PlayerApi";
-import { ModData } from "./ModData";
-import { Observer } from "../Observer/Observer";
+import { ModData } from "@client/components/Plushies/ModData";
+import { Observer } from "@client/components/Observer/Observer";
 import type { PerkBoost, PlayerModData, PlushieProps } from "types";
 
 // TODO: Apply the LuaEventManager to allow other mods to interact with this one
