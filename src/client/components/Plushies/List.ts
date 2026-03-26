@@ -1,5 +1,5 @@
 
-import { IsoPlayer } from "@asledgehammer/pipewrench";
+import { IsoPlayer, Perk, Perks } from "@asledgehammer/pipewrench";
 import { Plushie } from "@client/components/Plushies/Plushie";
 
 /**
@@ -106,29 +106,33 @@ export class GroguAZ extends Plushie {
 }
 
 /**
- * Jacques Beaver is a custom Naninhas trait plushie.
- * Grants the Naninhas_JacquesBeaver trait with +1 Woodwork XP boost.
+ * Jacques Beaver grants a direct XP bonus.
+ * Adds +1 Woodwork XP multiplier while equipped.
  */
 export class JacquesBeaver extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
 			player,
 			name: "JacquesBeaver",
-			traitsToAdd: ["Naninhas_JacquesBeaver"]
+			xpBoostsToAdd: [
+				{ perk: Perks.Woodwork as Perk, value: 1 }
+			]
 		});
 	}
 }
 
 /**
- * Moley Mole is a custom Naninhas trait plushie.
- * Grants the Naninhas_MoleyMole trait with +2 Plant Scavenging XP boost.
+ * Moley Mole grants a direct XP bonus.
+ * Adds +2 Plant Scavenging XP multiplier while equipped.
  */
 export class MoleyMole extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
 			player,
 			name: "MoleyMole",
-			traitsToAdd: ["Naninhas_MoleyMole"]
+			xpBoostsToAdd: [
+				{ perk: Perks.PlantScavenging as Perk, value: 2 }
+			]
 		});
 	}
 }
@@ -149,15 +153,18 @@ export class OtisPug extends Plushie {
 }
 
 /**
- * Pancake Hedgehog is a custom Naninhas trait plushie.
- * Grants the Naninhas_PancakeHedgehog trait with +1 Sprinting and +1 Agility XP boost.
+ * Pancake Hedgehog grants direct XP bonuses.
+ * Adds +1 Sprinting and +1 Agility XP multipliers while equipped.
  */
 export class PancakeHedgehog extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
 			player,
 			name: "PancakeHedgehog",
-			traitsToAdd: ["Naninhas_PancakeHedgehog"]
+			xpBoostsToAdd: [
+				{ perk: Perks.Sprinting as Perk, value: 1 },
+				{ perk: Perks.Agility as Perk, value: 1 }
+			]
 		});
 	}
 }
@@ -210,29 +217,37 @@ export class SpiffoCherry extends Plushie {
 }
 
 /**
- * Spiffo Grey is a custom Naninhas trait plushie.
- * Grants the Naninhas_SpiffoGray trait with +1 boost to 5 combat skills.
+ * Spiffo Grey grants direct combat XP bonuses.
+ * Adds +1 multiplier to Nimble, LongBlade, SmallBlade, Blunt, and SmallBlunt.
  */
 export class SpiffoGrey extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
 			player,
 			name: "SpiffoGrey",
-			traitsToAdd: ["Naninhas_SpiffoGray"]
+			xpBoostsToAdd: [
+				{ perk: Perks.Nimble as Perk, value: 1 },
+				{ perk: Perks.LongBlade as Perk, value: 1 },
+				{ perk: Perks.SmallBlade as Perk, value: 1 },
+				{ perk: Perks.Blunt as Perk, value: 1 },
+				{ perk: Perks.SmallBlunt as Perk, value: 1 }
+			]
 		});
 	}
 }
 
 /**
- * Spiffo Heart is a custom Naninhas trait plushie.
- * Grants the Naninhas_SpiffoHeart trait with +2 Doctor XP boost.
+ * Spiffo Heart grants a direct medical XP bonus.
+ * Adds +2 Doctor XP multiplier while equipped.
  */
 export class SpiffoHeart extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
 			player,
 			name: "SpiffoHeart",
-			traitsToAdd: ["Naninhas_SpiffoHeart"]
+			xpBoostsToAdd: [
+				{ perk: Perks.Doctor as Perk, value: 2 }
+			]
 		});
 	}
 }
@@ -274,15 +289,18 @@ export class SpiffoSanta extends Plushie {
 }
 
 /**
- * Spiffo Shamrock is a custom Naninhas trait plushie.
- * Grants the Naninhas_SpiffoShamrock trait with +5 Aiming and +5 Reloading XP boost.
+ * Spiffo Shamrock grants direct ranged-combat XP bonuses.
+ * Adds +5 Aiming and +5 Reloading XP multipliers while equipped.
  */
 export class SpiffoShamrock extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
 			player,
 			name: "SpiffoShamrock",
-			traitsToAdd: ["Naninhas_SpiffoShamrock"]
+			xpBoostsToAdd: [
+				{ perk: Perks.Aiming as Perk, value: 5 },
+				{ perk: Perks.Reloading as Perk, value: 5 }
+			]
 		});
 	}
 }

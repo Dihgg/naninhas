@@ -1,14 +1,7 @@
 import { mock } from "jest-mock-extended";
 import { Plushie } from "./Plushie";
 import { IsoPlayer, Perks } from "@asledgehammer/pipewrench";
-
-jest.mock("@shared/components/Traits", () => ({
-	Traits: {
-		getPerkBoostsForTrait: jest.fn(() => [
-			{ perk: Perks.Woodwork, value: 1 }
-		])
-	}
-}));
+import type { Perk } from "@asledgehammer/pipewrench";
 
 describe("Plushie", () => {
 	const addXpMultiplier = jest.fn();
@@ -86,7 +79,7 @@ describe("Plushie", () => {
 		const plushie = new TestPlushie({
 			player,
 			name: "mocked",
-			traitsToAdd: ["mockedTrait"]
+			xpBoostsToAdd: [{ perk: Perks.Woodwork as Perk, value: 1 }]
 		});
 		
 		plushie.subscribe();
@@ -107,10 +100,11 @@ describe("Plushie", () => {
 		const player = mockPlayer();
 		const plushie = new TestPlushie({
 			player,
-			name: "mocked"
+			name: "mocked",
+			xpBoostsToAdd: [{ perk: Perks.Woodwork as Perk, value: 1 }]
 		});
 
-		(plushie as unknown as { applyBoost: (trait: string) => void }).applyBoost("mockedTrait");
+		(plushie as unknown as { applyBoosts: () => void }).applyBoosts();
 
 		expect(addXpMultiplier).toHaveBeenCalledWith(Perks.Woodwork, 1, 0, 0);
 	});
@@ -146,7 +140,7 @@ describe("Plushie", () => {
 		const plushie = new TestPlushie({
 			player,
 			name: "mocked",
-			traitsToAdd: ["mockedTrait"]
+			xpBoostsToAdd: [{ perk: Perks.Woodwork as Perk, value: 1 }]
 		});
 		
 		plushie.subscribe();

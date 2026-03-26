@@ -5,19 +5,12 @@ export type PerkBoost = {
 	value: number
 };
 
-export type TraitType = {
-	id: string;
-	cost: number;
-	profession?: boolean;
-	xpBoosts: PerkBoost[];
-	exclusives?: string[];
-};
-
 export type PlushieProps = {
 	player: IsoPlayer;
 	name: string;
 	traitsToAdd?: string[];
 	traitsToSuppress?: string[];
+	xpBoostsToAdd?: PerkBoost[];
 };
 
 export type ModDataProps<T> = {
