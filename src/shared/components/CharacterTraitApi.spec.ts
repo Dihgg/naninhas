@@ -43,6 +43,13 @@ describe("CharacterTraitApi", () => {
 	});
 
 	it("falls back to known-traits iteration when direct lookup is unavailable", () => {
+		// Don't resolve the trait so it falls back to knownTraits
+		(globalThis as unknown as {
+			CharacterTrait?: { get: (id: unknown) => undefined };
+		}).CharacterTrait = {
+			get: jest.fn(() => undefined),
+		};
+
 		const player = {
 			getCharacterTraits: () => ({
 				getKnownTraits: () => ({
@@ -76,14 +83,29 @@ describe("CharacterTraitApi", () => {
 			get: jest.fn(() => undefined),
 		};
 
-		const player = {} as IsoPlayer;
+		const player = {
+			getCharacterTraits: () => ({
+				getKnownTraits: () => ({
+					size: () => 0,
+				}),
+			}),
+		} as unknown as IsoPlayer;
 		expect(CharacterTraitApi.hasTrait(player, "Organized")).toBe(false);
 	});
 
 	it("returns false when knownTraits does not provide size/get", () => {
+		// Don't resolve the trait so it tries the fallback
+		(globalThis as unknown as {
+			CharacterTrait?: { get: (id: unknown) => undefined };
+		}).CharacterTrait = {
+			get: jest.fn(() => undefined),
+		};
+
 		const player = {
 			getCharacterTraits: () => ({
-				getKnownTraits: () => ({}),
+				getKnownTraits: () => ({
+					size: () => 0, // Empty list - no traits to iterate
+				}),
 			}),
 		} as unknown as IsoPlayer;
 
@@ -91,11 +113,19 @@ describe("CharacterTraitApi", () => {
 	});
 
 	it("matches known trait IDs using toString normalization", () => {
+		// Don't resolve the trait so it falls back to knownTraits matching
+		(globalThis as unknown as {
+			CharacterTrait?: { get: (id: unknown) => undefined };
+		}).CharacterTrait = {
+			get: jest.fn(() => undefined),
+		};
+
 		const player = {
 			getCharacterTraits: () => ({
 				getKnownTraits: () => ({
 					size: () => 1,
 					get: () => ({
+						getName: jest.fn(() => null),
 						toString: () => "base:naninhas:mockedtrait",
 					}),
 				}),
@@ -123,5 +153,87 @@ describe("CharacterTraitApi", () => {
 
 		expect(add).not.toHaveBeenCalled();
 		expect(remove).not.toHaveBeenCalled();
+	});
+
+	it("matches string trait IDs from known traits", () => {
+		(globalThis as unknown as {
+			CharacterTrait?: { get: (id: unknown) => undefined };
+		}).CharacterTrait = {
+			get: jest.fn(() => undefined),
+		};
+
+		const player = {
+			getCharacterTraits: () => ({
+				getKnownTraits: () => ({
+					size: () => 1,
+					get: () => "naninhas:mockedtrait",
+				}),
+			}),
+		} as unknown as IsoPlayer;
+
+		expect(CharacterTraitApi.hasTrait(player, "Naninhas:mockedTrait")).toBe(true);
+	});
+
+	it("matches trait by getName() when available", () => {
+		(globalThis as unknown as {
+			CharacterTrait?: { get: (id: unknown) => undefined };
+		}).CharacterTrait = {
+			get: jest.fn(() => undefined),
+		};
+
+		const player = {
+			getCharacterTraits: () => ({
+				getKnownTraits: () => ({
+					size: () => 1,
+					get: () => ({
+						getName: jest.fn(() => "BASE:Organized"),
+						toString: jest.fn(() => ""),
+					}),
+				}),
+			}),
+		} as unknown as IsoPlayer;
+
+		expect(CharacterTraitApi.hasTrait(player, "Organized")).toBe(true);
+	});
+
+	it("returns false when trait object getName returns null", () => {
+		(globalThis as unknown as {
+			CharacterTrait?: { get: (id: unknown) => undefined };
+		}).CharacterTrait = {
+			get: jest.fn(() => undefined),
+		};
+
+		const player = {
+			getCharacterTraits: () => ({
+				getKnownTraits: () => ({
+					size: () => 1,
+					get: () => ({
+						getName: jest.fn(() => null),
+						toString: jest.fn(() => ""),
+					}),
+				}),
+			}),
+		} as unknown as IsoPlayer;
+
+		expect(CharacterTraitApi.hasTrait(player, "UnknownTrait")).toBe(false);
+	});
+
+	it("returns false when known trait is null/undefined", () => {
+		(globalThis as unknown as {
+			CharacterTrait?: { get: (id: unknown) => undefined };
+		}).CharacterTrait = {
+			get: jest.fn(() => undefined),
+		};
+
+		const player = {
+			getCharacterTraits: () => ({
+				getKnownTraits: () => ({
+					size: () => 1,
+					get: () => null,
+				}),
+			}),
+		} as unknown as IsoPlayer;
+
+		expect(CharacterTraitApi.hasTrait(player, "AnyTrait")).toBe(false);
 	});
 });

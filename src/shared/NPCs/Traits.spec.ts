@@ -1,11 +1,11 @@
-import { Traits } from "../components/Traits";
-jest.mock("../components/Traits");
+import { Traits } from "@shared/components/Traits";
+jest.mock("@shared/components/Traits");
 
 describe("TraitClass event registration", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
 	});
-	it.each([41, 42])("The TraitClass should be initialized on version %s", major => {
+	it("The TraitClass should be initialized", () => {
 		jest.isolateModules(() => {
 			require("./Traits");
 		});

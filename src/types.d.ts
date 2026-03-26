@@ -9,7 +9,7 @@ export type TraitType = {
 	id: string;
 	cost: number;
 	profession?: boolean;
-	xpBoosts?: PerkBoost[];
+	xpBoosts: PerkBoost[];
 	exclusives?: string[];
 };
 

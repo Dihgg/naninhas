@@ -1,7 +1,11 @@
 
 import { IsoPlayer } from "@asledgehammer/pipewrench";
-import { Plushie } from "./Plushie";
+import { Plushie } from "@client/components/Plushies/Plushie";
 
+/**
+ * Boris Badger plushie grants the NightVision trait.
+ * Helps the player see in low-light conditions.
+ */
 export class BorisBadger extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
@@ -12,6 +16,10 @@ export class BorisBadger extends Plushie {
 	}
 }
 
+/**
+ * Doll plushie improves eyesight.
+ * Adds the EagleEyed trait and suppresses ShortSighted.
+ */
 export class Doll extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
@@ -23,6 +31,10 @@ export class Doll extends Plushie {
 	}
 }
 
+/**
+ * Flamingo plushie improves agility and coordination.
+ * Adds the Graceful trait and suppresses Clumsy.
+ */
 export class Flamingo extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
@@ -34,6 +46,10 @@ export class Flamingo extends Plushie {
 	}
 }
 
+/**
+ * FluffyfootBunny plushie reduces food consumption.
+ * Adds the LightEater trait and suppresses HeartyAppitite.
+ */
 export class FluffyfootBunny extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
@@ -45,6 +61,10 @@ export class FluffyfootBunny extends Plushie {
 	}
 }
 
+/**
+ * Freddy Fox plushie improves stealth and concealment.
+ * Adds the Inconspicuous trait and suppresses Conspicuous.
+ */
 export class FreddyFox extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
@@ -56,6 +76,10 @@ export class FreddyFox extends Plushie {
 	}
 }
 
+/**
+ * Furbert Squirrel plushie improves outdoor survival and foraging.
+ * Adds the Outdoorsman trait for better survival in nature.
+ */
 export class FurbertSquirrel extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
@@ -66,6 +90,10 @@ export class FurbertSquirrel extends Plushie {
 	}
 }
 
+/**
+ * Grogu AZ plushie enhances learning speed.
+ * Adds the FastLearner trait and suppresses SlowLearner.
+ */
 export class GroguAZ extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
@@ -77,6 +105,10 @@ export class GroguAZ extends Plushie {
 	}
 }
 
+/**
+ * Jacques Beaver is a custom Naninhas trait plushie.
+ * Grants the Naninhas_JacquesBeaver trait with +1 Woodwork XP boost.
+ */
 export class JacquesBeaver extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
@@ -87,6 +119,10 @@ export class JacquesBeaver extends Plushie {
 	}
 }
 
+/**
+ * Moley Mole is a custom Naninhas trait plushie.
+ * Grants the Naninhas_MoleyMole trait with +2 Plant Scavenging XP boost.
+ */
 export class MoleyMole extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
@@ -97,6 +133,10 @@ export class MoleyMole extends Plushie {
 	}
 }
 
+/**
+ * Otis Pug plushie enhances reading speed.
+ * Adds the FastReader trait and suppresses SlowReader.
+ */
 export class OtisPug extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
@@ -108,6 +148,10 @@ export class OtisPug extends Plushie {
 	}
 }
 
+/**
+ * Pancake Hedgehog is a custom Naninhas trait plushie.
+ * Grants the Naninhas_PancakeHedgehog trait with +1 Sprinting and +1 Agility XP boost.
+ */
 export class PancakeHedgehog extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
@@ -118,6 +162,10 @@ export class PancakeHedgehog extends Plushie {
 	}
 }
 
+/**
+ * Spiffo is the iconic mascot plushie.
+ * Passively increases player endurance by 0.1 every update.
+ */
 export class Spiffo extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
@@ -131,6 +179,10 @@ export class Spiffo extends Plushie {
 	}
 }
 
+/**
+ * Spiffo Blueberry variant reduces thirst.
+ * Adds the LowThirst trait and suppresses HighThirst.
+ */
 export class SpiffoBlueberry extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
@@ -142,6 +194,10 @@ export class SpiffoBlueberry extends Plushie {
 	}
 }
 
+/**
+ * Spiffo Cherry variant improves organization.
+ * Adds the Organized trait and suppresses Disorganized.
+ */
 export class SpiffoCherry extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
@@ -153,17 +209,24 @@ export class SpiffoCherry extends Plushie {
 	}
 }
 
+/**
+ * Spiffo Grey is a custom Naninhas trait plushie.
+ * Grants the Naninhas_SpiffoGray trait with +1 boost to 5 combat skills.
+ */
 export class SpiffoGrey extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
 			player,
 			name: "SpiffoGrey",
-			traitsToAdd: ["Brave", "Naninhas_SpiffoGray"],
-			traitsToSuppress: ["Brave", "Cowardly", "Agoraphobic", "Claustophobic"]
+			traitsToAdd: ["Naninhas_SpiffoGray"]
 		});
 	}
 }
 
+/**
+ * Spiffo Heart is a custom Naninhas trait plushie.
+ * Grants the Naninhas_SpiffoHeart trait with +2 Doctor XP boost.
+ */
 export class SpiffoHeart extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
@@ -174,6 +237,10 @@ export class SpiffoHeart extends Plushie {
 	}
 }
 
+/**
+ * Spiffo Rainbow variant provides comprehensive stat benefits.
+ * Every update: reduces boredom by 0.5, increases endurance by 0.5, and reduces fatigue by 0.5.
+ */
 export class SpiffoPlushieRainbow extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
@@ -189,6 +256,10 @@ export class SpiffoPlushieRainbow extends Plushie {
 	}
 }
 
+/**
+ * Spiffo Santa variant provides emotional comfort.
+ * Every update: reduces boredom by 0.5 to combat loneliness during harsh winters.
+ */
 export class SpiffoSanta extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
@@ -202,6 +273,10 @@ export class SpiffoSanta extends Plushie {
 	}
 }
 
+/**
+ * Spiffo Shamrock is a custom Naninhas trait plushie.
+ * Grants the Naninhas_SpiffoShamrock trait with +5 Aiming and +5 Reloading XP boost.
+ */
 export class SpiffoShamrock extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
@@ -212,6 +287,10 @@ export class SpiffoShamrock extends Plushie {
 	}
 }
 
+/**
+ * Substitution Doll provides psychological comfort and courage.
+ * Adds the Brave trait and suppresses fear-based traits (Desensitized, Cowardly, Agoraphobic, Claustophobic).
+ */
 export class SubstitutionDoll extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
@@ -223,6 +302,10 @@ export class SubstitutionDoll extends Plushie {
 	}
 }
 
+/**
+ * Toy Bear provides comfort and anxiety relief.
+ * Every update: reduces panic by 0.5 to soothe the player's nerves.
+ */
 export class ToyBear extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
@@ -236,6 +319,10 @@ export class ToyBear extends Plushie {
 	}
 }
 
+/**
+ * Toy Bear Small is a miniature version providing modest anxiety relief.
+ * Every update: reduces panic by 0.1 for gentle emotional support.
+ */
 export class ToyBearSmall extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({

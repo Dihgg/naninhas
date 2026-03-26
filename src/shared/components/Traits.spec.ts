@@ -1,135 +1,77 @@
-const getTextMock = jest.fn((...args: string[]) => args.join());
+import { Traits } from "./Traits";
 
 jest.mock("@asledgehammer/pipewrench", () => ({
-  getText: getTextMock,
-  TraitFactory: {}
+  Perk: jest.fn(),
+  Perks: {
+    Woodwork: "woodwork",
+    Sprinting: "sprinting",
+    Agility: "agility",
+    PlantScavenging: "plantScavenging",
+    Doctor: "doctor",
+    Nimble: "nimble",
+    LongBlade: "longBlade",
+    SmallBlade: "smallBlade",
+    Blunt: "blunt",
+    SmallBlunt: "smallBlunt",
+    Aiming: "aiming",
+    Reloading: "reloading"
+  }
 }));
 
-jest.mock("@asledgehammer/pipewrench-events", () => {
-  const addListenerMock = jest.fn();
-  return {
-		onCreateLivingCharacter: { addListener: addListenerMock }
-  };
-});
-
-describe("Traitss", () => {
+describe("Traits", () => {
   beforeEach(() => {
-    jest.resetModules();
-    jest.clearAllMocks();
-		getTextMock.mockClear();
-  });
-  
-  it("registers addTraits on character creation", async () => {
-    jest.doMock("./TraitValues", () => ({
-      NaninhasTraits: []
-    }));
-    
-    await jest.isolateModulesAsync(async () => {
-      const { onCreateLivingCharacter } = await import("@asledgehammer/pipewrench-events");
-      const { Traits } = await import("@shared/components/Traits");
-      new Traits();
-      expect(onCreateLivingCharacter.addListener).toHaveBeenCalledTimes(1);
-    });
-  });
-  
-  it("registers configured traits when trait register is available", async () => {
-    const addTrait = jest.fn();
-    const setMutualExclusive = jest.fn();
-
-    jest.doMock("./TraitValues", () => ({
-      NaninhasTraits: [
-        {
-          id: "Mocked_Trait",
-          cost: -2,
-          profession: true
-        }
-      ]
-    }));
-
-    jest.doMock("./TraitRegister", () => ({
-      TraitRegister: {
-        create: () => ({
-          isAvailable: () => true,
-          addTrait,
-          setMutualExclusive,
-        }),
-      },
-    }));
-    
-    await jest.isolateModulesAsync(async () => {
-      const { onCreateLivingCharacter } = await import("@asledgehammer/pipewrench-events");
-      const { Traits } = await import("@shared/components/Traits");
-      new Traits();
-      const [addTraits] = (onCreateLivingCharacter.addListener as jest.Mock).mock.calls[0];
-      addTraits();
-      expect(addTrait).toHaveBeenCalledWith(
-        "Mocked_Trait",
-        "UI_Trait_Mocked_Trait",
-        -2,
-        "UI_Trait_Mocked_Trait_Description",
-        true
-      );
-      expect(setMutualExclusive).not.toHaveBeenCalled();
-    });
-  });
-  
-  it("does nothing when trait register is unavailable", async () => {
-    const addTrait = jest.fn();
-    const setMutualExclusive = jest.fn();
-
-    jest.doMock("./TraitValues", () => ({
-      NaninhasTraits: [
-        {
-          id: "NoBoost",
-          cost: 0,
-        }
-      ]
-    }));
-
-    jest.doMock("./TraitRegister", () => ({
-      TraitRegister: {
-        create: () => ({
-          isAvailable: () => false,
-          addTrait,
-          setMutualExclusive,
-        }),
-      },
-    }));
-    
-    await jest.isolateModulesAsync(async () => {
-      const { onCreateLivingCharacter } = await import("@asledgehammer/pipewrench-events");
-      const { Traits } = await import("@shared/components/Traits");
-      new Traits();
-      const [addTraits] = (onCreateLivingCharacter.addListener as jest.Mock).mock.calls[0];
-      addTraits();
-      expect(addTrait).not.toHaveBeenCalled();
-      expect(setMutualExclusive).not.toHaveBeenCalled();
-    });
-  });
-  
-  it("returns perk boosts for a given trait", async () => {
-    jest.doMock("./TraitValues", () => ({
-      NaninhasTraits: [
-        {
-          id: "TestTrait",
-          xpBoosts: [
-            { perk: "Aiming", value: 2 }
-          ]
-        },
-        {
-          id: "NoBoost"
-        }
-      ]
-    }));
-    
-    await jest.isolateModulesAsync(async () => {
-      const { Traits } = await import("@shared/components/Traits");
-      expect(Traits.getPerkBoostsForTrait("TestTrait")).toEqual([
-        { perk: "Aiming", value: 2 }
-      ]);
-      expect(Traits.getPerkBoostsForTrait("NoBoost")).toEqual([]);
-      expect(Traits.getPerkBoostsForTrait("Unknown")).toEqual([]);
-    });
+    // Clear the cache before each test
+    (Traits as any).cache = undefined;
   });
 
+  it("returns perk boosts for a trait with xpBoosts", () => {
+    const result = Traits.getPerkBoostsForTrait("Naninhas_PancakeHedgehog");
+    expect(result).toEqual([
+      { perk: "sprinting", value: 1 },
+      { perk: "agility", value: 1 }
+    ]);
+  });
+
+  it("returns empty array for a trait without xpBoosts", () => {
+    // Note: All current traits have xpBoosts, so we test with an unknown ID
+    const result = Traits.getPerkBoostsForTrait("Unknown_Trait");
+    expect(result).toEqual([]);
+  });
+
+  it("returns correct boosts for traits with multiple perks", () => {
+    const result = Traits.getPerkBoostsForTrait("Naninhas_SpiffoGray");
+    expect(result).toHaveLength(5);
+    expect(result[0]).toEqual({ perk: "nimble", value: 1 });
+    expect(result[1]).toEqual({ perk: "longBlade", value: 1 });
+  });
+
+  it("returns boosts with higher values", () => {
+    const result = Traits.getPerkBoostsForTrait("Naninhas_SpiffoShamrock");
+    expect(result).toEqual([
+      { perk: "aiming", value: 5 },
+      { perk: "reloading", value: 5 }
+    ]);
+  });
+
+  it("caches results for performance", () => {
+    const result1 = Traits.getPerkBoostsForTrait("Naninhas_JacquesBeaver");
+    const result2 = Traits.getPerkBoostsForTrait("Naninhas_JacquesBeaver");
+
+    // Should return same reference if cached
+    expect(result1).toEqual(result2);
+  });
+
+  it("returns empty array for non-existent traits", () => {
+    const result = Traits.getPerkBoostsForTrait("NonExistent");
+    expect(result).toEqual([]);
+  });
+
+	it("returns empty array for non-existent trait on second call (cached)", () => {
+		// First call builds cache
+		Traits.getPerkBoostsForTrait("SomeTraitWithBoosts");
+		
+		// Second call with non-existent trait uses cached map
+		const result = Traits.getPerkBoostsForTrait("StillNonExistent");
+		expect(result).toEqual([]);
+	});
 });

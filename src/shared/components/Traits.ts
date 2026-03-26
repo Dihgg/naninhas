@@ -1,52 +1,97 @@
-
-import { getText, Perk } from "@asledgehammer/pipewrench";
-import * as Events from "@asledgehammer/pipewrench-events";
+import { Perk, Perks } from "@asledgehammer/pipewrench";
 import type { PerkBoost, TraitType } from "types";
-import { NaninhasTraits } from "./TraitValues";
-import { TraitRegister } from "./TraitRegister";
+
+
+const TRAITS: TraitType[] = [
+	{
+		id: "Naninhas_JacquesBeaver",
+		cost: 2,
+		xpBoosts: [
+			{
+				perk: Perks.Woodwork as Perk,
+				value: 1
+			}
+		]
+	},
+	{
+		id: "Naninhas_PancakeHedgehog",
+		cost: 2,
+		xpBoosts: [
+			{
+				perk: Perks.Sprinting as Perk,
+				value: 1
+			},
+			{
+				perk: Perks.Agility as Perk,
+				value: 1
+			}
+		]
+	},
+	{
+		id: "Naninhas_MoleyMole",
+		cost: 2,
+		xpBoosts: [
+			{
+				perk: Perks.PlantScavenging as Perk,
+				value: 2
+			}
+		]
+	},
+	{
+		id: "Naninhas_SpiffoHeart",
+		cost: 2,
+		xpBoosts: [
+			{
+				perk: Perks.Doctor as Perk,
+				value: 2
+			}
+		]
+	},
+	{
+		id: "Naninhas_SpiffoGray",
+		cost: 6,
+		xpBoosts: [
+			{
+				perk: Perks.Nimble as Perk,
+				value: 1
+			},
+			{
+				perk: Perks.LongBlade as Perk,
+				value: 1
+			},
+			{
+				perk: Perks.SmallBlade as Perk,
+				value: 1
+			},
+			{
+				perk: Perks.Blunt as Perk,
+				value: 1
+			},
+			{
+				perk: Perks.SmallBlunt as Perk,
+				value: 1
+			}
+		]
+	},
+	{
+		id: "Naninhas_SpiffoShamrock",
+		cost: 2,
+		xpBoosts: [
+			{
+				perk: Perks.Aiming as Perk,
+				value: 5
+			},
+			{
+				perk: Perks.Reloading as Perk,
+				value: 5
+			}
+		]
+	}
+];
 
 export class Traits {
-	private readonly traits: TraitType[];
-	private readonly traitRegister: TraitRegister;
 
-	private static cache: Map<string,PerkBoost[]>;
-	constructor(traits: TraitType[] = NaninhasTraits, traitRegister: TraitRegister = TraitRegister.create()) {
-		this.traits = traits;
-		this.traitRegister = traitRegister;
-		Events.onCreateLivingCharacter.addListener(() => this.addTraits());
-	}
-
-	/**
-	 * For each Plushie trait, register it and it's boosts, if any;
-	 */
-	private addTraits() {
-		if (!this.traitRegister.isAvailable()) {
-			return;
-		}
-
-		for (const { id, cost, profession = false } of this.traits) {
-			const name = getText(`UI_Trait_${id}`);
-			const description = getText(`UI_Trait_${id}_Description`);
-			this.traitRegister.addTrait(id, name, cost, description, profession);
-		}
-		this.setMutualExclusive();
-	}
-
-	/**
-	 * Sets mutual exclusives for traits.
-	 * This method iterates through the traits and sets mutual exclusives using the TraitRegister.
-	 */
-	private setMutualExclusive() {
-		if (!this.traitRegister.isAvailable()) {
-			return;
-		}
-
-		for (const { id, exclusives = [] } of this.traits) {
-			for (const exclusive of exclusives) {
-				this.traitRegister.setMutualExclusive(id, exclusive);
-			}
-		}
-	}
+	private static cache: Map<string, PerkBoost[]>;
 
 	/**
 	 * Return an Array of Perks and values for a given trait
@@ -54,15 +99,15 @@ export class Traits {
 	 * @param trait the trait name for the lookup
 	 */
 	public static getPerkBoostsForTrait(trait: string): PerkBoost[] {
-		if(!this.cache) {
+		if (!this.cache) {
 			this.cache = new Map(
-				NaninhasTraits
-					.map((({ id, xpBoosts = [] }) =>
+				TRAITS
+					.map((({ id, xpBoosts }) =>
 						[
 							id,
 							xpBoosts.map(({ perk, value }) => ({ perk, value }))
 						]
-				))
+					))
 			);
 		}
 		return this.cache.get(trait) ?? [];
