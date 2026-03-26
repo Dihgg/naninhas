@@ -15,6 +15,11 @@ describe("Plushie", () => {
 	const getMultiplier = jest.fn();
 	const addTraitFn = jest.fn();
 	const removeTraitFn = jest.fn();
+	const hasTraitFn = jest.fn();
+	const runtimeTrait = {
+		getName: jest.fn(() => "mockedTrait"),
+		toString: jest.fn(() => "mockedTrait")
+	};
 
 	beforeEach(() => {
 		addXpMultiplier.mockReset();
@@ -22,6 +27,25 @@ describe("Plushie", () => {
 		getMultiplier.mockReturnValue(0);
 		addTraitFn.mockReset();
 		removeTraitFn.mockReset();
+		hasTraitFn.mockReset();
+
+		(globalThis as unknown as {
+			CharacterTrait?: { get: (id: unknown) => typeof runtimeTrait };
+			ResourceLocation?: { of: (id: string) => unknown };
+		}).CharacterTrait = {
+			get: jest.fn(() => runtimeTrait)
+		};
+
+		(globalThis as unknown as {
+			ResourceLocation?: { of: (id: string) => unknown };
+		}).ResourceLocation = {
+			of: jest.fn(() => ({ id: "mocked" }))
+		};
+	});
+
+	afterEach(() => {
+		delete (globalThis as unknown as { CharacterTrait?: unknown }).CharacterTrait;
+		delete (globalThis as unknown as { ResourceLocation?: unknown }).ResourceLocation;
 	});
 	
 	const mockPlayer = (hasTrait = false, initialNaninhasData?: Record<string, unknown>) => {
@@ -29,11 +53,13 @@ describe("Plushie", () => {
 		if (initialNaninhasData !== undefined) {
 			modData.Naninhas = initialNaninhasData;
 		}
+		hasTraitFn.mockReturnValue(hasTrait);
+
 		return mock<IsoPlayer>({
-			HasTrait: jest.fn().mockReturnValue(hasTrait),
-			getTraits: jest.fn().mockImplementation(() => ({
+			getCharacterTraits: jest.fn().mockImplementation(() => ({
+				get: hasTraitFn,
 				add: addTraitFn,
-				remove: removeTraitFn,
+				remove: removeTraitFn
 			})),
 			getXp: jest.fn().mockImplementation(() => ({
 				addXpMultiplier,
@@ -138,7 +164,7 @@ describe("Plushie", () => {
 				traitsToAdd: ["mockedTrait"]
 			});
 			plushie.subscribe();
-			expect(addTraitFn).toHaveBeenCalledWith("mockedTrait");
+			expect(addTraitFn).toHaveBeenCalledWith(runtimeTrait);
 		});
 
 		it("Should suppress trait if player has it", () => {
@@ -149,7 +175,7 @@ describe("Plushie", () => {
 				traitsToSuppress: ["mockedTrait"]
 			});
 			plushie.subscribe();
-			expect(removeTraitFn).toHaveBeenCalledWith("mockedTrait");
+			expect(removeTraitFn).toHaveBeenCalledWith(runtimeTrait);
 		});
 
 		it("Should add Plushie exclusive trait only once", () => {
@@ -161,7 +187,7 @@ describe("Plushie", () => {
 			});
 			plushie.subscribe();
 			plushie.subscribe();
-			expect(addTraitFn).toHaveBeenNthCalledWith(1, "mockedTrait");
+			expect(addTraitFn).toHaveBeenNthCalledWith(1, runtimeTrait);
 			expect(addTraitFn).toHaveBeenCalledTimes(1);
 		});
 
@@ -174,7 +200,7 @@ describe("Plushie", () => {
 			});
 			plushie.subscribe();
 			plushie.unsubscribe();
-			expect(removeTraitFn).toHaveBeenNthCalledWith(1, "mockedTrait");
+			expect(removeTraitFn).toHaveBeenNthCalledWith(1, runtimeTrait);
 		});
 
 		it("Should restore suppressed traits on unsubscribe", () => {
@@ -186,7 +212,7 @@ describe("Plushie", () => {
 			});
 			plushie.subscribe();
 			plushie.unsubscribe();
-			expect(addTraitFn).toHaveBeenNthCalledWith(1, "mockedTrait");
+			expect(addTraitFn).toHaveBeenNthCalledWith(1, runtimeTrait);
 		});
 
 		it("Do not add Trait if Player has the Trait", () => {

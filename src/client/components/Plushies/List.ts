@@ -127,7 +127,7 @@ export class Spiffo extends Plushie {
 	}
 	update() {
 		super.update();
-		this.player.increaseEndurance(0.1);
+		this.playerApi.increaseEndurance(0.1);
 	}
 }
 
@@ -183,9 +183,9 @@ export class SpiffoPlushieRainbow extends Plushie {
 	}
 	update() {
 		super.update();
-		this.player.reduceBoredom(0.5);
-		this.player.increaseEndurance(0.5);
-		this.player.reduceFatigue(0.5);
+		this.playerApi.reduceBoredom(0.5);
+		this.playerApi.increaseEndurance(0.5);
+		this.playerApi.reduceFatigue(0.5);
 	}
 }
 
@@ -198,7 +198,7 @@ export class SpiffoSanta extends Plushie {
 	}
 	public update() {
 		super.update();
-		this.player.reduceBoredom(0.5);
+		this.playerApi.reduceBoredom(0.5);
 	}
 }
 
@@ -232,7 +232,7 @@ export class ToyBear extends Plushie {
 	}
 	update() {
 		super.update();
-		this.player.reducePanic(0.5);
+		this.playerApi.reducePanic(0.5);
 	}
 }
 
@@ -245,6 +245,6 @@ export class ToyBearSmall extends Plushie {
 	}
 	update() {
 		super.update();
-		this.player.reducePanic(0.1);
+		this.playerApi.reducePanic(0.1);
 	}
 }
