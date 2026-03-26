@@ -1,0 +1,65 @@
+[h1]🧸 Naninhas - Bônus de Pelúcias para Authentic Z[/h1]
+
+[b]✅ Compatível com Build 42[/b]
+
+Naninhas transforma as pelúcias anexáveis do [b]Authentic Z[/b] em bônus ativos de gameplay.
+Anexe uma pelúcia à mochila e ganhe seu efeito enquanto estiver equipada.
+
+[hr][/hr]
+
+[h2]⚙️ Como Funciona[/h2]
+[list]
+[*]Anexe uma pelúcia compatível à sua mochila
+[*]O bônus dela é ativado enquanto estiver equipada
+[*]Ao desequipar, o efeito é removido
+[*]Efeitos de traço e XP são tratados para evitar resíduos permanentes
+[/list]
+
+[hr][/hr]
+
+[h2]🧸 Todas as Pelúcias e Efeitos[/h2]
+[list]
+[*]🦡 [b]Boris The Badger[/b]: Concede [i]Cat’s Eyes / Visão Noturna[/i]
+[*]🧸 [b]Doll[/b]: Concede [i]Eagle Eyed[/i] (suprime [i]Short Sighted[/i])
+[*]🦩 [b]Flamingo[/b]: Concede [i]Graceful[/i] (suprime [i]Clumsy[/i])
+[*]🐇 [b]Fluffyfoot The Bunny[/b]: Concede [i]Light Eater[/i]
+[*]🦊 [b]Freddy The Fox[/b]: Concede [i]Inconspicuous[/i] (suprime [i]Conspicuous[/i])
+[*]🐿️ [b]Furbert The Squirrel[/b]: Concede [i]Outdoorsman[/i]
+[*]👽 [b]Green Sci-Fi Goblin[/b]: Concede [i]Fast Learner[/i] (suprime [i]Slow Learner[/i])
+[*]🐾 [b]Moley The Mole[/b]: Bônus de XP em Forrageamento
+[*]🐶 [b]Otis The Pug[/b]: Concede [i]Fast Reader[/i] (suprime [i]Slow Reader[/i])
+[*]🦔 [b]Pancake The Hedgehog[/b]: Bônus de XP em Corrida + Agilidade
+[*]🪵 [b]Jacques The Beaver[/b]: Bônus de XP em Carpintaria
+[*]🦝 [b]Spiffo[/b]: Suporte de resistência enquanto equipado
+[*]🫐 [b]Spiffo Blueberry[/b]: Concede [i]Low Thirst[/i] (suprime [i]High Thirst[/i])
+[*]🍒 [b]Spiffo Cherry[/b]: Concede [i]Organized[/i] (suprime [i]Disorganized[/i])
+[*]🐾 [b]Spiffo PAWS (Gray)[/b]: Bônus de XP em Nimble + Armas Contundentes + Lâminas
+[*]❤️ [b]Spiffo Heart[/b]: Bônus de XP em Primeiros Socorros
+[*]🌈 [b]Spiffo Rainbow[/b]: Reduz tédio/fadiga e ajuda na resistência
+[*]🎅 [b]Spiffo Santa[/b]: Reduz o tédio lentamente
+[*]🍀 [b]Spiffo Shamrock[/b]: Bônus de XP em Mira + Recarga
+[*]🪆 [b]Substitution Doll[/b]: Concede [i]Brave[/i]
+[*]🐻 [b]Toy Bear[/b]: Reduz pânico/medo
+[*]🧸 [b]Toy Bear (Small)[/b]: Versão reduzida do efeito do Toy Bear
+[/list]
+
+[hr][/hr]
+
+[h2]📦 Requisitos[/h2]
+[list]
+[*][b]Authentic Z - Current[/b] é obrigatório
+[/list]
+
+[hr][/hr]
+
+[h2]🔗 Links[/h2]
+[list]
+[*][url=https://github.com/dihgg/naninhas]Repositório no GitHub[/url]
+[*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=3624617298]Página na Steam Workshop[/url]
+[/list]
+
+[hr][/hr]
+
+[h2]💬 Feedback[/h2]
+Se você curtir o mod, um joinha/favorito ajuda muito.
+Sugestões e relatos de bugs são sempre bem-vindos.

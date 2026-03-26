@@ -1,0 +1,65 @@
+[h1]🧸 Naninhas - Plushie Buffs for Authentic Z[/h1]
+
+[b]✅ Build 41 + Build 42 Compatible[/b]
+
+Naninhas turns [b]Authentic Z[/b] attachable plushies into active gameplay bonuses.
+Attach a plushie to your backpack and gain its effect while equipped.
+
+[hr][/hr]
+
+[h2]⚙️ How It Works[/h2]
+[list]
+[*]Attach a supported plushie to your backpack
+[*]Its bonus activates while equipped
+[*]Unequip it and the effect is removed
+[*]Trait and XP effects are handled to avoid permanent leftovers
+[/list]
+
+[hr][/hr]
+
+[h2]🧸 All Plushies & Effects[/h2]
+[list]
+[*]🦡 [b]Boris The Badger[/b]: Grants [i]Cat’s Eyes / Night Vision[/i]
+[*]🧸 [b]Doll[/b]: Grants [i]Eagle Eyed[/i] (suppresses [i]Short Sighted[/i])
+[*]🦩 [b]Flamingo[/b]: Grants [i]Graceful[/i] (suppresses [i]Clumsy[/i])
+[*]🐇 [b]Fluffyfoot The Bunny[/b]: Grants [i]Light Eater[/i]
+[*]🦊 [b]Freddy The Fox[/b]: Grants [i]Inconspicuous[/i] (suppresses [i]Conspicuous[/i])
+[*]🐿️ [b]Furbert The Squirrel[/b]: Grants [i]Outdoorsman[/i]
+[*]👽 [b]Green Sci-Fi Goblin[/b]: Grants [i]Fast Learner[/i] (suppresses [i]Slow Learner[/i])
+[*]🐾 [b]Moley The Mole[/b]: Foraging XP bonus
+[*]🐶 [b]Otis The Pug[/b]: Grants [i]Fast Reader[/i] (suppresses [i]Slow Reader[/i])
+[*]🦔 [b]Pancake The Hedgehog[/b]: Sprinting + Agility XP bonuses
+[*]🪵 [b]Jacques The Beaver[/b]: Carpentry XP bonus
+[*]🦝 [b]Spiffo[/b]: Endurance support while equipped
+[*]🫐 [b]Spiffo Blueberry[/b]: Grants [i]Low Thirst[/i] (suppresses [i]High Thirst[/i])
+[*]🍒 [b]Spiffo Cherry[/b]: Grants [i]Organized[/i] (suppresses [i]Disorganized[/i])
+[*]🐾 [b]Spiffo PAWS (Gray)[/b]: Nimble + Blunt + Blade XP bonuses
+[*]❤️ [b]Spiffo Heart[/b]: First Aid XP bonus
+[*]🌈 [b]Spiffo Rainbow[/b]: Reduces boredom/fatigue and helps endurance
+[*]🎅 [b]Spiffo Santa[/b]: Slowly reduces boredom
+[*]🍀 [b]Spiffo Shamrock[/b]: Aiming + Reloading XP bonuses
+[*]🪆 [b]Substitution Doll[/b]: Grants [i]Brave[/i]
+[*]🐻 [b]Toy Bear[/b]: Reduces panic/fear
+[*]🧸 [b]Toy Bear (Small)[/b]: Reduced version of Toy Bear effect
+[/list]
+
+[hr][/hr]
+
+[h2]📦 Requirements[/h2]
+[list]
+[*][b]Authentic Z - Current[/b] is required
+[/list]
+
+[hr][/hr]
+
+[h2]🔗 Links[/h2]
+[list]
+[*][url=https://github.com/dihgg/naninhas]GitHub Repository[/url]
+[*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=3624617298]Steam Workshop Page[/url]
+[/list]
+
+[hr][/hr]
+
+[h2]💬 Feedback[/h2]
+If you enjoy the mod, a thumbs up/favorite helps a lot.
+Suggestions and bug reports are always welcome.
