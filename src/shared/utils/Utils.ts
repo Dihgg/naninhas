@@ -9,3 +9,9 @@ export const getVersion = () => {
 	const [ major, minor ] = string.match(version, "(%d+)%.(%d+)");
 	return { major: +major, minor: +minor };
 };
+
+/**
+ * Get whether the game is running Build 42 or later.
+ * @returns True if the game is running Build 42 or later, false otherwise.
+ */
+export const isB42 = () => getVersion().major >= 42;

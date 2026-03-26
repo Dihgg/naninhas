@@ -66,33 +66,10 @@ const loadTranslationSource = async sourceRoot => {
 };
 
 /**
- * Escapes a value for Build 41 translation txt files.
- * @param {string} value
- * @returns {string}
+ * Generates Build 42 translation json files from src/translations-json.
+ * @param {{sourceRoot: string, build42TranslateRoot: string}} paths
  */
-const escapeBuild41Value = value => value.replace(/\\/g, "\\\\").replace(/\"/g, '\\\"').replace(/\r/g, "").replace(/\n/g, "<LINE>");
-
-/**
- * Converts a json translation object to Build 41 txt format.
- * @param {string} namespace
- * @param {string} locale
- * @param {Record<string, string>} entries
- * @returns {string}
- */
-const toBuild41Translation = (namespace, locale, entries) => {
-	const header = `${namespace}_${locale} = {`;
-	const body = Object.entries(entries)
-		.map(([key, value]) => `\t${key} = "${escapeBuild41Value(value)}",`)
-		.join("\n");
-
-	return `${header}\n${body}\n}\n`;
-};
-
-/**
- * Generates translations for Build 41 and Build 42 from json source.
- * @param {{sourceRoot: string, build41TranslateRoot: string, build42TranslateRoot: string}} paths
- */
-const generateTranslations = async ({ sourceRoot, build41TranslateRoot, build42TranslateRoot }) => {
+const generateTranslations = async ({ sourceRoot, build42TranslateRoot }) => {
 	const source = await loadTranslationSource(sourceRoot);
 	const locales = Object.keys(source);
 
@@ -108,15 +85,12 @@ const generateTranslations = async ({ sourceRoot, build41TranslateRoot, build42T
 
 		for (const namespace of namespaceNames) {
 			const entries = namespaces[namespace];
-			const build41Path = path.join(build41TranslateRoot, locale, `${namespace}_${locale}.txt`);
 			const build42Path = path.join(build42TranslateRoot, locale, `${namespace}.json`);
 
-			await fs.ensureDir(path.dirname(build41Path));
 			await fs.ensureDir(path.dirname(build42Path));
 
-			await fs.writeFile(build41Path, toBuild41Translation(namespace, locale, entries), "utf8");
 			await fs.writeJson(build42Path, entries, { spaces: 4 });
-			fileCount += 2;
+			fileCount += 1;
 		}
 	}
 

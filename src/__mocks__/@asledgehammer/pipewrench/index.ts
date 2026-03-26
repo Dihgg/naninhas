@@ -15,7 +15,7 @@ export const TraitFactory = {
 };
 
 export const getCore = jest.fn().mockImplementation(() => ({
-	getVersionNumber: jest.fn()
+	getVersionNumber: jest.fn().mockReturnValue("42.0")
 }));
 
 export const Perks = {
@@ -24,7 +24,10 @@ export const Perks = {
 };
 
 (globalThis as any).string = {
-	match: (version: string, pattern: string) => version.match(pattern)
+	match: (version: string) => {
+		const [, major, minor] = version.match(/(\d+)\.(\d+)/) ?? [];
+		return [ major, minor ];
+	}
 };
 
 const _statValue = (name: string) => ({ __brand: "CharacterStatValue", name } as any);

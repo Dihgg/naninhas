@@ -13,6 +13,7 @@
 		"release": "standard-version",
 		"postrelease": "npm run zip",
 		"zip": "node scripts/zip.js",
+		"presteam": "npm run build",
 		"steam": "node scripts/steam.js",
 		"zipname": "node scripts/zipname.js",
 		"test": "jest",

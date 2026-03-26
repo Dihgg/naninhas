@@ -1,5 +1,5 @@
 
-import { Observer } from "./Observer";
+import { Observer } from "@client/components/Observer/Observer";
 
 /**
  * This class will handle all the observers

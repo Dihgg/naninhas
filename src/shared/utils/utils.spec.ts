@@ -1,4 +1,4 @@
-import { getVersion } from "@shared/utils";
+import { getVersion, isB42 } from "@shared/utils";
 
 jest.mock("@asledgehammer/pipewrench", () => ({
 	getCore: () => ({
@@ -16,11 +16,18 @@ describe("Utils", () => {
 				return [ major, minor ];
 			}
 		};
-	})
-	it("should return a valid game version", () => {
-		const { major, minor } = getVersion();
-		expect(major).toBe(41);
-		expect(minor).toBe(20);
+	});
+	describe("getVersion", () => {
+		it("should return a valid game version", () => {
+			const { major, minor } = getVersion();
+			expect(major).toBe(41);
+			expect(minor).toBe(20);
+		});
+	});
+	describe("isB42", () => {
+		it("should return false for Build 41", () => {
+			expect(isB42()).toBe(false);
+		});
 	});
 	afterEach(() => {
 		(globalThis as any) = originalGlobal;

@@ -1,13 +1,19 @@
 import { IsoPlayer } from "@asledgehammer/pipewrench";
+import { PlayerApi } from "@shared/components/PlayerApi";
 import type { PlushieProps } from "types";
+
 export class Plushie {
 	name = "";
-	player: IsoPlayer;
+	protected readonly playerApi: PlayerApi;
+
 	constructor({ player, name }: PlushieProps) {
-		this.player = player;
 		this.name = name;
+		this.playerApi = new PlayerApi(player);
 	}
+
 	update() {}
+
 	subscribe() {}
+
 	unsubscribe() {}
 }

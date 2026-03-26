@@ -1,10 +1,9 @@
 
 import { IsoPlayer } from "@asledgehammer/pipewrench";
-import { CharacterTraitApi } from "@shared/components/CharacterTraitApi";
-import { Traits } from "@shared/components/Traits";
-import { ModData } from "./ModData";
-import { Observer } from "../Observer/Observer";
-import type { PlayerModData, PlushieProps } from "types";
+import { PlayerApi } from "@shared/components/PlayerApi";
+import { ModData } from "@client/components/Plushies/ModData";
+import { Observer } from "@client/components/Observer/Observer";
+import type { PerkBoost, PlayerModData, PlushieProps } from "types";
 
 // TODO: Apply the LuaEventManager to allow other mods to interact with this one
 // import { LuaEventManager } from "@asledgehammer/pipewrench"
@@ -15,12 +14,13 @@ import type { PlayerModData, PlushieProps } from "types";
  */
 export abstract class Plushie implements Observer {
 	name: string;
-	/** Zomboid player object */
-	protected readonly player: IsoPlayer;
+	/** Wrapped player object */
+	protected readonly playerApi: PlayerApi;
 
 	/** List of traits that this Plushie should grant */
 	private readonly traitsToAdd: string[];
 	private readonly traitsToSuppress: string[] = [];
+	private readonly xpBoostsToAdd: PerkBoost[];
 
 	/** List of traits that are added by Plushies */
 	// private readonly addedTraits: Set<string>;
@@ -35,13 +35,14 @@ export abstract class Plushie implements Observer {
 	 * @param name Plushie name
 	 * @param traitsNames A string with traits that this plushies gives when equipped
 	 */
-	constructor({ player, name, traitsToAdd = [], traitsToSuppress = [] }: PlushieProps) {
+	constructor({ player, name, traitsToAdd = [], traitsToSuppress = [], xpBoostsToAdd = [] }: PlushieProps) {
 		this.name = name;
-		this.player = player;
+		this.playerApi = new PlayerApi(player);
 		this.traitsToAdd = traitsToAdd;
 		this.traitsToSuppress = traitsToSuppress;
+		this.xpBoostsToAdd = xpBoostsToAdd;
 		this.playerData = new ModData({
-			object: this.player,
+			object: this.playerApi.player,
 			modKey: "Naninhas",
 			defaultData: { addedTraits: [], suppressedTraits: [], xpBoosts: {} }
 		});
@@ -59,18 +60,15 @@ export abstract class Plushie implements Observer {
 	update() {}
 
 	/**
-	 * For a given trait, apply a boost based on Naninhas traits
-	 * @param trait The trait to look for in Naninhas traits
-	 * @param shouldApply Should the boost be applied or removed (set to 0)
+	 * Applies/removes plushie XP multipliers while preserving any pre-existing player multipliers.
+	 * Uses persisted target values and delta math to avoid stacking drift.
 	 */
-	private applyBoost(trait: string, shouldApply = true) {
+	private applyBoosts(shouldApply = true) {
 		const data = this.ensureData();
-		const perks = Traits.getPerkBoostsForTrait(trait);
-
-		const xp = this.player.getXp();
+		const xp = this.playerApi.getXp();
 		
-		for (const { perk, value } of perks) {
-			const key = `${trait}:${perk}`;
+		for (const { perk, value } of this.xpBoostsToAdd) {
+			const key = `${this.name}:${perk}`;
 			const appliedValue = data.xpBoosts[key] ?? 0;
 			const targetValue = shouldApply ? value : 0;
 			const delta = targetValue - appliedValue;
@@ -98,17 +96,17 @@ export abstract class Plushie implements Observer {
 		
 		for (const trait of toAdd) {
 			data.addedTraits.push(trait);
-			CharacterTraitApi.addTrait(this.player, trait);
-			this.applyBoost(trait, true);
+			this.playerApi.addTrait(trait);
 		}
+
+		this.applyBoosts(true);
 
 		const toSuppress = this.traitsToSuppress
 			.filter((trait) => !data.suppressedTraits.includes(trait) && this.hasTrait(trait));
 		
 		for (const trait of toSuppress) {
 			data.suppressedTraits.push(trait);
-			CharacterTraitApi.removeTrait(this.player, trait);
-			this.applyBoost(trait, false);
+			this.playerApi.removeTrait(trait);
 		}
 	}
 
@@ -123,8 +121,7 @@ export abstract class Plushie implements Observer {
 
 		for (const trait of toRemove) {
 			data.addedTraits = data.addedTraits.filter((t) => t !== trait);
-			CharacterTraitApi.removeTrait(this.player, trait);
-			this.applyBoost(trait, false);
+			this.playerApi.removeTrait(trait);
 		}
 
 		// Add back the traits that are suppressed by this Plushie
@@ -132,13 +129,14 @@ export abstract class Plushie implements Observer {
 			.filter((trait) => data.suppressedTraits.includes(trait));
 		for (const trait of toRestore) {
 			data.suppressedTraits = data.suppressedTraits.filter((t) => t !== trait);
-			CharacterTraitApi.addTrait(this.player, trait);
-			this.applyBoost(trait, true);
+			this.playerApi.addTrait(trait);
 		}
+
+		this.applyBoosts(false);
 	}
 
 	private hasTrait(trait: string): boolean {
-		return CharacterTraitApi.hasTrait(this.player, trait);
+		return this.playerApi.hasTrait(trait);
 	}
 
 	private ensureData(): PlayerModData {

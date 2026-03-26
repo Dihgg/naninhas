@@ -16,7 +16,7 @@ declare global {
 	 * Build 42 CharacterStat enum - global accessible from Lua.
 	 * Replaces the legacy direct stat getter/setter methods on Stats.
 	 */
-	const CharacterStat: {
+	var CharacterStat: {
 		readonly ANGER: CharacterStatValue;
 		readonly BOREDOM: CharacterStatValue;
 		readonly DISCOMFORT: CharacterStatValue;
@@ -42,6 +42,30 @@ declare global {
 		readonly ZOMBIE_FEVER: CharacterStatValue;
 		readonly ZOMBIE_INFECTION: CharacterStatValue;
 	};
+
+	interface CharacterTraitRef {
+		getName: () => string;
+		toString: () => string;
+	}
+
+	var CharacterTrait: {
+		get: (this: void, id: unknown) => CharacterTraitRef | undefined
+	};
+	var ResourceLocation: {
+		of: (this: void, id: string) => unknown;
+	};
+
+	interface PZList {
+		size: () => number;
+		get: (index: number) => CharacterTraitRef | string;
+	}
+
+	interface PzCharacterTraits {
+		get: (trait: CharacterTraitRef) => boolean;
+		add: (trait: CharacterTraitRef) => void;
+		remove: (trait: CharacterTraitRef) => void;
+		getKnownTraits: () => PZList;
+	}
 }
 
 declare module "@asledgehammer/pipewrench" {
