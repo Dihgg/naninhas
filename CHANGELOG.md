@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.3.0](https://github.com/dihgg/naninhas/compare/v1.2.1...v1.3.0) (2026-03-26)
+
+
+### Features
+
+* **plushies:** updating plushies to remove build 41 ([7c77d08](https://github.com/dihgg/naninhas/commit/7c77d081251e16ad80b5bddb72ffe789e1a19038))
+* **traits:** transition xp boosts away from custom traits ([7e3a1a7](https://github.com/dihgg/naninhas/commit/7e3a1a754d393002c089610fe14e248efe38d8a6))
+* **traits:** updating traits to remove build 41 ([e5cc41c](https://github.com/dihgg/naninhas/commit/e5cc41c4ba3831e09f6404bf4da99e317f10a89e))
+
 ### [1.2.1](https://github.com/dihgg/naninhas/compare/v1.2.0...v1.2.1) (2026-03-25)
 
 
