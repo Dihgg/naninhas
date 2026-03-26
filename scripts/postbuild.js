@@ -179,19 +179,17 @@ const run = async () => {
 
 		const translationResult = await generateTranslations({
 			sourceRoot: srcPath("src/translations-json"),
-			build41TranslateRoot: distPath("lua/shared/Translate"),
 			build42TranslateRoot: path.join(build42Path, "media", "lua", "shared", "Translate")
 		});
 
 		if (translationResult.generated) {
-			console.info(`Translations generated for Build 41 (.txt) and Build 42 (.json): ${translationResult.fileCount} files.`);
+			console.info(`Translations generated for Build 42 (.json): ${translationResult.fileCount} files.`);
 		} else {
-			await copyFolder(srcPath("src/translations"), distPath("lua/shared/Translate"));
 			await copyFolder(
 				srcPath("src/translations"),
 				path.join(build42Path, "media", "lua", "shared", "Translate")
 			);
-			console.info("No src/translations-json found; fallback copy from src/translations completed for Build 41 and Build 42.");
+			console.info("No src/translations-json found; fallback copy from src/translations completed for Build 42.");
 		}
 	} catch (err) {
 		console.error("Error copying files:", err);
