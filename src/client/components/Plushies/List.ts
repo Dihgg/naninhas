@@ -1,7 +1,6 @@
 
 import { IsoPlayer } from "@asledgehammer/pipewrench";
 import { Plushie } from "./Plushie";
-import { increaseEndurance, reduceBoredom, reduceFatigue, reducePanic } from "./StatsCompat";
 
 export class BorisBadger extends Plushie {
 	constructor(player: IsoPlayer) {
@@ -128,7 +127,7 @@ export class Spiffo extends Plushie {
 	}
 	update() {
 		super.update();
-		increaseEndurance(this.player.getStats(), 0.1);
+		this.player.increaseEndurance(0.1);
 	}
 }
 
@@ -184,10 +183,9 @@ export class SpiffoPlushieRainbow extends Plushie {
 	}
 	update() {
 		super.update();
-		const stats = this.player.getStats();
-		reduceBoredom(stats, 0.5);
-		increaseEndurance(stats, 0.5);
-		reduceFatigue(stats, 0.5);
+		this.player.reduceBoredom(0.5);
+		this.player.increaseEndurance(0.5);
+		this.player.reduceFatigue(0.5);
 	}
 }
 
@@ -200,7 +198,7 @@ export class SpiffoSanta extends Plushie {
 	}
 	public update() {
 		super.update();
-		reduceBoredom(this.player.getStats(), 0.5);
+		this.player.reduceBoredom(0.5);
 	}
 }
 
@@ -234,7 +232,7 @@ export class ToyBear extends Plushie {
 	}
 	update() {
 		super.update();
-		reducePanic(this.player.getStats(), 0.5);
+		this.player.reducePanic(0.5);
 	}
 }
 
@@ -247,6 +245,6 @@ export class ToyBearSmall extends Plushie {
 	}
 	update() {
 		super.update();
-		reducePanic(this.player.getStats(), 0.1);
+		this.player.reducePanic(0.1);
 	}
 }
