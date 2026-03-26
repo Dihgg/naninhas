@@ -1,113 +1,63 @@
 import type { IsoPlayer } from "@asledgehammer/pipewrench";
-import { getVersion } from "@shared/utils";
-import { CharacterTraitApi } from "./CharacterTraitApi";
-
-type Stats = ReturnType<IsoPlayer["getStats"]>;
-type CharacterStatArgument = Parameters<Stats["add"]>[0];
-
-type RuntimeCharacterStatApi = {
-	readonly BOREDOM?: CharacterStatArgument;
-	readonly ENDURANCE?: CharacterStatArgument;
-	readonly FATIGUE?: CharacterStatArgument;
-	readonly PANIC?: CharacterStatArgument;
-};
+import { CharacterTraitApi } from "@shared/components/CharacterTraitApi";
 
 /**
- * Wrapper around IsoPlayer that centralizes version-aware player operations.
+ * Wrapper around IsoPlayer that centralizes Build 42 player operations.
  */
 export class PlayerApi {
-	private readonly version = getVersion();
-
-	constructor(private readonly player: IsoPlayer) {}
+	constructor(private readonly _player: IsoPlayer) {}
 
 	/** Returns the underlying Project Zomboid player. */
-	public get raw(): IsoPlayer {
-		return this.player;
+	public get player(): IsoPlayer {
+		return this._player;
 	}
 
 	/** Returns the underlying XP tracker. */
 	public getXp(): ReturnType<IsoPlayer["getXp"]> {
-		return this.player.getXp();
+		return this._player.getXp();
 	}
 
 	/** Returns the player's mod data table. */
 	public getModData(): ReturnType<IsoPlayer["getModData"]> {
-		return this.player.getModData();
+		return this._player.getModData();
 	}
 
 	/** Returns whether the player currently has the given trait. */
 	public hasTrait(traitId: string): boolean {
-		return CharacterTraitApi.hasTrait(this.player, traitId);
+		return CharacterTraitApi.hasTrait(this._player, traitId);
 	}
 
 	/** Adds a trait to the player. */
 	public addTrait(traitId: string): void {
-		CharacterTraitApi.addTrait(this.player, traitId);
+		CharacterTraitApi.addTrait(this._player, traitId);
 	}
 
 	/** Removes a trait from the player. */
 	public removeTrait(traitId: string): void {
-		CharacterTraitApi.removeTrait(this.player, traitId);
+		CharacterTraitApi.removeTrait(this._player, traitId);
 	}
 
-	/** Reduces boredom while honoring the active game build API. */
+	/** Reduces boredom using Build 42 CharacterStat API. */
 	public reduceBoredom(amount: number): void {
-		const stats = this.player.getStats();
-		const characterStats = this.getCharacterStatApi();
-
-		if (this.canUseCharacterStats() && characterStats?.BOREDOM) {
-			stats.remove(characterStats.BOREDOM, amount);
-			return;
-		}
-
-		stats.setBoredom(Math.max(0, stats.getBoredom() - amount));
+		const stats = this._player.getStats();
+		stats.remove(CharacterStat.BOREDOM, amount);
 	}
 
-	/** Increases endurance while honoring the active game build API. */
+	/** Increases endurance using Build 42 CharacterStat API. */
 	public increaseEndurance(amount: number): void {
-		const stats = this.player.getStats();
-		const characterStats = this.getCharacterStatApi();
-
-		if (this.canUseCharacterStats() && characterStats?.ENDURANCE) {
-			stats.add(characterStats.ENDURANCE, amount);
-			return;
-		}
-
-		stats.setEndurance(Math.min(1, stats.getEndurance() + amount));
+		const stats = this._player.getStats();
+		stats.add(CharacterStat.ENDURANCE, amount);
 	}
 
-	/** Reduces fatigue while honoring the active game build API. */
+	/** Reduces fatigue using Build 42 CharacterStat API. */
 	public reduceFatigue(amount: number): void {
-		const stats = this.player.getStats();
-		const characterStats = this.getCharacterStatApi();
-
-		if (this.canUseCharacterStats() && characterStats?.FATIGUE) {
-			stats.remove(characterStats.FATIGUE, amount);
-			return;
-		}
-
-		stats.setFatigue(Math.max(0, stats.getFatigue() - amount));
+		const stats = this._player.getStats();
+		stats.remove(CharacterStat.FATIGUE, amount);
 	}
 
-	/** Reduces panic, and fear on Build 41, while honoring the active game build API. */
+	/** Reduces panic using Build 42 CharacterStat API. */
 	public reducePanic(amount: number): void {
-		const stats = this.player.getStats();
-		const characterStats = this.getCharacterStatApi();
-
-		if (this.canUseCharacterStats() && characterStats?.PANIC) {
-			stats.remove(characterStats.PANIC, amount);
-			return;
-		}
-
-		stats.setFear(Math.max(0, stats.getFear() - amount));
-		stats.setPanic(Math.max(0, stats.getPanic() - amount));
-	}
-
-	private canUseCharacterStats(): boolean {
-		return this.version.major >= 42 && this.getCharacterStatApi() !== undefined;
-	}
-
-	private getCharacterStatApi(): RuntimeCharacterStatApi | undefined {
-		return (globalThis as unknown as { CharacterStat?: RuntimeCharacterStatApi }).CharacterStat;
+		const stats = this._player.getStats();
+		stats.remove(CharacterStat.PANIC, amount);
 	}
 }
