@@ -148,6 +148,23 @@ describe("Plushie", () => {
 		expect(addXpMultiplier).toHaveBeenNthCalledWith(2, Perks.Woodwork, 2, 0, 0);
 	});
 
+	it("Should skip applying multiplier when persisted boost already matches target", () => {
+		const player = mockPlayer(false, {
+			addedTraits: [],
+			suppressedTraits: [],
+			xpBoosts: { "mocked:Woodwork": 1 }
+		});
+		const plushie = new TestPlushie({
+			player,
+			name: "mocked",
+			xpBoostsToAdd: [{ perk: Perks.Woodwork as Perk, value: 1 }]
+		});
+
+		plushie.subscribe();
+
+		expect(addXpMultiplier).not.toHaveBeenCalled();
+	});
+
 	describe("Player does not have the Trait", () => {
 
 		it("Should add trait if player does not have it", () => {

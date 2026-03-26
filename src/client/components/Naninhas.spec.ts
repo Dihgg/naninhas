@@ -61,7 +61,7 @@ describe("Naninhas.class", () => {
 				.mockReturnValueOnce(undefined) // First call returns undefined, meaning no plushie is attached
 				.mockReturnValueOnce(mock<Plushie>({ name: "SpiffoSanta" })); // In second call, it finds the plushie
 			const naninhas = new Naninhas(player, [
-				mock({ name: "SpiffoSanta" }) /*, mock({ name: "BorisBadger" }) */
+				mock({ name: "SpiffoSanta" })
 			]);
 			naninhas.update();
 			expect(Subject.prototype.unsubscribe).toHaveBeenCalledWith("SpiffoSanta");
