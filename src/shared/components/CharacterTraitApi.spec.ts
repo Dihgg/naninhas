@@ -1,5 +1,5 @@
 import type { IsoPlayer } from "@asledgehammer/pipewrench";
-import { CharacterTraitApi } from "./CharacterTraitApi";
+import { CharacterTraitApi } from "@shared/components/CharacterTraitApi";
 
 describe("CharacterTraitApi", () => {
 	const runtimeTrait = {
@@ -43,6 +43,13 @@ describe("CharacterTraitApi", () => {
 	});
 
 	it("falls back to known-traits iteration when direct lookup is unavailable", () => {
+		// Don't resolve the trait so it falls back to knownTraits
+		(globalThis as unknown as {
+			CharacterTrait?: { get: (id: unknown) => undefined };
+		}).CharacterTrait = {
+			get: jest.fn(() => undefined),
+		};
+
 		const player = {
 			getCharacterTraits: () => ({
 				getKnownTraits: () => ({
@@ -69,47 +76,36 @@ describe("CharacterTraitApi", () => {
 		expect(remove).toHaveBeenCalledWith(runtimeTrait);
 	});
 
-	it("falls back to runtimePlayer.hasTrait when CharacterTraits is unavailable", () => {
-		const hasTrait = jest.fn(() => true);
-		const player = {
-			hasTrait,
-		} as unknown as IsoPlayer;
-
-		expect(CharacterTraitApi.hasTrait(player, "Naninhas:mockedTrait")).toBe(true);
-		expect(hasTrait).toHaveBeenCalledWith(runtimeTrait);
-	});
-
-	it("falls back to legacy HasTrait when runtime trait resolution fails", () => {
+	it("returns false when runtime trait resolution fails", () => {
 		(globalThis as unknown as {
 			CharacterTrait?: { get: (id: unknown) => undefined };
 		}).CharacterTrait = {
 			get: jest.fn(() => undefined),
 		};
 
-		const HasTrait = jest.fn(() => true);
 		const player = {
-			HasTrait,
+			getCharacterTraits: () => ({
+				getKnownTraits: () => ({
+					size: () => 0,
+				}),
+			}),
 		} as unknown as IsoPlayer;
-
-		expect(CharacterTraitApi.hasTrait(player, "Organized")).toBe(true);
-		expect(HasTrait).toHaveBeenCalledWith("Organized");
-	});
-
-	it("returns false when no trait APIs are available", () => {
-		(globalThis as unknown as {
-			CharacterTrait?: { get: (id: unknown) => undefined };
-		}).CharacterTrait = {
-			get: jest.fn(() => undefined),
-		};
-
-		const player = {} as IsoPlayer;
 		expect(CharacterTraitApi.hasTrait(player, "Organized")).toBe(false);
 	});
 
 	it("returns false when knownTraits does not provide size/get", () => {
+		// Don't resolve the trait so it tries the fallback
+		(globalThis as unknown as {
+			CharacterTrait?: { get: (id: unknown) => undefined };
+		}).CharacterTrait = {
+			get: jest.fn(() => undefined),
+		};
+
 		const player = {
 			getCharacterTraits: () => ({
-				getKnownTraits: () => ({}),
+				getKnownTraits: () => ({
+					size: () => 0, // Empty list - no traits to iterate
+				}),
 			}),
 		} as unknown as IsoPlayer;
 
@@ -117,11 +113,19 @@ describe("CharacterTraitApi", () => {
 	});
 
 	it("matches known trait IDs using toString normalization", () => {
+		// Don't resolve the trait so it falls back to knownTraits matching
+		(globalThis as unknown as {
+			CharacterTrait?: { get: (id: unknown) => undefined };
+		}).CharacterTrait = {
+			get: jest.fn(() => undefined),
+		};
+
 		const player = {
 			getCharacterTraits: () => ({
 				getKnownTraits: () => ({
 					size: () => 1,
 					get: () => ({
+						getName: jest.fn(() => null),
 						toString: () => "base:naninhas:mockedtrait",
 					}),
 				}),
@@ -131,7 +135,7 @@ describe("CharacterTraitApi", () => {
 		expect(CharacterTraitApi.hasTrait(player, "Naninhas:mockedtrait")).toBe(true);
 	});
 
-	it("uses legacy trait collection when runtime trait object cannot be resolved", () => {
+	it("does not add/remove when runtime trait object cannot be resolved", () => {
 		(globalThis as unknown as {
 			CharacterTrait?: { get: (id: unknown) => undefined };
 		}).CharacterTrait = {
@@ -141,18 +145,95 @@ describe("CharacterTraitApi", () => {
 		const add = jest.fn();
 		const remove = jest.fn();
 		const player = {
-			getTraits: () => ({ add, remove }),
+			getCharacterTraits: () => ({ add, remove }),
 		} as unknown as IsoPlayer;
 
 		CharacterTraitApi.addTrait(player, "Organized");
 		CharacterTraitApi.removeTrait(player, "Organized");
 
-		expect(add).toHaveBeenCalledWith("Organized");
-		expect(remove).toHaveBeenCalledWith("Organized");
+		expect(add).not.toHaveBeenCalled();
+		expect(remove).not.toHaveBeenCalled();
 	});
 
-	it("returns undefined trait collection when player has no getTraits", () => {
-		const player = {} as IsoPlayer;
-		expect(CharacterTraitApi.getTraitCollection(player)).toBeUndefined();
+	it("matches string trait IDs from known traits", () => {
+		(globalThis as unknown as {
+			CharacterTrait?: { get: (id: unknown) => undefined };
+		}).CharacterTrait = {
+			get: jest.fn(() => undefined),
+		};
+
+		const player = {
+			getCharacterTraits: () => ({
+				getKnownTraits: () => ({
+					size: () => 1,
+					get: () => "naninhas:mockedtrait",
+				}),
+			}),
+		} as unknown as IsoPlayer;
+
+		expect(CharacterTraitApi.hasTrait(player, "Naninhas:mockedTrait")).toBe(true);
+	});
+
+	it("matches trait by getName() when available", () => {
+		(globalThis as unknown as {
+			CharacterTrait?: { get: (id: unknown) => undefined };
+		}).CharacterTrait = {
+			get: jest.fn(() => undefined),
+		};
+
+		const player = {
+			getCharacterTraits: () => ({
+				getKnownTraits: () => ({
+					size: () => 1,
+					get: () => ({
+						getName: jest.fn(() => "BASE:Organized"),
+						toString: jest.fn(() => ""),
+					}),
+				}),
+			}),
+		} as unknown as IsoPlayer;
+
+		expect(CharacterTraitApi.hasTrait(player, "Organized")).toBe(true);
+	});
+
+	it("returns false when trait object getName returns null", () => {
+		(globalThis as unknown as {
+			CharacterTrait?: { get: (id: unknown) => undefined };
+		}).CharacterTrait = {
+			get: jest.fn(() => undefined),
+		};
+
+		const player = {
+			getCharacterTraits: () => ({
+				getKnownTraits: () => ({
+					size: () => 1,
+					get: () => ({
+						getName: jest.fn(() => null),
+						toString: jest.fn(() => ""),
+					}),
+				}),
+			}),
+		} as unknown as IsoPlayer;
+
+		expect(CharacterTraitApi.hasTrait(player, "UnknownTrait")).toBe(false);
+	});
+
+	it("returns false when known trait is null/undefined", () => {
+		(globalThis as unknown as {
+			CharacterTrait?: { get: (id: unknown) => undefined };
+		}).CharacterTrait = {
+			get: jest.fn(() => undefined),
+		};
+
+		const player = {
+			getCharacterTraits: () => ({
+				getKnownTraits: () => ({
+					size: () => 1,
+					get: () => null,
+				}),
+			}),
+		} as unknown as IsoPlayer;
+
+		expect(CharacterTraitApi.hasTrait(player, "AnyTrait")).toBe(false);
 	});
 });

@@ -1,6 +1,6 @@
 import { mock } from "jest-mock-extended";
-import { Observer } from "./Observer";
-import { Subject } from "./Subject";
+import { Observer } from "@client/components/Observer/Observer";
+import { Subject } from "@client/components/Observer/Subject";
 
 describe("Subject", () => {
 	const observer = mock<Observer>({ name: "mock" });
