@@ -1,12 +1,14 @@
 import type { IsoPlayer } from "@asledgehammer/pipewrench";
-import { getVersion } from "@shared/utils";
+import { getVersion, isB42 } from "@shared/utils";
 import { CharacterTraitApi } from "./CharacterTraitApi";
 
 jest.mock("@shared/utils", () => ({
-	getVersion: jest.fn()
+	getVersion: jest.fn(),
+	isB42: jest.fn()
 }));
 
 const mockedGetVersion = getVersion as jest.MockedFunction<typeof getVersion>;
+const mockedIsB42 = isB42 as jest.MockedFunction<typeof isB42>;
 
 describe("CharacterTraitApi", () => {
 	const runtimeTrait = {
@@ -16,6 +18,7 @@ describe("CharacterTraitApi", () => {
 
 	beforeEach(() => {
 		mockedGetVersion.mockReturnValue({ major: 42, minor: 0 });
+		mockedIsB42.mockReturnValue(true);
 		runtimeTrait.getName.mockClear();
 		runtimeTrait.toString.mockClear();
 
@@ -79,6 +82,7 @@ describe("CharacterTraitApi", () => {
 
 	it("falls back to runtimePlayer.hasTrait when CharacterTraits is unavailable", () => {
 		mockedGetVersion.mockReturnValue({ major: 41, minor: 78 });
+		mockedIsB42.mockReturnValue(false);
 		const player = {
 			HasTrait: jest.fn(() => true),
 		} as unknown as IsoPlayer;
@@ -89,6 +93,7 @@ describe("CharacterTraitApi", () => {
 
 	it("falls back to legacy HasTrait when runtime trait resolution fails", () => {
 		mockedGetVersion.mockReturnValue({ major: 41, minor: 78 });
+		mockedIsB42.mockReturnValue(false);
 		(globalThis as unknown as {
 			CharacterTrait?: { get: (id: unknown) => undefined };
 		}).CharacterTrait = {
@@ -106,6 +111,7 @@ describe("CharacterTraitApi", () => {
 
 	it("returns false when no trait APIs are available", () => {
 		mockedGetVersion.mockReturnValue({ major: 41, minor: 78 });
+		mockedIsB42.mockReturnValue(false);
 		(globalThis as unknown as {
 			CharacterTrait?: { get: (id: unknown) => undefined };
 		}).CharacterTrait = {
@@ -143,6 +149,7 @@ describe("CharacterTraitApi", () => {
 
 	it("uses legacy trait collection when runtime trait object cannot be resolved", () => {
 		mockedGetVersion.mockReturnValue({ major: 41, minor: 78 });
+		mockedIsB42.mockReturnValue(false);
 		(globalThis as unknown as {
 			CharacterTrait?: { get: (id: unknown) => undefined };
 		}).CharacterTrait = {

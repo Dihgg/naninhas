@@ -1,87 +1,29 @@
 import type { IsoPlayer } from "@asledgehammer/pipewrench";
-import { getVersion } from "@shared/utils";
+import { isB42 } from "@shared/utils";
 
-type RuntimeCharacterTrait = {
-	getName?: () => string;
-	toString?: () => string;
-};
-
-type RuntimeKnownTraitList = {
-	size?: () => number;
-	get?: (index: number) => RuntimeCharacterTrait | string;
-};
-
-type RuntimeCharacterTraits = {
-	get?: (trait: RuntimeCharacterTrait) => boolean;
-	add?: (trait: RuntimeCharacterTrait) => void;
-	remove?: (trait: RuntimeCharacterTrait) => void;
-	getKnownTraits?: () => RuntimeKnownTraitList;
-};
-
-type RuntimeLegacyTraitCollection = {
-	add?: (trait: string) => void;
-	remove?: (trait: string) => boolean;
-};
-
-type RuntimeCharacterTraitStatic = {
-	get?: (this: void, id: unknown) => RuntimeCharacterTrait;
-};
-
-type RuntimeResourceLocationStatic = {
-	of?: (this: void, id: string) => unknown;
-};
-
-type RuntimePlayer = {
-	getCharacterTraits?: () => RuntimeCharacterTraits;
-	getTraits?: () => RuntimeLegacyTraitCollection;
-	hasTrait?: (trait: RuntimeCharacterTrait) => boolean;
-	HasTrait?: (trait: string) => boolean;
-};
-
+/**
+ * Cross-build trait operations for IsoPlayer.
+ * Uses Build 42 CharacterTrait APIs when available and falls back to legacy trait APIs.
+ */
 export class CharacterTraitApi {
-	private static getRuntimePlayer(player: IsoPlayer): RuntimePlayer {
-		return player as unknown as RuntimePlayer;
-	}
-
-	private static isB42(): boolean {
-		return getVersion().major >= 42;
-	}
-
-	private static getRuntimeCharacterTraitApi(): RuntimeCharacterTraitStatic | undefined {
-		return (globalThis as unknown as { CharacterTrait?: RuntimeCharacterTraitStatic }).CharacterTrait;
-	}
-
-	private static getRuntimeResourceLocationApi(): RuntimeResourceLocationStatic | undefined {
-		return (globalThis as unknown as { ResourceLocation?: RuntimeResourceLocationStatic }).ResourceLocation;
-	}
-
 	private static normalizeTraitId(value: string): string {
 		const normalized = value.trim().toLowerCase();
 		return normalized.startsWith("base:") ? normalized.slice(5) : normalized;
 	}
 
-	private static resolveTrait(traitId: string): RuntimeCharacterTrait | undefined {
-		const runtimeCharacterTraitApi = this.getRuntimeCharacterTraitApi();
-		const resourceLocationOf = this.getRuntimeResourceLocationApi()?.of;
+	private static resolveTrait(traitId: string): PzCharacterTraitRef | undefined {
+		const getTrait = globalThis.CharacterTrait?.get;
+		const makeResourceLocation = globalThis.ResourceLocation?.of;
 
-		if (!runtimeCharacterTraitApi || !resourceLocationOf) {
+		if (!getTrait || !makeResourceLocation) {
 			return undefined;
 		}
 
-		const get = runtimeCharacterTraitApi.get;
-		if (get) {
-			const traitLocation = resourceLocationOf(this.normalizeTraitId(traitId));
-			const traitByLocation = get(traitLocation);
-
-			if (traitByLocation !== undefined) {
-				return traitByLocation;
-			}
-		}
-
-		return undefined;
+		const traitLocation = makeResourceLocation(this.normalizeTraitId(traitId));
+		return getTrait(traitLocation);
 	}
 
-	private static matchesTraitId(trait: RuntimeCharacterTrait | string | undefined, traitId: string): boolean {
+	private static matchesTraitId(trait: PzCharacterTraitRef | string | undefined, traitId: string): boolean {
 		const normalizedTraitId = this.normalizeTraitId(traitId);
 
 		if (!trait) {
@@ -101,7 +43,7 @@ export class CharacterTraitApi {
 		return !!traitString && this.normalizeTraitId(traitString) === normalizedTraitId;
 	}
 
-	private static hasKnownTrait(knownTraits: RuntimeKnownTraitList | undefined, traitId: string): boolean {
+	private static hasKnownTrait(knownTraits: PzKnownTraitList | undefined, traitId: string): boolean {
 		const size = knownTraits?.size?.();
 
 		if (size === undefined || !knownTraits?.get) {
@@ -117,24 +59,19 @@ export class CharacterTraitApi {
 		return false;
 	}
 
-	public static getCharacterTraits(player: IsoPlayer): RuntimeCharacterTraits | undefined {
-		return this.getRuntimePlayer(player).getCharacterTraits?.();
+	/** Returns the Build 42 CharacterTraits container, when available. */
+	public static getCharacterTraits(player: IsoPlayer): PzCharacterTraits | undefined {
+		return player.getCharacterTraits?.() as unknown as PzCharacterTraits | undefined;
 	}
 
-	public static getTraitCollection(player: IsoPlayer): RuntimeLegacyTraitCollection | undefined {
-		const runtimePlayer = player as unknown as RuntimePlayer;
-
-		if (runtimePlayer.getTraits) {
-			return runtimePlayer.getTraits();
-		}
-
-		return undefined;
+	/** Returns the legacy trait collection used by Build 41-style APIs. */
+	public static getTraitCollection(player: IsoPlayer): PzLegacyTraitCollection | undefined {
+		return player.getTraits?.();
 	}
 
+	/** Checks whether a player has the given trait across Build 41 and Build 42 APIs. */
 	public static hasTrait(player: IsoPlayer, traitId: string): boolean {
-		const runtimePlayer = this.getRuntimePlayer(player);
-
-		if (this.isB42()) {
+		if (isB42()) {
 			const characterTraits = this.getCharacterTraits(player);
 			const runtimeTrait = this.resolveTrait(traitId);
 
@@ -142,22 +79,19 @@ export class CharacterTraitApi {
 				return characterTraits.get(runtimeTrait);
 			}
 
-			if (runtimeTrait && runtimePlayer.hasTrait) {
-				return runtimePlayer.hasTrait(runtimeTrait);
-			}
-
-			if (runtimePlayer.HasTrait) {
-				return runtimePlayer.HasTrait(traitId);
+			if (player.HasTrait !== undefined) {
+				return player.HasTrait(traitId);
 			}
 
 			return this.hasKnownTrait(characterTraits?.getKnownTraits?.(), traitId);
 		}
 
-		return runtimePlayer.HasTrait?.(traitId) ?? false;
+		return player.HasTrait?.(traitId) ?? false;
 	}
 
+	/** Adds a trait using Build 42 trait objects or legacy trait collection fallback. */
 	public static addTrait(player: IsoPlayer, traitId: string): void {
-		if (this.isB42()) {
+		if (isB42()) {
 			const characterTraits = this.getCharacterTraits(player);
 			const runtimeTrait = this.resolveTrait(traitId);
 
@@ -170,8 +104,9 @@ export class CharacterTraitApi {
 		this.getTraitCollection(player)?.add?.(traitId);
 	}
 
+	/** Removes a trait using Build 42 trait objects or legacy trait collection fallback. */
 	public static removeTrait(player: IsoPlayer, traitId: string): void {
-		if (this.isB42()) {
+		if (isB42()) {
 			const characterTraits = this.getCharacterTraits(player);
 			const runtimeTrait = this.resolveTrait(traitId);
 
