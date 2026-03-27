@@ -10,16 +10,20 @@ This mod introduces the concept of "naninhas" to AuthenticZ attachable plushies!
 
 Each plushie will give a different bonus when attached to the backpack!
 
-## Translations
+## 🦸‍♀️ Support!
+<hr/>
+<br/>
+<p align="center">
+  <strong>Found this mod fun or useful? You can support its development!</strong>
+</p>
+<p align="center">
+  <a href="https://buymeacoffee.com/dihgg">
+    <img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-support-yellow?logo=buymeacoffee" alt="Buy Me a Coffee">
+  </a>
+</p>
+<hr/>
 
-Translations are maintained in JSON under [src/translations-json](src/translations-json).
-
-During `npm run postbuild`:
-- Build 42 output is generated as `.json` files in `42/media/lua/shared/Translate/<LANG>/<NAMESPACE>.json`
-
-If `src/translations-json` is missing, the script falls back to legacy `src/translations` for Build 42.
-
-## Buffs
+## ✊ Buffs
 
 Each plushie grants a unique bonus when attached to your backpack. Only one plushie can be equipped at a time, and buffs are active while equipped.
 
@@ -48,14 +52,17 @@ Each plushie grants a unique bonus when attached to your backpack. Only one plus
 | **🐻 Toy Bear**             | Reduces Panic and Stress                                                                                                                      |
 | **🐻 Toy Bear (Small)**     | Same as ToyBear but slightly lower effect                                                                                                     |
 
-## Useful links
+## 🌎 Translations
 
--   [Umbrella](https://github.com/asledgehammer/Umbrella) - Lua script code completion for Zomboid API
+Translations are maintained in JSON under [src/translations-json](src/translations-json).
 
-## Stats
+During `npm run postbuild`:
+- Build 42 output is generated as `.json` files in `42/media/lua/shared/Translate/<LANG>/<NAMESPACE>.json`
 
-### Code coverage
+---
 
+## 👩‍💻 Repository Badges
+### Code Coverage
 <table>
   <thead>
     <tr>
