@@ -16,6 +16,11 @@ This mod requires one of the **[Authentic Z](https://steamcommunity.com/sharedfi
 - Authentic Z (full mod)
 - AuthenticZBackpacks+ (only the backpacks)
 
+## Links
+
+- [Steam Workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=3624617298)
+- [GitHub Repository](https://github.com/dihgg/naninhas)
+
 
 ## 🦸‍♀️ Support!
 <hr/>
