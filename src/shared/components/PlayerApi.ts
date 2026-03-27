@@ -5,7 +5,16 @@ import { CharacterTraitApi } from "@shared/components/CharacterTraitApi";
  * Wrapper around IsoPlayer that centralizes Build 42 player operations.
  */
 export class PlayerApi {
-	constructor(private readonly _player: IsoPlayer) {}
+	/** The underlying IsoPlayer instance. */
+	private readonly _player: IsoPlayer;
+	
+	/**
+	 * Creates a new PlayerApi instance for the given player.
+	 * @param _player The IsoPlayer to wrap
+	 */
+	constructor(player: IsoPlayer) {
+		this._player = player;
+	}
 
 	/** Returns the underlying Project Zomboid player. */
 	public get player(): IsoPlayer {

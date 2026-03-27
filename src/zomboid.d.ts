@@ -48,28 +48,32 @@ declare global {
 		toString: () => string;
 	}
 
+	type KnownTraitList = {
+		size(): number;
+		get(index: number): CharacterTraitRef;
+	};
+
 	var CharacterTrait: {
 		get: (this: void, id: unknown) => CharacterTraitRef | undefined
 	};
 	var ResourceLocation: {
 		of: (this: void, id: string) => unknown;
 	};
-
-	interface PZList {
-		size: () => number;
-		get: (index: number) => CharacterTraitRef | string;
-	}
-
-	interface PzCharacterTraits {
-		get: (trait: CharacterTraitRef) => boolean;
-		add: (trait: CharacterTraitRef) => void;
-		remove: (trait: CharacterTraitRef) => void;
-		getKnownTraits: () => PZList;
-	}
 }
 
 declare module "@asledgehammer/pipewrench" {
 	export namespace zombie.characters {
+		interface IsoGameCharacter$CharacterTraits {
+			/** Build 42 overload using CharacterTrait object. */
+			get(trait: CharacterTraitRef): boolean;
+			/** Build 42 overload using CharacterTrait object. */
+			add(trait: CharacterTraitRef): void;
+			/** Build 42 overload using CharacterTrait object. */
+			remove(trait: CharacterTraitRef): void;
+			/** Build 42 API: list of known trait refs/ids. */
+			getKnownTraits(): KnownTraitList;
+		}
+
 		interface Stats {
 			/** Gets the current value of a stat. */
 			get(stat: CharacterStatValue): number;
