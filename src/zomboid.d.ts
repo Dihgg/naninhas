@@ -50,7 +50,7 @@ declare global {
 
 	type KnownTraitList = {
 		size(): number;
-		get(index: number): CharacterTraitRef | string;
+		get(index: number): CharacterTraitRef;
 	};
 
 	var CharacterTrait: {

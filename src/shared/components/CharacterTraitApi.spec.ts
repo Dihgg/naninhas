@@ -155,25 +155,6 @@ describe("CharacterTraitApi", () => {
 		expect(remove).not.toHaveBeenCalled();
 	});
 
-	it("matches string trait IDs from known traits", () => {
-		(globalThis as unknown as {
-			CharacterTrait?: { get: (id: unknown) => undefined };
-		}).CharacterTrait = {
-			get: jest.fn(() => undefined),
-		};
-
-		const player = {
-			getCharacterTraits: () => ({
-				getKnownTraits: () => ({
-					size: () => 1,
-					get: () => "naninhas:mockedtrait",
-				}),
-			}),
-		} as unknown as IsoPlayer;
-
-		expect(CharacterTraitApi.hasTrait(player, "Naninhas:mockedTrait")).toBe(true);
-	});
-
 	it("matches trait by getName() when available", () => {
 		(globalThis as unknown as {
 			CharacterTrait?: { get: (id: unknown) => undefined };
@@ -218,22 +199,4 @@ describe("CharacterTraitApi", () => {
 		expect(CharacterTraitApi.hasTrait(player, "UnknownTrait")).toBe(false);
 	});
 
-	it("returns false when known trait is null/undefined", () => {
-		(globalThis as unknown as {
-			CharacterTrait?: { get: (id: unknown) => undefined };
-		}).CharacterTrait = {
-			get: jest.fn(() => undefined),
-		};
-
-		const player = {
-			getCharacterTraits: () => ({
-				getKnownTraits: () => ({
-					size: () => 1,
-					get: () => null,
-				}),
-			}),
-		} as unknown as IsoPlayer;
-
-		expect(CharacterTraitApi.hasTrait(player, "AnyTrait")).toBe(false);
-	});
 });

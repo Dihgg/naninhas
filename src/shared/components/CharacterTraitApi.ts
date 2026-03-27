@@ -20,29 +20,18 @@ export class CharacterTraitApi {
 	 * @returns The CharacterTraitRef object if found, otherwise undefined
 	 */
 	private static resolveTrait(traitId: string): CharacterTraitRef | undefined {
-		const getTrait = CharacterTrait.get;
-		const makeResourceLocation = globalThis.ResourceLocation.of;
-
-		const traitLocation = makeResourceLocation(this.normalizeTraitId(traitId));
-		return getTrait(traitLocation);
+		const traitLocation = ResourceLocation.of(this.normalizeTraitId(traitId));
+		return CharacterTrait.get(traitLocation);
 	}
 
 	/**
-	 * Checks if a given trait matches the provided trait ID, accounting for both string and CharacterTraitRef formats.
+	 * Checks if a given Build 42 CharacterTraitRef matches the provided trait ID.
 	 * @param trait The trait to check
 	 * @param traitId The trait ID to match against
 	 * @returns True if the trait matches the trait ID, otherwise false
 	 */
-	private static matchesTraitId(trait: CharacterTraitRef | string, traitId: string): boolean {
+	private static matchesTraitId(trait: CharacterTraitRef, traitId: string): boolean {
 		const normalizedTraitId = this.normalizeTraitId(traitId);
-
-		if (!trait) {
-			return false;
-		}
-
-		if (typeof trait === "string") {
-			return this.normalizeTraitId(trait) === normalizedTraitId;
-		}
 
 		const traitName = trait.getName();
 		if (traitName && this.normalizeTraitId(traitName) === normalizedTraitId) {
