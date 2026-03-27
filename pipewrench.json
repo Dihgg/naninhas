@@ -1,14 +1,15 @@
 {
 	"modInfo": {
 		"id": "Naninhas",
-		"name": "Naninhas",
+		"name": "Naninhas - Attachable plushies buffs",
 		"authors": ["Diego Lopes"],
 		"description": "Adds gameplay bonuses to Authentic Z backpack plushies.<LINE>Equip a plushie to gain traits, stat effects, or XP boosts while it<LINE> is attached.<LINE>Build 42 only.",
 		"url": "https://github.com/Dihgg/naninhas",
 		"icon": "./logo.png",
 		"logo": "./logo.png",
 		"poster": "./poster.png",
-		"require": ["Authentic Z - Current"],
+		"require": [],
+		"category": "items",
 		"tags": ["items"]
 	},
 	"modelsDir": "./src/models",

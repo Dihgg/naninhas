@@ -40,7 +40,9 @@ Attach a plushie to your backpack and gain its effect while equipped.
 [hr][/hr]
 [h2]📦 Requirements[/h2]
 [list]
-[*][b]Authentic Z - Current[/b] is required
+[*]This mod requires one of the [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2335368829][b]Authentic Z[/b][/url] mods that allows attachable items, either:
+[*][b]Authentic Z - Current[/b] (full mod)
+[*][b]AuthenticZBackpacks+[/b] (only the backpacks)
 [/list]
 
 [hr][/hr]
@@ -53,8 +55,9 @@ Attach a plushie to your backpack and gain its effect while equipped.
 [hr][/hr]
 [h2]☕ Support Development[/h2]
 If you want to support the ongoing development of this mod and future updates, you can buy me a coffee.
+[p]
 [url=https://buymeacoffee.com/dihgg][img]https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExa3ByZm5qejRkdmxqcGlsZ3Vha3l3eHR1ZXVubWUyemhtZzlwd3AxYyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/RETzc1mj7HpZPuNf3e/giphy.gif[/img][/url]
-
+[/p]
 [hr][/hr]
 [h2]💬 Feedback[/h2]
 If you enjoy the mod, a thumbs up/favorite helps a lot. Suggestions and bug reports are always welcome.
