@@ -40,7 +40,9 @@ Prenda um plushie na sua mochila e ganhe seu efeito enquanto ele estiver equipad
 [hr][/hr]
 [h2]📦 Requisitos[/h2]
 [list]
-[*][b]Authentic Z - Current[/b] é obrigatório
+[*]Este mod requer um dos mods do [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2335368829][b]Authentic Z[/b][/url] que permitem itens anexáveis, sendo:
+[*][b]Authentic Z - Current[/b] (mod completo)
+[*][b]AuthenticZBackpacks+[/b] (somente mochilas)
 [/list]
 
 [hr][/hr]
@@ -53,8 +55,9 @@ Prenda um plushie na sua mochila e ganhe seu efeito enquanto ele estiver equipad
 [hr][/hr]
 [h2]☕ Apoie o Desenvolvimento[/h2]
 Se você quiser apoiar o desenvolvimento contínuo deste mod e as próximas atualizações, você pode me pagar um café.
+[p]
 [url=https://buymeacoffee.com/dihgg][img]https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExa3ByZm5qejRkdmxqcGlsZ3Vha3l3eHR1ZXVubWUyemhtZzlwd3AxYyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/RETzc1mj7HpZPuNf3e/giphy.gif[/img][/url]
-
+[/p]
 [hr][/hr]
 [h2]💬 Feedback[/h2]
 Se você gostou do mod, um joinha/favorito ajuda bastante. Sugestões e relatos de bugs são sempre bem-vindos.
