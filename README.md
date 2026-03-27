@@ -10,6 +10,13 @@ This mod introduces the concept of "naninhas" to AuthenticZ attachable plushies!
 
 Each plushie will give a different bonus when attached to the backpack!
 
+## Requirements
+
+This mod requires one of the **[Authentic Z](https://steamcommunity.com/sharedfiles/filedetails/?id=2335368829)** mods that allows attachable items, either:
+- Authentic Z (full mod)
+- AuthenticZBackpacks+ (only the backpacks)
+
+
 ## 🦸‍♀️ Support!
 <hr/>
 <br/>
