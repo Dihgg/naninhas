@@ -49,7 +49,7 @@ export class CharacterTraitApi {
 		return false;
 	}
 
-	/** Returns the Build 42 CharacterTraits container, when available. */
+	/** Returns the Build 42 CharacterTraits container. */
 	public static getCharacterTraits(player: IsoPlayer): PzCharacterTraits {
 		return player.getCharacterTraits() as unknown as PzCharacterTraits;
 	}
