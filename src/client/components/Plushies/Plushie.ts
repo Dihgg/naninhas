@@ -3,6 +3,8 @@ import { PlayerApi } from "@shared/components/PlayerApi";
 import { ModData } from "@client/components/Plushies/ModData";
 import { Observer } from "@client/components/Observer/Observer";
 import type { PerkBoost, PlayerModData, PlushieProps } from "types";
+import { triggerEvent } from "@asledgehammer/pipewrench";
+import { Events } from "@constants";
 
 // TODO: Apply the LuaEventManager to allow other mods to interact with this one
 // import { LuaEventManager } from "@asledgehammer/pipewrench"
@@ -51,7 +53,13 @@ export abstract class Plushie implements Observer {
 	 * This ensures the traits data are saved in the `player.getModData()`
 	 * Not all Plushies may need to implement this if they don't have any time-based effects.
 	 */
-	update() {}
+	update() {
+		// Calls the event with the current traits to allow other mods to react accordingly
+		triggerEvent(Events.Update, {
+			name: this.name,
+			...this.data
+		});
+	}
 
 	/**
 	 * Applies/removes plushie XP multipliers while preserving any pre-existing player multipliers.
@@ -105,6 +113,12 @@ export abstract class Plushie implements Observer {
 
 		// Apply XP boosts for this Plushie (if any)
 		this.applyBoosts(true);
+
+		// Calls the event with the current traits to allow other mods to react accordingly
+		triggerEvent(Events.Equipped, {
+			name: this.name,
+			...this.data
+		});
 	}
 
 	/**
@@ -132,6 +146,12 @@ export abstract class Plushie implements Observer {
 
 		// Remove XP boosts for this Plushie (if any)
 		this.applyBoosts(false);
+		
+		// Calls the event with the current traits to allow other mods to react accordingly
+		triggerEvent(Events.Unequipped, {
+			name: this.name,
+			...this.data
+		});
 	}
 
 	/**

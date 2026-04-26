@@ -72,6 +72,30 @@ During `npm run postbuild`:
 - Build 42 output is generated as `.json` files in `42/media/lua/shared/Translate/<LANG>/<NAMESPACE>.json`
 
 ---
+## 👩‍💻 API
+Other mods can interact with **Naninhas** by using the `Events`.
+
+### Equipped / Unequipped / Update
+Each Plushie will trigger custom events that can be listened.
+```lua
+  Events.NaninhasEquipped.Add(function(data) { });
+
+  Events.NaninhasUnequipped.Add(function(data) { });
+
+  Events.NaninhasUpdate.Add(function(data) { });
+```
+
+The `data` structure is the following
+
+| Property | Type | Description |
+|----------|-------|------------|
+| data.name | `string` | The plushie name |
+| addedTraits | `Array<string>` | Array of Traits the plushie grants |
+| suppressedTraits | `Array<string>` | Array of Traits the plushie will suppress. |
+| xpBoosts | `Table<string,number>` | A Set of Perks and boosts (e.g { perk = Perks.Aiming , value = 5 }) |
+
+
+---
 
 ## 👩‍💻 Repository Badges
 ### Code Coverage

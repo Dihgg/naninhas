@@ -1,9 +1,13 @@
 import { mock } from "jest-mock-extended";
 import { Plushie } from "@client/components/Plushies/Plushie";
-import { IsoPlayer, Perks } from "@asledgehammer/pipewrench";
+import { IsoPlayer, Perks, triggerEvent } from "@asledgehammer/pipewrench";
 import type { Perk } from "@asledgehammer/pipewrench";
+import { Events } from "@constants";
+jest.mock("@asledgehammer/pipewrench");
+jest.mock("@asledgehammer/pipewrench-events");
 
 describe("Plushie", () => {
+    const triggerEventMock = triggerEvent as jest.MockedFunction<typeof triggerEvent>;
 	const addXpMultiplier = jest.fn();
 	const getMultiplier = jest.fn();
 	const addTraitFn = jest.fn();
@@ -15,6 +19,7 @@ describe("Plushie", () => {
 	};
 
 	beforeEach(() => {
+		triggerEventMock.mockReset();
 		addXpMultiplier.mockReset();
 		getMultiplier.mockReset();
 		getMultiplier.mockReturnValue(0);
@@ -84,6 +89,9 @@ describe("Plushie", () => {
 		
 		plushie.subscribe();
 		expect(addXpMultiplier).toHaveBeenCalledWith(Perks.Woodwork, 3, 0, 0);
+		expect(triggerEventMock).toHaveBeenCalledWith(Events.Equipped, expect.objectContaining({
+			name: "mocked"
+		}));
 	});
 
 	it("Allows calling update directly without throwing", () => {
@@ -94,6 +102,9 @@ describe("Plushie", () => {
 		});
 
 		expect(() => plushie.update()).not.toThrow();
+		expect(triggerEventMock).toHaveBeenCalledWith(Events.Update, expect.objectContaining({
+			name: "mocked"
+		}));
 	});
 
 	it("Uses the default boost behavior when 'shouldApply' argument is omitted", () => {
@@ -146,6 +157,9 @@ describe("Plushie", () => {
 		plushie.subscribe();
 		plushie.unsubscribe();
 		expect(addXpMultiplier).toHaveBeenNthCalledWith(2, Perks.Woodwork, 2, 0, 0);
+		expect(triggerEventMock).toHaveBeenNthCalledWith(2, Events.Unequipped, expect.objectContaining({
+			name: "mocked"
+		}));
 	});
 
 	it("Should skip applying multiplier when persisted boost already matches target", () => {
