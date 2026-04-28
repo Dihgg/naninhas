@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.4.0](https://github.com/dihgg/naninhas/compare/v1.3.4...v1.4.0) (2026-04-28)
+
+
+### Features
+
+* **events:** adding type for EventData ([164fc39](https://github.com/dihgg/naninhas/commit/164fc39e2a43a1b65e636a05dd159a26f93c7ea5))
+* **events:** create triggers for custom events ([cd5ab90](https://github.com/dihgg/naninhas/commit/cd5ab90687c2db1258b0d1dbe45dc0335344ee7c))
+
 ### [1.3.4](https://github.com/dihgg/naninhas/compare/v1.3.3...v1.3.4) (2026-03-27)
 
 ### [1.3.3](https://github.com/dihgg/naninhas/compare/v1.3.2...v1.3.3) (2026-03-27)
