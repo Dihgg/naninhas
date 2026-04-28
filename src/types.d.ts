@@ -27,3 +27,7 @@ export type PlayerModData = {
 	suppressedTraits: string[];
 	xpBoosts: Record<string, number>;
 };
+
+export type EventData = PlayerModData & {
+	name: string;
+};

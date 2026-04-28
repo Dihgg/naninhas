@@ -16,6 +16,11 @@ This mod requires one of the **[Authentic Z](https://steamcommunity.com/sharedfi
 - Authentic Z (full mod)
 - AuthenticZBackpacks+ (only the backpacks)
 
+## Links
+
+- [Steam Workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=3624617298)
+- [GitHub Repository](https://github.com/dihgg/naninhas)
+
 
 ## 🦸‍♀️ Support!
 <hr/>
@@ -65,6 +70,45 @@ Translations are maintained in JSON under [src/translations-json](src/translatio
 
 During `npm run postbuild`:
 - Build 42 output is generated as `.json` files in `42/media/lua/shared/Translate/<LANG>/<NAMESPACE>.json`
+
+---
+## 👩‍💻 API
+Other mods can interact with **Naninhas** by using the `Events`.
+
+### Equipped / Unequipped / Update
+Each Plushie will trigger custom events that can be listened.
+```lua
+  Events.NaninhasEquipped.Add(function(data) { });
+
+  Events.NaninhasUnequipped.Add(function(data) { });
+
+  Events.NaninhasUpdate.Add(function(data) { });
+```
+
+On Typescript, this is how it would looks like:
+
+```typescript
+
+import * as Events from "@asledgehammer/pipewrench-events";
+import { EventsEnum } from "@constants";
+import type { EventData } from "types";
+
+new Events.EventEmitter<(data: EventData) => void>(EventsEnum.Update)
+  .addListener((data) => {
+	  print(`Updating Plushie ${data.name} with traits:`, tostring(data.addedTraits), "and XP boosts:", tostring(data.xpBoosts));
+  }
+);
+```
+
+The `data` structure is the following
+
+| Property | Type | Description |
+|----------|-------|------------|
+| data.name | `string` | The plushie name |
+| addedTraits | `Array<string>` | Array of Traits the plushie grants |
+| suppressedTraits | `Array<string>` | Array of Traits the plushie will suppress. |
+| xpBoosts | `Table<string,number>` | A Set of Perks and boosts (e.g { perk = Perks.Aiming , value = 5 }) |
+
 
 ---
 

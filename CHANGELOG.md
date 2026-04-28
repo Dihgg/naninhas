@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.3.4](https://github.com/dihgg/naninhas/compare/v1.3.3...v1.3.4) (2026-03-27)
+
+### [1.3.3](https://github.com/dihgg/naninhas/compare/v1.3.2...v1.3.3) (2026-03-27)
+
+
+### Bug Fixes
+
+* **docs:** fixing broken text on mod description ([6c60a27](https://github.com/dihgg/naninhas/commit/6c60a274f8f528e0c4d696ac5a574975ddeaaf26))
+
 ### [1.3.2](https://github.com/dihgg/naninhas/compare/v1.3.1...v1.3.2) (2026-03-27)
 
 ### [1.3.1](https://github.com/dihgg/naninhas/compare/v1.3.0...v1.3.1) (2026-03-27)
