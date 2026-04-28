@@ -5,6 +5,7 @@ import { Observer } from "@client/components/Observer/Observer";
 import type { PerkBoost, PlayerModData, PlushieProps } from "types";
 import { triggerEvent } from "@asledgehammer/pipewrench";
 import { Events } from "@constants";
+import { EventsEnum } from "@constants";
 
 // TODO: Apply the LuaEventManager to allow other mods to interact with this one
 // import { LuaEventManager } from "@asledgehammer/pipewrench"
@@ -55,7 +56,7 @@ export abstract class Plushie implements Observer {
 	 */
 	update() {
 		// Calls the event with the current traits to allow other mods to react accordingly
-		triggerEvent(Events.Update, {
+		triggerEvent(EventsEnum.Update, {
 			name: this.name,
 			...this.data
 		});
@@ -115,7 +116,7 @@ export abstract class Plushie implements Observer {
 		this.applyBoosts(true);
 
 		// Calls the event with the current traits to allow other mods to react accordingly
-		triggerEvent(Events.Equipped, {
+		triggerEvent(EventsEnum.Equipped, {
 			name: this.name,
 			...this.data
 		});
@@ -148,7 +149,7 @@ export abstract class Plushie implements Observer {
 		this.applyBoosts(false);
 		
 		// Calls the event with the current traits to allow other mods to react accordingly
-		triggerEvent(Events.Unequipped, {
+		triggerEvent(EventsEnum.Unequipped, {
 			name: this.name,
 			...this.data
 		});

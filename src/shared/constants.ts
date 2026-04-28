@@ -1,4 +1,4 @@
-export enum Events {
+export enum EventsEnum {
     /** Event fired when a plushie is equipped. */
     Equipped = "NaninhasEquipped",
     /** Event fired when a plushie is unequipped. */
