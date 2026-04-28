@@ -2,9 +2,8 @@
 import { PlayerApi } from "@shared/components/PlayerApi";
 import { ModData } from "@client/components/Plushies/ModData";
 import { Observer } from "@client/components/Observer/Observer";
-import type { PerkBoost, PlayerModData, PlushieProps } from "types";
+import type { EventData, PerkBoost, PlayerModData, PlushieProps } from "types";
 import { triggerEvent } from "@asledgehammer/pipewrench";
-import { Events } from "@constants";
 import { EventsEnum } from "@constants";
 
 // TODO: Apply the LuaEventManager to allow other mods to interact with this one
@@ -59,7 +58,7 @@ export abstract class Plushie implements Observer {
 		triggerEvent(EventsEnum.Update, {
 			name: this.name,
 			...this.data
-		});
+		} as EventData);
 	}
 
 	/**
@@ -119,7 +118,7 @@ export abstract class Plushie implements Observer {
 		triggerEvent(EventsEnum.Equipped, {
 			name: this.name,
 			...this.data
-		});
+		} as EventData);
 	}
 
 	/**

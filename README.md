@@ -85,6 +85,21 @@ Each Plushie will trigger custom events that can be listened.
   Events.NaninhasUpdate.Add(function(data) { });
 ```
 
+On Typescript, this is how it would looks like:
+
+```typescript
+
+import * as Events from "@asledgehammer/pipewrench-events";
+import { EventsEnum } from "@constants";
+import type { EventData } from "types";
+
+new Events.EventEmitter<(data: EventData) => void>(EventsEnum.Update)
+  .addListener((data) => {
+	  print(`Updating Plushie ${data.name} with traits:`, tostring(data.addedTraits), "and XP boosts:", tostring(data.xpBoosts));
+  }
+);
+```
+
 The `data` structure is the following
 
 | Property | Type | Description |
