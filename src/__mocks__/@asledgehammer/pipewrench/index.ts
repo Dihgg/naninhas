@@ -58,9 +58,12 @@ const _statValue = (name: string) => ({ __brand: "CharacterStatValue", name } as
 	ZOMBIE_INFECTION: _statValue("ZOMBIE_INFECTION"),
 };
 
+export const triggerEvent = jest.fn();
+
 export default {
 	TraitFactory,
 	Perks,
 	getText,
 	getCore,
+	triggerEvent
 };

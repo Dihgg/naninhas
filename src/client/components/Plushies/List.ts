@@ -1,6 +1,7 @@
 
 import { IsoPlayer, Perk, Perks } from "@asledgehammer/pipewrench";
 import { Plushie } from "@client/components/Plushies/Plushie";
+import { PlushieNames } from "@constants";
 
 /**
  * Boris Badger plushie grants the NightVision trait.
@@ -10,7 +11,7 @@ export class BorisBadger extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
 			player,
-			name: "BorisBadger",
+			name: PlushieNames.BORISBADGER,
 			traitsToAdd: ["NightVision"]
 		});
 	}
@@ -24,7 +25,7 @@ export class Doll extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
 			player,
-			name: "Doll",
+			name: PlushieNames.DOLL,
 			traitsToAdd: ["EagleEyed"],
 			traitsToSuppress: ["ShortSighted"]
 		});
@@ -39,7 +40,7 @@ export class Flamingo extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
 			player,
-			name: "Flamingo",
+			name: PlushieNames.FLAMINGO,
 			traitsToAdd: ["Graceful"],
 			traitsToSuppress: ["Clumsy"]
 		});
@@ -54,7 +55,7 @@ export class FluffyfootBunny extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
 			player,
-			name: "FluffyfootBunny",
+			name: PlushieNames.FLUFFYFOOTBUNNY,
 			traitsToAdd: ["LightEater"],
 			traitsToSuppress: ["HeartyAppitite"]
 		});
@@ -69,7 +70,7 @@ export class FreddyFox extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
 			player,
-			name: "FreddyFox",
+			name: PlushieNames.FREDDYFOX,
 			traitsToAdd: ["Inconspicuous"],
 			traitsToSuppress: ["Conspicuous"]
 		});
@@ -84,7 +85,7 @@ export class FurbertSquirrel extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
 			player,
-			name: "FurbertSquirrel",
+			name: PlushieNames.FURBERTSQUIRREL,
 			traitsToAdd: ["Outdoorsman"]
 		});
 	}
@@ -98,7 +99,7 @@ export class GroguAZ extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
 			player,
-			name: "GroguAZ",
+			name: PlushieNames.GROGUAZ,
 			traitsToAdd: ["FastLearner"],
 			traitsToSuppress: ["SlowLearner"]
 		});
@@ -113,7 +114,7 @@ export class JacquesBeaver extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
 			player,
-			name: "JacquesBeaver",
+			name: PlushieNames.JACQUESBEAVER,
 			xpBoostsToAdd: [
 				{ perk: Perks.Woodwork as Perk, value: 1 }
 			]
@@ -129,7 +130,7 @@ export class MoleyMole extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
 			player,
-			name: "MoleyMole",
+			name: PlushieNames.MOLEYMOLE,
 			xpBoostsToAdd: [
 				{ perk: Perks.PlantScavenging as Perk, value: 2 }
 			]
@@ -145,7 +146,7 @@ export class OtisPug extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
 			player,
-			name: "OtisPug",
+			name: PlushieNames.OTISPUG,
 			traitsToAdd: ["FastReader"],
 			traitsToSuppress: ["SlowReader"]
 		});
@@ -160,7 +161,7 @@ export class PancakeHedgehog extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
 			player,
-			name: "PancakeHedgehog",
+			name: PlushieNames.PANCAKEHEDGEHOG,
 			xpBoostsToAdd: [
 				{ perk: Perks.Sprinting as Perk, value: 1 },
 				{ perk: Perks.Agility as Perk, value: 1 }
@@ -177,12 +178,12 @@ export class Spiffo extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
 			player,
-			name: "Spiffo"
+			name: PlushieNames.SPIFFO
 		});
 	}
 	update() {
-		super.update();
 		this.playerApi.increaseEndurance(0.1);
+		super.update();
 	}
 }
 
@@ -194,7 +195,7 @@ export class SpiffoBlueberry extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
 			player,
-			name: "SpiffoBlueberry",
+			name: PlushieNames.SPIFFOBLUEBERRY,
 			traitsToAdd: ["LowThirst"],
 			traitsToSuppress: ["HighThirst"]
 		});
@@ -209,7 +210,7 @@ export class SpiffoCherry extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
 			player,
-			name: "SpiffoCherry",
+			name: PlushieNames.SPIFFOCHERRY,
 			traitsToAdd: ["Organized"],
 			traitsToSuppress: ["Disorganized"]
 		});
@@ -224,7 +225,7 @@ export class SpiffoGrey extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
 			player,
-			name: "SpiffoGrey",
+			name: PlushieNames.SPIFFOGREY,
 			xpBoostsToAdd: [
 				{ perk: Perks.Nimble as Perk, value: 1 },
 				{ perk: Perks.LongBlade as Perk, value: 1 },
@@ -244,7 +245,7 @@ export class SpiffoHeart extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
 			player,
-			name: "SpiffoHeart",
+			name: PlushieNames.SPIFFOHEART,
 			xpBoostsToAdd: [
 				{ perk: Perks.Doctor as Perk, value: 2 }
 			]
@@ -260,14 +261,14 @@ export class SpiffoPlushieRainbow extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
 			player,
-			name: "SpiffoPlushieRainbow"
+			name: PlushieNames.SPIFFOPLUSHIERAINBOW
 		});
 	}
 	update() {
-		super.update();
 		this.playerApi.reduceBoredom(0.5);
 		this.playerApi.increaseEndurance(0.5);
 		this.playerApi.reduceFatigue(0.5);
+		super.update();
 	}
 }
 
@@ -279,12 +280,12 @@ export class SpiffoSanta extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
 			player,
-			name: "SpiffoSanta"
+			name: PlushieNames.SPIFFOSANTA
 		});
 	}
 	public update() {
-		super.update();
 		this.playerApi.reduceBoredom(0.5);
+		super.update();
 	}
 }
 
@@ -296,7 +297,7 @@ export class SpiffoShamrock extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
 			player,
-			name: "SpiffoShamrock",
+			name: PlushieNames.SPIFFOSHAMROCK,
 			xpBoostsToAdd: [
 				{ perk: Perks.Aiming as Perk, value: 5 },
 				{ perk: Perks.Reloading as Perk, value: 5 }
@@ -313,7 +314,7 @@ export class SubstitutionDoll extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
 			player,
-			name: "SubstitutionDoll",
+			name: PlushieNames.SUBSTITUTIONDOLL,
 			traitsToAdd: ["Brave"],
 			traitsToSuppress: ["Desensitized", "Cowardly", "Agoraphobic", "Claustophobic"]
 		});
@@ -328,12 +329,12 @@ export class ToyBear extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
 			player,
-			name: "ToyBear"
+			name: PlushieNames.TOYBEAR
 		});
 	}
 	update() {
-		super.update();
 		this.playerApi.reducePanic(0.5);
+		super.update();
 	}
 }
 
@@ -345,11 +346,11 @@ export class ToyBearSmall extends Plushie {
 	constructor(player: IsoPlayer) {
 		super({
 			player,
-			name: "ToyBearSmall"
+			name: PlushieNames.TOYBEARSMALL
 		});
 	}
 	update() {
-		super.update();
 		this.playerApi.reducePanic(0.1);
+		super.update();
 	}
 }
