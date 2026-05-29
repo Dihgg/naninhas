@@ -1,201 +1,222 @@
 #!/usr/bin/env node
 
-import path from "node:path";
-import fs from "fs-extra";
-import { execa } from "execa";
-import { Command } from "commander";
-import translate, { languages } from "translatte";
+const path = require("path");
+const fs = require("fs-extra");
+const { Command } = require("commander");
+const translate = require("translatte");
 
-import { getInfo, stringifyInfoFile, copyFolder } from "./utils/index.js";
-
-/**
- * Convert a locale to the format used by Project Zomboid
- * @param {string} locale The locale to convert
- * @returns {string} The converted locale
- */
-const getLocale = (locale) => {
-    switch (locale) {
-        case "pt":
-            return "PTBR";
-        default:
-            return locale.toUpperCase();
-    }
-}
+const { copyFolder, getInfo, startProgressBar, stopProgressBar } = require("./utils");
 
 /**
- * Creates the output folder for the translated mod, ensuring it exists.
- * @param {string} locale The locale for which to create the output folder
- * @returns {Promise<string>} The path to the created output folder
+ * Converts a language code to Project Zomboid locale format.
+ * @param {string} language
+ * @returns {string}
  */
-async function createOutputFolder(locale) {
-    const { id } = getInfo();
-    const outputDir = path.join(process.cwd(), "dist", `${id} - ${locale}`);
-    fs.ensureDirSync(outputDir);
-    return outputDir;
-}
+const getLocale = language => {
+	switch (language.toLowerCase()) {
+		case "pt":
+			return "PTBR";
+		default:
+			return language.toUpperCase();
+	}
+};
 
 /**
- * Loads existing translations from a file into a map.
- * @param {string} filePath The path to the file containing the translations to load 
- * @param {Map<string, string>} translations The map to store the loaded translations
+ * Converts info object back to .info content.
+ * @param {Record<string, string | undefined>} info
+ * @returns {string}
  */
-async function loadTranslations(filePath, translations = new Map()) {
-    if (fs.existsSync(filePath)) {
-        console.log(`File ${filePath} already exists, loading existing translations...`);
-        const existingTranslations = await fs.readJSON(filePath);
-        for (const key in existingTranslations) {
-            const value = existingTranslations[key];
-            console.log(`Existing translation for ${key}: ${value}`);
-            translations.set(key, value);
-        }
-    }
-    return translations;
-}
+const stringifyInfoFile = info => {
+	return Object.entries(info)
+		.filter(([, value]) => value !== undefined && value !== null)
+		.map(([key, value]) => `${key}=${value}`)
+		.join("\n");
+};
 
 /**
- * Generates translations for the specified language and locale.
- * @param {string} language The language to translate to (e.g., "en", "fr", "de")
- * @param {string} locale The Zomboid locale to use for the output (e.g., "PTBR", "FR", "DE")
- * @param {string} outputPath The path to the output directory
+ * Loads translations from an existing JSON file into a map.
+ * @param {string} filePath
+ * @returns {Promise<Map<string, string>>}
  */
-async function generateTranslations(language, locale, outputPath) { 
+const loadTranslations = async filePath => {
+	const map = new Map();
+	if (!(await fs.pathExists(filePath))) {
+		return map;
+	}
 
-    console.log(`Translating to ${language}...`);
+	const json = await fs.readJson(filePath);
+	for (const [key, value] of Object.entries(json)) {
+		if (typeof value === "string") {
+			map.set(key, value);
+		}
+	}
 
-    const { modInfo } = await fs.readJSON(path.join(process.cwd(), `pipewrench.json`));
-    const { id } = modInfo;
-
-    const outputDir = path.join(outputPath, "42", "media", "lua", "shared", "Translate", locale);
-
-    fs.ensureDirSync(outputDir);
-
-    const files = await fs.readdir(path.join(process.cwd(), "src", "translations-json", "EN"));
-
-    console.log(`Found ${files.length} files to translate.`);
-
-    for (const file of files) {
-        const enFilePath = path.join(process.cwd(), "src", "translations-json", "EN", file);
-        const outputFilePath = path.join(outputDir, file);
-
-        const translations = new Map(
-            [
-                // Extract existing translations from the output file if it exists, to avoid re-translating unchanged entries
-                ...(await loadTranslations(outputFilePath)),
-                // load existing translations from the src/translations-json/LOCALE folder, that folder is the official human reviewed translations and should be used if exists.
-                ...(await loadTranslations(path.join(process.cwd(), "src", "translations-json", locale, file)))
-            ]
-        );
-
-        const content = new Map(Object.entries(await fs.readJSON(enFilePath)));
-
-        const toTranslate = new Map(
-            [...content.entries()]
-                .filter(([key, value]) => !translations.has(key))
-        );
-
-        console.log(`Number of entries to translate: ${toTranslate.size}`);
-
-        for (const [key, value] of toTranslate) {
-            console.log(`Translating ${key}`);
-            const translation = await translate(value, { to: language });
-            translations.set(key, translation.text);
-            console.log(`Translated ${value} => ${translations.get(key)}`);
-        }
-
-        console.log(`Saving translations for ${file}...`);
-
-        const sortedTranslations = new Map([...translations.entries()].sort());
-        const translationsObject = Object.fromEntries(sortedTranslations);
-        const formattedTranslations = JSON.stringify(translationsObject, null, 4);
-
-        await fs.writeFile(outputFilePath, formattedTranslations);
-    }
-}
+	return map;
+};
 
 /**
- * Generates the mod.info file for the translated mod, updating the id, name, and require fields to include the locale.
- * @param {string} outputPath The path to the output directory where the mod.info file should be created
- * @param {string} locale The locale to include in the mod ID and name
- * @param {string} language The language for the description translation
+ * Creates output folder for a locale package.
+ * @param {string} locale
+ * @returns {Promise<string>}
  */
-async function generateModInfo(outputPath, locale, language) {
-    const { id, name, modInfo } = getInfo();
-    const description = (await translate(`Translation of ${name} to ${locale.toUpperCase()}`, { to: language })).text;
-    const infoContent = stringifyInfoFile({
-        ...modInfo,
-        id: `${id}-${locale.toLowerCase()}`,
-        name: `${name} - ${locale.toUpperCase()}`,
+const createOutputFolder = async locale => {
+	const { name } = getInfo();
+	const outputDir = path.join(process.cwd(), "dist", `${name} - ${locale}`);
+	await fs.ensureDir(outputDir);
+	return outputDir;
+};
+
+/**
+ * Generates translation JSON files for one locale package.
+ * Priority order:
+ * 1) Existing output translations (preserve previous human edits)
+ * 2) src/translations-json/{LOCALE} human-reviewed translations
+ * 3) Machine-translate missing keys from EN
+ *
+ * @param {string} language
+ * @param {string} locale
+ * @param {string} outputPath
+ */
+const generateLocaleTranslations = async (language, locale, outputPath) => {
+	const sourceEnPath = path.join(process.cwd(), "src", "translations-json", "EN");
+	if (!(await fs.pathExists(sourceEnPath))) {
+		throw new Error("Missing EN source translations at src/translations-json/EN");
+	}
+
+	const targetTranslateDir = path.join(outputPath, "42", "media", "lua", "shared", "Translate", locale);
+	await fs.ensureDir(targetTranslateDir);
+
+	const humanReviewedLocaleDir = path.join(process.cwd(), "src", "translations-json", locale);
+	const allSourceFiles = await fs.readdir(sourceEnPath);
+	const files = allSourceFiles.filter(file => path.extname(file).toLowerCase() === ".json");
+	const filePlans = [];
+	let totalMissingKeys = 0;
+
+	for (const file of files) {
+		const enFilePath = path.join(sourceEnPath, file);
+		const outFilePath = path.join(targetTranslateDir, file);
+		const sourceContent = await fs.readJson(enFilePath);
+		const translations = new Map();
+
+		for (const [key, value] of await loadTranslations(outFilePath)) {
+			translations.set(key, value);
+		}
+
+		for (const [key, value] of await loadTranslations(path.join(humanReviewedLocaleDir, file))) {
+			translations.set(key, value);
+		}
+
+		const toTranslate = Object.entries(sourceContent).filter(([key]) => !translations.has(key));
+		totalMissingKeys += toTranslate.length;
+		filePlans.push({
+			file,
+			outFilePath,
+			toTranslate,
+			translations
+		});
+	}
+
+	console.info(`Translation plan ready for ${files.length} files.`);
+	console.info(`Missing keys to machine-translate: ${totalMissingKeys}`);
+
+	const translationProgress = startProgressBar(totalMissingKeys, {
+		format: "Translate |{bar}| {percentage}% | {value}/{total} keys",
+		unit: "keys"
+	});
+
+	for (const filePlan of filePlans) {
+		for (const [key, value] of filePlan.toTranslate) {
+			if (typeof value !== "string") {
+				continue;
+			}
+			const translated = await translate(value, { to: language });
+			filePlan.translations.set(key, translated.text);
+			if (translationProgress) {
+				translationProgress.increment();
+			}
+		}
+
+		const sorted = Object.fromEntries(
+			[...filePlan.translations.entries()].sort(([a], [b]) => a.localeCompare(b))
+		);
+		await fs.writeJson(filePlan.outFilePath, sorted, { spaces: 4 });
+	}
+
+	stopProgressBar(translationProgress);
+};
+
+/**
+ * Copies root assets to output root and output/42.
+ * @param {string} outputPath
+ */
+const copyRootAssets = async outputPath => {
+	const rootSource = path.join(process.cwd(), "src", "root");
+	if (!(await fs.pathExists(rootSource))) {
+		return;
+	}
+
+	await copyFolder(rootSource, outputPath);
+	await copyFolder(rootSource, path.join(outputPath, "42"));
+};
+
+/**
+ * Creates mod.info for translated locale package.
+ * @param {string} outputPath the path to the output directory for the locale package
+ * @param {string} locale the locale being generated (e.g., "PTBR")
+ * @param {string} language the original language code (e.g., "pt") for translation purposes
+ */
+const writeTranslatedModInfo = async (outputPath, locale, language) => {
+	
+    const { id, name, modInfo } = getInfo();    
+    const description = translate(`Translation package for ${name} in ${locale}.`, { to: language });
+    const require = [
+        ...(modInfo.require ?? []),
+        id
+    ];
+
+	const infoContent = stringifyInfoFile({
+		...modInfo,
+		id: `${id}-${locale.toLowerCase()}`,
+		name: `${name} - ${locale}`,
         description,
-        require: [
-            ...modInfo.require,
-            id
-        ]
-    });
-    await fs.ensureDir(path.join(outputPath, "42"));
-    await fs.writeFile(path.join(outputPath, "42", "mod.info"), infoContent);
-    await fs.writeFile(path.join(outputPath, "mod.info"), infoContent);
-}
+		require: require
+	});
+
+	await fs.writeFile(path.join(outputPath, "mod.info"), infoContent);
+	await fs.ensureDir(path.join(outputPath, "42"));
+	await fs.writeFile(path.join(outputPath, "42", "mod.info"), infoContent);
+};
 
 /**
- * Copies the media files to the output directory.
- * @param {string} outputPath The path to the output directory
+ * Parses and validates language argument.
+ * @returns {{language: string, locale: string}}
  */
-async function copyMedia(outputPath) {
-    fs.ensureDirSync(outputPath);
-    await copyFolder(path.join(process.cwd(), "src", "root"), path.join(outputPath));
-    await copyFolder(path.join(process.cwd(), "src", "root"), path.join(outputPath, "42"));
-}
+const getArgs = () => {
+	const program = new Command();
+	program
+		.argument("<language>", "Language code to translate to (e.g. pt, es, de)")
+		.parse();
 
-/**
- * Gets the language argument from the command line and validates it.
- * @returns {string} The validated language argument
- */
-function getLanguageArg() {
-    const program = new Command();
+	const language = (program.args[0] || "").trim().toLowerCase();
+	if (!language) {
+		throw new Error("Please specify a language, e.g. npm run translate -- pt");
+	}
 
-    program
-        .argument(
-            "<language>",
-            "The language to translate to"
-        )
-        .parse();
+	return { language, locale: getLocale(language) };
+};
 
-    const args = program.args;
+const run = async () => {
+	const { language, locale } = getArgs();
+	const outputPath = await createOutputFolder(locale);
 
-    const [language] = args;
-    if (!language) {
-        console.error("Please specify a language");
-        process.exit(1);
-    }
+	await generateLocaleTranslations(language, locale, outputPath);
+	await copyRootAssets(outputPath);
+	await writeTranslatedModInfo(outputPath, locale , language);
 
-    if (!languages[language]) {
-        console.error(`Language ${language} is not supported`);
-        process.exit(1);
-    }
+	console.info(`Translations package generated: ${outputPath}`);
+};
 
-    return language;
-}
-
-/**
- * Main function to run the translation process
- */
-async function main() {
-
-    const language = getLanguageArg();
-    const locale = getLocale(language);
-    const outputPath = await createOutputFolder(locale);
-    
-    await generateTranslations(language, locale, outputPath);
-    await generateModInfo(outputPath, locale, language);
-    await copyMedia(outputPath);
-    
-}
-
-main()
-    .then(() => {
-        console.log("Translations - Done!");
-    })
-    .catch((err) => {
-        console.error("Translations - Error generating translations:", err);
-        process.exit(1);
-    });
+run().catch(err => {
+	console.error("Translations - Error generating translations:", err);
+	process.exitCode = 1;
+});
