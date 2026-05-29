@@ -1,6 +1,6 @@
 const path = require("path");
 const fs = require("fs-extra");
-const { copyFolder, getInfo } = require("./utils");
+const { copyFolder, getInfo, stringifyInfoFile } = require("./utils");
 const { generateTranslations } = require("./utils/translations");
 
 /**
@@ -55,16 +55,7 @@ const parseInfoFile = content => {
 		}, {});
 };
 
-/**
- * Converts info object back to .info format
- * @param {Record<string, string>}
- * @returns {string}
- */
-const stringifyInfoFile = info =>
-	Object.entries(info)
-		.filter(([, value]) => value !== undefined && value !== null)
-		.map(([key, value]) => `${key}=${value}`)
-		.join("\n");
+
 
 /**
  * Parses a mod.info require line into dependency ids
