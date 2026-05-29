@@ -35,6 +35,24 @@ async function createOutputFolder(locale) {
 }
 
 /**
+ * Loads existing translations from a file into a map.
+ * @param {string} filePath The path to the file containing the translations to load 
+ * @param {Map<string, string>} translations The map to store the loaded translations
+ */
+async function loadTranslations(filePath, translations = new Map()) {
+    if (fs.existsSync(filePath)) {
+        console.log(`File ${filePath} already exists, loading existing translations...`);
+        const existingTranslations = await fs.readJSON(filePath);
+        for (const key in existingTranslations) {
+            const value = existingTranslations[key];
+            console.log(`Existing translation for ${key}: ${value}`);
+            translations.set(key, value);
+        }
+    }
+    return translations;
+}
+
+/**
  * Generates translations for the specified language and locale.
  * @param {string} language The language to translate to (e.g., "en", "fr", "de")
  * @param {string} locale The Zomboid locale to use for the output (e.g., "PTBR", "FR", "DE")
@@ -56,22 +74,19 @@ async function generateTranslations(language, locale, outputPath) {
     console.log(`Found ${files.length} files to translate.`);
 
     for (const file of files) {
-        const originalFilePath = path.join(process.cwd(), "src", "translations-json", "EN", file);
+        const enFilePath = path.join(process.cwd(), "src", "translations-json", "EN", file);
         const outputFilePath = path.join(outputDir, file);
 
-        const translations = new Map();
+        const translations = new Map(
+            [
+                // Extract existing translations from the output file if it exists, to avoid re-translating unchanged entries
+                ...(await loadTranslations(outputFilePath)),
+                // load existing translations from the src/translations-json/LOCALE folder, that folder is the official human reviewed translations and should be used if exists.
+                ...(await loadTranslations(path.join(process.cwd(), "src", "translations-json", locale, file)))
+            ]
+        );
 
-        if (fs.existsSync(outputFilePath)) {
-            console.log(`File ${file} already exists, loading existing translations...`);
-            const existingTranslations = await fs.readJSON(outputFilePath);
-            for (const key in existingTranslations) {
-                const value = existingTranslations[key];
-                console.log(`Existing translation for ${key}: ${value}`);
-                translations.set(key, value);
-            }
-        }
-
-        const content = new Map(Object.entries(await fs.readJSON(originalFilePath)));
+        const content = new Map(Object.entries(await fs.readJSON(enFilePath)));
 
         const toTranslate = new Map(
             [...content.entries()]
