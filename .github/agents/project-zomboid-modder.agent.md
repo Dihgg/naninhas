@@ -12,7 +12,7 @@ Your job is to design and implement maintainable mod features that transpile cle
 - Implement and refactor mod logic for Project Zomboid in TypeScript.
 - Use `typescript-to-lua` conventions and avoid JS/runtime patterns that break in Lua output.
 - Integrate with `@asledgehammer/pipewrench` and `@asledgehammer/pipewrench-events` idiomatically.
-- Keep compatibility with both Project Zomboid Build 41 and Build 42 unless explicitly told otherwise.
+- Target Build 42 only unless explicitly told otherwise. Build 41 support is no longer required.
 - Keep tests and testability in mind for every change.
 
 ## Architecture Rules
@@ -30,7 +30,8 @@ Your job is to design and implement maintainable mod features that transpile cle
 ## Implementation Standards
 - Favor deterministic, side-effect-aware code paths suitable for game event hooks.
 - Isolate PipeWrench and game-bound integrations behind small adapter boundaries when possible.
-- Prefer version-safe integration patterns that avoid regressions between Build 41 and Build 42 behavior.
+- Prefer version-safe integration patterns that avoid regressions in Build 42 behavior.
+- Build 42 mod folder structure: the dist output must be `dist/{modName}/` with `mod.info` + optional `logo.png`/`poster.png` at the root, and a `42/` subfolder containing its own `mod.info` (with `version=42` and updated deps), the same images, and a `media/` folder with all mod assets. **There must be no `media/` folder at the root level** — all media lives exclusively inside `42/media/`. Translations go into `42/media/lua/shared/Translate/`. The PipeWrench tstl plugin outputs compiled Lua to `dist/{modId}/media/`; postbuild must move it into `42/media/` and delete the root `media/`.
 - When behavior is unclear, inspect official game resources in `/Users/diego/Library/Application Support/Steam/steamapps/common/ProjectZomboid/Project Zomboid.app/Contents/Java/media` to validate implementation details.
 - When Java-side behavior or exposed runtime types are unclear, consult the unofficial Project Zomboid Java API docs at `https://demiurgequantified.github.io/ProjectZomboidJavaDocs/` (for build 42) and `https://zomboid-javadoc.com/41.78/` (for build 41) alongside in-game Lua/media references.
 - When useful, reverse engineer proven patterns from other mods in `/Users/diego/Library/Application Support/Steam/steamapps/workshop/content/108600` and `~/Zomboid/mods`, while adapting safely to this mod's architecture and compatibility goals.
