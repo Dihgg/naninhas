@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.6.0](https://github.com/dihgg/naninhas/compare/v1.5.0...v1.6.0) (2026-06-01)
+
+
+### Features
+
+* **deployment:** creating translation pipeline ([1f2d7f5](https://github.com/dihgg/naninhas/commit/1f2d7f531d810c3125003e834c79a5df5ad9c7c4))
+
 ## [1.5.0](https://github.com/dihgg/naninhas/compare/v1.4.0...v1.5.0) (2026-06-01)
 
 
