@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.5.0](https://github.com/dihgg/naninhas/compare/v1.4.0...v1.5.0) (2026-06-01)
+
+
+### Features
+
+* **deployment:** updating playtest script ([eb043c8](https://github.com/dihgg/naninhas/commit/eb043c881117c8446f25ab9b8a43114165380e2c))
+* **deployment:** updating zip script ([c01f8fd](https://github.com/dihgg/naninhas/commit/c01f8fda0e34619847c595ad530e14365432cd58))
+* **steam:** changing behavior of steam script ([54082d1](https://github.com/dihgg/naninhas/commit/54082d113ea0223ab8a4b932c67ad15597897b87))
+* **steam:** revamping steam script ([ce42533](https://github.com/dihgg/naninhas/commit/ce42533d91b704dcca4717a03d7c4bc2c3160ac6))
+* **translations:** adding logic to gather official translations ([e8ae458](https://github.com/dihgg/naninhas/commit/e8ae4588e2b687bea2f00828d1363feb678864b8))
+* **translations:** adding translation script ([4593a09](https://github.com/dihgg/naninhas/commit/4593a09826aec600086d0cfbd8f346a737de6084))
+* **translations:** updating translation scripts ([99cbc61](https://github.com/dihgg/naninhas/commit/99cbc61b8802575bf594e6632486b69cc11b93bd))
+* **ui:** including tips & jokes on load screen ([53f3036](https://github.com/dihgg/naninhas/commit/53f30360b04e84e0cdfe3438fef070575ef5ab1a))
+
+
+### Bug Fixes
+
+* **build:** fix pipewrench generated imports path ([20b60f3](https://github.com/dihgg/naninhas/commit/20b60f3d8f1b82504155622f62c21c131621963a))
+
 ## [1.4.0](https://github.com/dihgg/naninhas/compare/v1.3.4...v1.4.0) (2026-04-28)
 
 
