@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.7.0](https://github.com/dihgg/naninhas/compare/v1.6.0...v1.7.0) (2026-06-01)
+
+
+### Features
+
+* **deployments:** adding npm caching into GitHub workflow ([e4ef0e2](https://github.com/dihgg/naninhas/commit/e4ef0e220331764b7d203b3a809ea35bf2133ea3))
+
 ## [1.6.0](https://github.com/dihgg/naninhas/compare/v1.5.0...v1.6.0) (2026-06-01)
 
 
