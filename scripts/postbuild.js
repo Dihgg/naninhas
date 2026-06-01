@@ -1,263 +1,63 @@
 const path = require("path");
 const fs = require("fs-extra");
-const { copyFolder, getInfo } = require("./utils");
-const { generateTranslations } = require("./utils/translations");
+const { srcPath, distPath, copyFolder, moveFolder, getInfo, patchPipeWrenchLua } = require("./utils");
 
 /**
- * returns the src Path for this operation
- * @param {string} dirPath
- * @returns {string}
+ * Copy EN translations from src/translations-json/LOCALE to the Build 42 output folder, ensuring the directory structure is correct.
+ * @param {string} outputPath the path to the output directory for translations (e.g., 42/media/lua/shared/Translate/LOCALE)
+ * @param {string} locale the locale to copy (default: "EN")
  */
-const srcPath = dirPath => path.join(process.cwd(), ...dirPath.split("/"));
-
-/**
- * returns the dist path (inside media) for this operation
- * @param {string} dirPath
- * @param {boolean} media should include the media folder in destPath ?
- * @returns {string}
- */
-const distPath = (dirPath, media = true) => {
-	const { name } = getInfo();
-	return path.join(process.cwd(), "dist", name, media ? "media" : "", ...dirPath.split("/"));
-};
-
-/**
- * Reads optional build42 config from build42.config.json
- * @returns {{require?: string[], requireMap?: Record<string, string>}}
- */
-const getBuild42Config = () => {
-	const configPath = path.join(process.cwd(), "build42.config.json");
-	if (!fs.existsSync(configPath)) {
-		return {};
+const translations = async (outputPath, locale = "EN") => {
+	const sourceDir = srcPath(`src/translations-json/${locale}`);
+	if (!(await fs.pathExists(sourceDir))) {
+		console.info(`No src/translations-json/${locale} found; skipping translations.`);
+		return;
 	}
-
-	try {
-		const raw = fs.readFileSync(configPath, "utf8");
-		return JSON.parse(raw);
-	} catch (_err) {
-		return {};
+	await fs.ensureDir(path.join(outputPath, locale));
+	const translationFiles = await fs.readdir(sourceDir);
+	for (const file of translationFiles) {
+		const json = await fs.readJSON(path.join(sourceDir, file));
+		const sortedTranslations = new Map(Object.entries(json).sort());
+		await fs.writeJson(path.join(outputPath, locale, file), Object.fromEntries(sortedTranslations), { spaces: 4 });
 	}
-};
-
-/**
- * Parses a .info file (key=value per line)
- * @param {string} content
- * @returns {Record<string, string>}
- */
-const parseInfoFile = content => {
-	return content
-		.split(/\r?\n/)
-		.filter(Boolean)
-		.reduce((acc, line) => {
-			const [key, ...rest] = line.split("=");
-			acc[key.trim()] = rest.join("=").trim();
-			return acc;
-		}, {});
-};
-
-/**
- * Converts info object back to .info format
- * @param {Record<string, string>}
- * @returns {string}
- */
-const stringifyInfoFile = info =>
-	Object.entries(info)
-		.filter(([, value]) => value !== undefined && value !== null)
-		.map(([key, value]) => `${key}=${value}`)
-		.join("\n");
-
-/**
- * Parses a mod.info require line into dependency ids
- * @param {string | undefined} requireValue
- * @returns {string[]}
- */
-const parseRequireDependencies = requireValue => {
-	if (!requireValue) {
-		return [];
-	}
-
-	return requireValue
-		.split(",")
-		.map(dep => dep.trim().replace(/^\\+/, ""))
-		.filter(Boolean);
-};
-
-/**
- * Resolves build 42 dependencies from config overrides/map
- * @param {string | undefined} currentRequire
- * @param {{require?: string[], requireMap?: Record<string, string>}} build42Config
- * @returns {string[]}
- */
-const resolveBuild42Dependencies = (currentRequire, build42Config) => {
-	if (Array.isArray(build42Config.require) && build42Config.require.length > 0) {
-		return build42Config.require;
-	}
-
-	const requireMap = build42Config.requireMap || {};
-	const currentDependencies = parseRequireDependencies(currentRequire);
-	return currentDependencies.map(dep => requireMap[dep] || dep);
-};
-
-/**
- * Applies Build 42-specific changes
- * @param {Record<string, string>}
- * @returns {Record<string, string>}
- */
-const transformInfoForBuild42 = info => {
-	const build42Config = getBuild42Config();
-	const dependencies = resolveBuild42Dependencies(info.require, build42Config);
-
-	return {
-		...info,
-		require: dependencies.length > 0 ? `\\${dependencies.join(",\\")}` : undefined,
-		version: "42"
-	};
-};
-
-const generateBuild42Files = async ({ basePath, build42Path }) => {
-	await fs.ensureDir(build42Path);
-
-	/* ----------------------------
-	   1. Copy legacy artifacts
-	   ---------------------------- */
-	const legacyFiles = ["logo.png", "poster.png"];
-	await Promise.all(
-		legacyFiles.map(async file => {
-			const src = path.join(basePath, file);
-			const dest = path.join(build42Path, file);
-			if (await fs.pathExists(src)) {
-				await fs.copy(src, dest);
-			}
-		})
-	);
-
-	const legacyMedia = path.join(basePath, "media");
-	if (await fs.pathExists(legacyMedia)) {
-		await fs.remove(path.join(build42Path, "media"));
-		// Exclude lua/shared/Translate folder since Build 42 uses separate .json translations
-		await fs.copy(legacyMedia, path.join(build42Path, "media"), {
-			filter: filePath => !filePath.includes("lua/shared/Translate") && !filePath.includes("lua\\shared\\Translate")
-		});
-	}
-
-	/* ----------------------------
-	   2. Rewrite mod.info
-	   ---------------------------- */
-	const infoPath = path.join(basePath, "mod.info");
-	if (await fs.pathExists(infoPath)) {
-		const raw = await fs.readFile(infoPath, "utf8");
-		const parsed = parseInfoFile(raw);
-		const transformed = transformInfoForBuild42(parsed);
-		const output = stringifyInfoFile(transformed);
-
-		await fs.writeFile(path.join(build42Path, "mod.info"), output);
-	}
-
-	/* ----------------------------
-	   3. Overlay src/42 (override)
-	   ---------------------------- */
-	const src42Path = srcPath("src/42");
-	if (await fs.pathExists(src42Path)) {
-		await fs.copy(src42Path, build42Path, { overwrite: true });
-	}
-};
-
-/**
- * Patches PipeWrench-generated Lua files to avoid false startup mod errors in PZ.
- *
- * - client.lua and PipeWrench.lua:
- *   Rewrites `loadstring("require('X');return _G['Y']")()` to `_G['Y']`
- *   so startup does not attempt to require vanilla modules eagerly.
- * - lualib_bundle.lua:
- *   Replaces test fixture import with runtime-safe `require "ISBaseObject"`.
- *
- * @param {string} basePath
- */
-const patchPipeWrenchLua = async basePath => {
-	const glob = await fs.readdir(basePath, { recursive: true }).catch(() => []);
-
-	const allFiles = Array.isArray(glob)
-		? glob.map(filePath => path.join(basePath, filePath))
-		: [];
-
-	for (const filePath of allFiles) {
-		const base = path.basename(filePath);
-
-		if (base !== "client.lua" && base !== "PipeWrench.lua" && base !== "lualib_bundle.lua") {
-			continue;
-		}
-
-		const stat = await fs.stat(filePath).catch(() => null);
-		if (!stat || !stat.isFile()) {
-			continue;
-		}
-
-		let content = await fs.readFile(filePath, "utf8");
-		let changed = false;
-
-		if (base === "client.lua" || base === "PipeWrench.lua") {
-			const patched = content.replace(
-				/loadstring\("require\('[^']+'\);return _G\['([^']+)'\]"\)\(\)/g,
-				"_G['$1']"
-			);
-			if (patched !== content) {
-				content = patched;
-				changed = true;
-			}
-		}
-
-		if (base === "lualib_bundle.lua") {
-			const patched = content.replace(
-				/require\s+"tests\/classExtendEachOther\/base\/ISBaseObject"/g,
-				"require \"ISBaseObject\""
-			);
-			if (patched !== content) {
-				content = patched;
-				changed = true;
-			}
-		}
-
-		if (changed) {
-			await fs.writeFile(filePath, content, "utf8");
-		}
-	}
-};
+	console.info(`${locale} Translations copied successfully.`);
+}
 
 const run = async () => {
 	try {
-		const { name } = getInfo();
-		const basePath = path.join(process.cwd(), "dist", name);
-		const build42Path = path.join(basePath, "42");
+		const { id } = getInfo();
 
-		await copyFolder(srcPath("src/media"), distPath(""));
-		console.info("media folder copied successfully.");
-
-		await patchPipeWrenchLua(basePath);
-		console.info("PipeWrench Lua files patched.");
-
-		await copyFolder(srcPath("src/root"), distPath("", false));
-		console.info("Root folder copied successfully.");
-
-		await generateBuild42Files({ basePath, build42Path });
-		console.info("Build 42 folder structure ready.");
-
-		const translationResult = await generateTranslations({
-			sourceRoot: srcPath("src/translations-json"),
-			build42TranslateRoot: path.join(build42Path, "media", "lua", "shared", "Translate")
-		});
-
-		if (translationResult.generated) {
-			console.info(`Translations generated for Build 42 (.json): ${translationResult.fileCount} files.`);
+		// Move the built mod from dist/id to dist/Name
+		const generatedDistPath = path.join(process.cwd(), "dist", id);
+		if (generatedDistPath !== distPath()) {
+			await moveFolder(generatedDistPath, distPath());
 		} else {
-			await copyFolder(
-				srcPath("src/translations"),
-				path.join(build42Path, "media", "lua", "shared", "Translate")
-			);
-			console.info("No src/translations-json found; fallback copy from src/translations completed for Build 42.");
+			console.warn(`Generated dist path ${generatedDistPath} is the same as target dist path ${distPath()}. Skipping move to avoid overwriting source.`);
 		}
+
+		// Copy root assets to both dist/Name and dist/Name/42
+		await copyFolder(srcPath("src/root"), distPath());
+		await copyFolder(srcPath("src/root"), distPath("42"));
+
+		// Copy mod.info to dist/Name/mod.info to dist/Name/42/mod.info
+		await fs.copy(distPath("mod.info"), distPath("42/mod.info"));
+
+		// Move generated media from dist/Name/media to dist/Name/42/media
+		await moveFolder(distPath("media"), distPath("42/media"));
+
+		// Copy media assets to dist/Name/42/media
+		await copyFolder(srcPath("src/media"), distPath("42/media"));
+
+		// Copy EN translations to dist/Name/42/media/lua/shared/Translate/EN - these are the only translations shipped with the base mod
+		await translations(distPath("42/media/lua/shared/Translate"));
+
+		// Patch PipeWrench-generated Lua files to avoid spurious WARNs in PZ's console
+		await patchPipeWrenchLua(distPath("42"));
+		console.log("PipeWrench Lua files patched.");
+
 	} catch (err) {
 		console.error("Error copying files:", err);
-		process.exitCode = 1;
+		process.exit(1);
 	}
 };
 

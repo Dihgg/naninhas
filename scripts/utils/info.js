@@ -18,7 +18,9 @@ const getInfo = () => {
 	const { modInfo } = JSON.parse(readFileSync(join(process.cwd(), "pipewrench.json"), "utf-8"));
 
 	return {
+		id: modInfo.id,
 		name: modInfo.id,
+		modInfo,
 		version,
 		zipname: `${modInfo.id}-${version}.zip`
 	};

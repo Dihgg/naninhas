@@ -1,10 +1,7 @@
 const path = require("path");
 const os = require("os");
 const fs = require("fs-extra");
-// const { join } = require('path');
-//const { tmpdir } = require('os');
-const { copyFolder, getInfo } = require("./utils");
-// const { ensureDirSync, createWriteStream, removeSync } = require('fs-extra');
+const { copyFolder, getInfo, distPath } = require("./utils");
 
 const archiver = require("archiver");
 
@@ -12,21 +9,28 @@ const archiver = require("archiver");
  * Creates a easy to share zip
  */
 const createZip = async () => {
+
+	if (!(await fs.pathExists(distPath()))) {
+		console.error("Error: dist path does not exist. Please run the build script first.");
+		process.exit(1);
+	}
+
 	const { name, zipname } = getInfo();
-	const tempDir = path.join(os.tmpdir(), `${name}-temp`);
+	const tempPath = path.join(os.tmpdir(), `${name}-temp`);
 
-	fs.ensureDirSync(tempDir);
+	await fs.ensureDir(tempPath);	
 
-	await copyFolder(path.join(process.cwd(), "dist", name), path.join(tempDir));
+	await copyFolder(distPath(), tempPath);
 
 	const output = fs.createWriteStream(zipname);
 	const archive = archiver("zip", { zlib: { level: 9 } });
 
 	archive.pipe(output);
-	archive.directory(tempDir, false);
+	archive.directory(tempPath, false);
 	await archive.finalize();
 
-	fs.removeSync(tempDir);
+	await fs.remove(tempPath);
+	console.log(`Zip file created successfully: ${zipname}`);
 };
 
 createZip().catch(err => {
