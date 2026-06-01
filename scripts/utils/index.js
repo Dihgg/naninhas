@@ -1,7 +1,19 @@
-const { copyFolder } = require("./copyFolder");
+const { copyFolder, moveFolder, srcPath, distPath } = require("./folders");
 const { getInfo } = require("./info");
+const { createProgressBar, startProgressBar, stopProgressBar } = require("./progressBar");
+const { patchPipeWrenchLua } = require("./patches");
+const { markdownToBbcode, extractFrontMatterData } = require("./markdown");
 
 module.exports = {
 	copyFolder,
-	getInfo
+	moveFolder,
+	srcPath,
+	distPath,
+	createProgressBar,
+	startProgressBar,
+	stopProgressBar,
+	getInfo,
+	patchPipeWrenchLua,
+	markdownToBbcode,
+	extractFrontMatterData
 };
