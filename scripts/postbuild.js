@@ -57,7 +57,7 @@ const run = async () => {
 
 	} catch (err) {
 		console.error("Error copying files:", err);
-		process.exitCode = 1;
+		process.exit(1);
 	}
 };
 
