@@ -38,7 +38,7 @@ jobs:
                   git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
             - name: Install dependencies
-              run: npm install
+              run: npm ci
 
             - name: Build code
               run: npm run build
@@ -50,6 +50,9 @@ jobs:
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: git push --follow-tags origin HEAD
+
+            - name: Create main zip
+              run: npm run zip
 
             - name: Get latest tag
               id: get_latest_tag
@@ -131,25 +134,42 @@ jobs:
                   cache-dependency-path: package-lock.json
 
             - name: Install dependencies
-              run: npm install
+              run: npm ci
 
-            - name: Generate translation package
-              run: npm run translate -- ${{ matrix.language }}
-
-            - name: Zip translation package
-              run: npm run zip:translation -- ${{ matrix.language }}
-
-            - name: Get translation zip name
-              id: get_translation_zip_name
+            - name: Build translation zip (best effort)
+              id: build_translation_zip
+              shell: bash
               run: |
-                  ZIPNAME=$(node scripts/zipname-translation.js ${{ matrix.language }})
-                  echo "ZIPNAME=$ZIPNAME" >> $GITHUB_OUTPUT
+                  LANGUAGE="${{ matrix.language }}"
+
+                  if ! npm run translate -- "$LANGUAGE"; then
+                      echo "::warning::Translation generation failed for ${LANGUAGE}. Skipping this language."
+                      echo "should_upload=false" >> "$GITHUB_OUTPUT"
+                      exit 0
+                  fi
+
+                  if ! npm run zip:translation -- "$LANGUAGE"; then
+                      echo "::warning::Translation zip creation failed for ${LANGUAGE}. Skipping this language."
+                      echo "should_upload=false" >> "$GITHUB_OUTPUT"
+                      exit 0
+                  fi
+
+                  ZIPNAME=$(node scripts/zipname-translation.js "$LANGUAGE")
+                  if [ ! -f "./$ZIPNAME" ]; then
+                      echo "::warning::Translation zip artifact was not found for ${LANGUAGE}: ./$ZIPNAME"
+                      echo "should_upload=false" >> "$GITHUB_OUTPUT"
+                      exit 0
+                  fi
+
+                  echo "zipname=$ZIPNAME" >> "$GITHUB_OUTPUT"
+                  echo "should_upload=true" >> "$GITHUB_OUTPUT"
 
             - name: Upload translation zip artifact
+              if: steps.build_translation_zip.outputs.should_upload == 'true'
               uses: actions/upload-artifact@v4
               with:
                   name: translation-zip-${{ matrix.language }}
-                  path: ./${{ steps.get_translation_zip_name.outputs.ZIPNAME }}
+                  path: ./${{ steps.build_translation_zip.outputs.zipname }}
 
     create_release:
         needs:
@@ -176,6 +196,66 @@ jobs:
                   path: release-assets
                   merge-multiple: true
 
+            - name: Translation artifact summary
+              env:
+                  HAS_TRANSLATIONS: ${{ needs.prepare_release.outputs.has_translations }}
+                  EXPECTED_LANGS: ${{ needs.prepare_release.outputs.translation_languages }}
+                  MAIN_ZIP: ${{ needs.prepare_release.outputs.main_zip_name }}
+              run: |
+                  node <<'NODE'
+                  const fs = require("node:fs");
+
+                  const hasTranslations = process.env.HAS_TRANSLATIONS === "true";
+                  const expected = JSON.parse(process.env.EXPECTED_LANGS || "[]");
+                  const mainZip = process.env.MAIN_ZIP || "";
+                  const assetsDir = "release-assets";
+                  const files = fs.existsSync(assetsDir)
+                    ? fs.readdirSync(assetsDir).filter(name => name.toLowerCase().endsWith(".zip"))
+                    : [];
+
+                  const getLocale = language =>
+                    String(language).toLowerCase() === "pt"
+                      ? "ptbr"
+                      : String(language).toLowerCase();
+
+                  const uploaded = [];
+                  const skipped = [];
+
+                  for (const language of expected) {
+                    const locale = getLocale(language);
+                    const found = files.some(name => name !== mainZip && name.includes(`-${locale}-`));
+                    if (found) {
+                      uploaded.push(String(language));
+                    } else {
+                      skipped.push(String(language));
+                    }
+                  }
+
+                  console.log("Translation artifact summary:");
+                  if (!hasTranslations || expected.length === 0) {
+                    console.log("- translations configured: no");
+                    console.log("- uploaded: []");
+                    console.log("- skipped: []");
+                  } else {
+                    console.log(`- expected: ${JSON.stringify(expected)}`);
+                    console.log(`- uploaded: ${JSON.stringify(uploaded)}`);
+                    console.log(`- skipped: ${JSON.stringify(skipped)}`);
+                  }
+
+                  const summaryPath = process.env.GITHUB_STEP_SUMMARY;
+                  if (summaryPath) {
+                    const lines = [
+                      "## Translation Artifacts",
+                      "",
+                      `Expected languages: ${JSON.stringify(expected)}`,
+                      `Uploaded languages: ${JSON.stringify(uploaded)}`,
+                      `Skipped languages: ${JSON.stringify(skipped)}`,
+                      ""
+                    ];
+                    fs.appendFileSync(summaryPath, lines.join("\n"));
+                  }
+                  NODE
+
             - name: Generate changelog link
               id: generate_changelog
               uses: actions/github-script@v7
@@ -187,6 +267,17 @@ jobs:
                       const owner = context.repo.owner;
                       const changelogUrl = `https://github.com/${owner}/${repo}/compare/${previousTag}...${latestTag}`;
                       return `Full Changelog: ${changelogUrl}`;
+
+            - name: Verify release assets
+              run: |
+                  echo "Release assets ready for upload:"
+                  ls -lah release-assets
+                  ZIP_COUNT=$(find release-assets -maxdepth 1 -type f -name '*.zip' | wc -l)
+                  if [ "$ZIP_COUNT" -eq 0 ]; then
+                      echo "No zip assets found in release-assets"
+                      exit 1
+                  fi
+                  find release-assets -maxdepth 1 -type f -name '*.zip' -print
 
             - name: Create GitHub Release
               id: create_release
