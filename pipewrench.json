@@ -8,7 +8,6 @@
 		"icon": "./logo.png",
 		"logo": "./logo.png",
 		"poster": "./poster.png",
-		"require": [],
 		"category": "items",
 		"tags": ["items"]
 	},
