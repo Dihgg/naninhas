@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.7.2](https://github.com/dihgg/naninhas/compare/v1.7.1...v1.7.2) (2026-06-02)
+
+
+### Bug Fixes
+
+* **translations:** fixing translation workflow ([95fba30](https://github.com/dihgg/naninhas/commit/95fba307e8c36242b8e9b47e904c496df8b3b1b6))
+
 ### [1.7.1](https://github.com/dihgg/naninhas/compare/v1.7.0...v1.7.1) (2026-06-01)
 
 ## [1.7.0](https://github.com/dihgg/naninhas/compare/v1.6.0...v1.7.0) (2026-06-01)
