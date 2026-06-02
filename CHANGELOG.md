@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.8.1](https://github.com/dihgg/naninhas/compare/v1.8.0...v1.8.1) (2026-06-02)
+
+
+### Bug Fixes
+
+* **deployment:** removing empty require ([eb1959b](https://github.com/dihgg/naninhas/commit/eb1959b0b76e6892b4a8473dff7918912db23095))
+
 ## [1.8.0](https://github.com/dihgg/naninhas/compare/v1.7.2...v1.8.0) (2026-06-02)
 
 
