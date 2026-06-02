@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.8.0](https://github.com/dihgg/naninhas/compare/v1.7.2...v1.8.0) (2026-06-02)
+
+
+### Features
+
+* **agent:** updating agent behavior ([1c33a6a](https://github.com/dihgg/naninhas/commit/1c33a6a0726b656245864805805a278f6bb90ed6))
+
 ### [1.7.2](https://github.com/dihgg/naninhas/compare/v1.7.1...v1.7.2) (2026-06-02)
 
 
