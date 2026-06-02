@@ -5,21 +5,7 @@ const fs = require("fs-extra");
 const { Command } = require("commander");
 const translate = require("translatte");
 
-const { copyFolder, getInfo, startProgressBar, stopProgressBar } = require("./utils");
-
-/**
- * Converts a language code to Project Zomboid locale format.
- * @param {string} language
- * @returns {string}
- */
-const getLocale = language => {
-	switch (language.toLowerCase()) {
-		case "pt":
-			return "PTBR";
-		default:
-			return language.toUpperCase();
-	}
-};
+const { copyFolder, getInfo, getLocale, startProgressBar, stopProgressBar } = require("./utils");
 
 /**
  * Converts info object back to .info content.
@@ -160,6 +146,23 @@ const copyRootAssets = async outputPath => {
 };
 
 /**
+ * Translates the package description and falls back to English if translation fails.
+ * @param {string} name the base mod/package name
+ * @param {string} locale the target locale identifier (e.g. "PTBR")
+ * @param {string} language the translation language code (e.g. "pt")
+ * @returns {Promise<string>} translated description text or a safe English fallback
+ */
+const translateDescription = async (name, locale, language) => {
+	try {
+		return (await translate(`Translation package for ${name} in ${locale}.`, { to: language })).text;
+	} catch (err) {
+		console.error("Error translating description:", err);
+		console.info(`Using fallback description for ${name} - ${locale}`);
+		return `Translation package for ${name} in ${locale}.`;
+	}
+};
+
+/**
  * Creates mod.info for translated locale package.
  * @param {string} outputPath the path to the output directory for the locale package
  * @param {string} locale the locale being generated (e.g., "PTBR")
@@ -167,16 +170,14 @@ const copyRootAssets = async outputPath => {
  */
 const writeTranslatedModInfo = async (outputPath, locale, language) => {
 	const { id, name, modInfo } = getInfo();
-	const descriptionResult = await translate(`Translation package for ${name} in ${locale}.`, {
-		to: language
-	});
 	const require = [...(modInfo.require ?? []), id];
+	const description = await translateDescription(name, locale, language);
 
 	const infoContent = stringifyInfoFile({
 		...modInfo,
 		id: `${id}-${locale.toLowerCase()}`,
 		name: `${name} - ${locale}`,
-		description: descriptionResult.text,
+		description,
 		require
 	});
 
