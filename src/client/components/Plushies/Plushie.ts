@@ -3,8 +3,9 @@ import { PlayerApi } from "@shared/components/PlayerApi";
 import { ModData } from "@client/components/Plushies/ModData";
 import { Observer } from "@client/components/Observer/Observer";
 import type { EventData, PerkBoost, PlayerModData, PlushieProps } from "types";
-import { triggerEvent } from "@asledgehammer/pipewrench";
+import { Perk, Perks, triggerEvent } from "@asledgehammer/pipewrench";
 import { EventsEnum } from "@constants";
+import { getPlushieDefinition } from "@shared/catalog/PlushieCatalog";
 
 // TODO: Apply the LuaEventManager to allow other mods to interact with this one
 // import { LuaEventManager } from "@asledgehammer/pipewrench"
@@ -30,17 +31,19 @@ export abstract class Plushie implements Observer {
 
 	/**
 	 * @param player Player object from PZ
-	 * @param name Plushie name
-	 * @param traitsToAdd A list of traits that this plushie gives when equipped
-	 * @param traitsToSuppress A list of traits that this plushie suppresses when equipped
-	 * @param xpBoostsToAdd A list of XP boosts that this plushie gives when equipped
+	 * @param name Plushie name. Effect data (traits, suppressions, XP boosts) is
+	 * always resolved from the catalog via {@link getPlushieDefinition}.
 	 */
-	constructor({ player, name, traitsToAdd = [], traitsToSuppress = [], xpBoostsToAdd = [] }: PlushieProps) {
+	constructor({ player, name }: PlushieProps) {
+		const { traitsToAdd, traitsToSuppress, xpBoostsToAdd } = getPlushieDefinition(name)!;
 		this.name = name;
 		this.playerApi = new PlayerApi(player);
 		this.traitsToAdd = traitsToAdd;
 		this.traitsToSuppress = traitsToSuppress;
-		this.xpBoostsToAdd = xpBoostsToAdd;
+		this.xpBoostsToAdd = xpBoostsToAdd.map(b => ({
+			perk: Perks[b.perk as keyof typeof Perks] as Perk,
+			value: b.value
+		}));
 		this.playerData = new ModData({
 			object: this.playerApi.player,
 			modKey: "Naninhas",

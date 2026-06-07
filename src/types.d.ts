@@ -8,9 +8,6 @@ export type PerkBoost = {
 export type PlushieProps = {
 	player: IsoPlayer;
 	name: string;
-	traitsToAdd?: string[];
-	traitsToSuppress?: string[];
-	xpBoostsToAdd?: PerkBoost[];
 };
 
 export type ModDataProps<T> = {
