@@ -3,6 +3,7 @@ import { AttachedItem, InventoryItem, IsoPlayer } from "@asledgehammer/pipewrenc
 import * as Events from "@asledgehammer/pipewrench-events";
 import { Subject } from "@client/components/Observer/Subject";
 import { Plushie } from "@client/components/Plushies/Plushie";
+import { extractItemName } from "@shared/utils/ItemType";
 import {
 	BorisBadger,
 	Doll,
@@ -80,7 +81,7 @@ export class Naninhas {
 		for (let i = 0; i < attachedItems.size(); i++) {
 			const attachedItem: AttachedItem = attachedItems.get(i);
 			const fullType = attachedItem.getItem().getFullType();
-			const name = fullType.replace("AuthenticZClothing.", "");
+			const name = extractItemName(fullType);
 			// Check if the item is a plushie
 			if (this.PLUSHIES.some(p => p.name === name)) {
 				attachedSet.add(name);

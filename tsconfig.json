@@ -19,6 +19,7 @@
 		"paths": {
 			"@constants": ["shared/constants.ts"],
 			"@shared/components/*": ["shared/components/*"],
+			"@shared/utils/*": ["shared/utils/*"],
 			"@server/components/*": ["server/components/*"],
 			"@client/components/*": ["client/components/*"],
 			"@test/*": [
