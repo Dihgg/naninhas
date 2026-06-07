@@ -18,6 +18,7 @@
 		],
 		"paths": {
 			"@constants": ["shared/constants.ts"],
+			"@shared/catalog/*": ["shared/catalog/*"],
 			"@shared/components/*": ["shared/components/*"],
 			"@shared/utils/*": ["shared/utils/*"],
 			"@server/components/*": ["server/components/*"],
