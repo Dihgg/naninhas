@@ -1,6 +1,6 @@
 import { mock } from "jest-mock-extended";
 import type { IsoPlayer } from "@asledgehammer/pipewrench";
-import { sendClientCommand } from "@asledgehammer/pipewrench";
+import { sendClientCommand, isClient, isServer } from "@asledgehammer/pipewrench";
 import * as Events from "@asledgehammer/pipewrench-events";
 import { PROTOCOL_SCHEMA_VERSION } from "@constants";
 import type { SyncAppliedPlushiesPayload } from "types";
@@ -12,6 +12,8 @@ jest.mock("@shared/catalog/PlushieCatalog");
 jest.mock("@shared/components/PlayerApi");
 
 const sendClientCommandMock = sendClientCommand as jest.MockedFunction<typeof sendClientCommand>;
+const isClientMock = isClient as jest.MockedFunction<typeof isClient>;
+const isServerMock = isServer as jest.MockedFunction<typeof isServer>;
 
 describe("PlushieSyncPublisher", () => {
 	const { PlayerApi } = jest.requireMock("@shared/components/PlayerApi");
@@ -41,6 +43,8 @@ describe("PlushieSyncPublisher", () => {
 		sendClientCommandMock.mockReset();
 		isKnownPlushie.mockReset();
 		replyListener = undefined;
+		isClientMock.mockReturnValue(true);  // default: pure MP client
+		isServerMock.mockReturnValue(false);
 
 		getAttachedItemNamesMock = jest.fn(() => new Set<string>());
 
@@ -59,6 +63,25 @@ describe("PlushieSyncPublisher", () => {
 	describe("tick()", () => {
 		it("does not send when no plushies are attached", () => {
 			getAttachedItemNamesMock.mockReturnValue(new Set());
+			const pub = makePublisher();
+			pub.tick();
+			expect(sendClientCommandMock).not.toHaveBeenCalled();
+		});
+
+		it("does nothing in single-player (isClient=false)", () => {
+			isClientMock.mockReturnValue(false);
+			getAttachedItemNamesMock.mockReturnValue(new Set(["Doll"]));
+			isKnownPlushie.mockReturnValue(true);
+			const pub = makePublisher();
+			pub.tick();
+			expect(sendClientCommandMock).not.toHaveBeenCalled();
+		});
+
+		it("does nothing when hosting (isClient=true, isServer=true)", () => {
+			isClientMock.mockReturnValue(true);
+			isServerMock.mockReturnValue(true);
+			getAttachedItemNamesMock.mockReturnValue(new Set(["Doll"]));
+			isKnownPlushie.mockReturnValue(true);
 			const pub = makePublisher();
 			pub.tick();
 			expect(sendClientCommandMock).not.toHaveBeenCalled();

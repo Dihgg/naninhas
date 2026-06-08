@@ -9,6 +9,11 @@ export const addXPBoost = jest.fn();
 export const sendClientCommand = jest.fn();
 export const sendServerCommand = jest.fn();
 
+/** Default: single-player. Override per-test with mockReturnValue(true) to simulate MP client. */
+export const isClient = jest.fn().mockReturnValue(false);
+/** Default: false (not a dedicated/listen server). */
+export const isServer = jest.fn().mockReturnValue(false);
+
 export const TraitFactory = {
 	addTrait: jest.fn(() =>
 		mock<Trait>({

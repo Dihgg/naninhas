@@ -60,12 +60,17 @@ export class NaninhasCommandHandler {
 		}).data;
 		const { protocol, authoritative } = serverModData;
 
+		// A reconnect creates a new client publisher that restarts revision at 1.
+		// Accept that reset so one old persisted server revision does not cause
+		// permanent stale-reject loops.
+		if (payload.revision === 1 && protocol.lastClientRevision > 0) {
+			protocol.lastClientRevision = 0;
+		}
+
 		// Check revision freshness to prevent stale / out-of-order requests
 		if (payload.revision <= protocol.lastClientRevision) {
-			print(
-				`[Naninhas] SyncDesiredPlushies: stale revision from ${player.getUsername()} ` +
-				`(expected > ${protocol.lastClientRevision}, got ${payload.revision})`
-			);
+			print(`[Naninhas] SyncDesiredPlushies: stale revision from ${player.getUsername()} `);
+			print(`(last accepted: ${protocol.lastClientRevision}, got ${payload.revision})`);
 			this.sendRejectReply(player, payload);
 			return;
 		}
@@ -150,7 +155,7 @@ export class NaninhasCommandHandler {
 			appliedNames: validNames,
 			rejectedNames
 		};
-		sendServerCommand(player, `${NETWORK_MODULE}:${NetworkCommands.SyncAppliedPlushies}`, reply);
+		sendServerCommand(player, NETWORK_MODULE, NetworkCommands.SyncAppliedPlushies, reply);
 	}
 
 	/**
@@ -164,7 +169,7 @@ export class NaninhasCommandHandler {
 			appliedNames: [],
 			rejectedNames: payload.desiredNames
 		};
-		sendServerCommand(player, `${NETWORK_MODULE}:${NetworkCommands.SyncAppliedPlushies}`, reply);
+		sendServerCommand(player, NETWORK_MODULE, NetworkCommands.SyncAppliedPlushies, reply);
 	}
 
 	/**

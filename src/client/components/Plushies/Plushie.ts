@@ -3,7 +3,7 @@ import { PlayerApi } from "@shared/components/PlayerApi";
 import { ModData } from "@shared/components/ModData";
 import { Observer } from "@client/components/Observer/Observer";
 import type { EventData, PerkBoost, PlayerModData, PlushieProps } from "types";
-import { Perk, Perks, triggerEvent } from "@asledgehammer/pipewrench";
+import { Perk, Perks, triggerEvent, isClient, isServer } from "@asledgehammer/pipewrench";
 import { EventsEnum } from "@constants";
 import { getPlushieDefinition } from "@shared/catalog/PlushieCatalog";
 
@@ -76,8 +76,12 @@ export abstract class Plushie implements Observer {
 	/**
 	 * Applies/removes plushie XP multipliers while preserving any pre-existing player multipliers.
 	 * Uses persisted target values and delta math to avoid stacking drift.
+	 *
+	 * No-op in multiplayer — the server applies XP multipliers authoritatively.
 	 */
 	private applyBoosts(shouldApply = true) {
+		if (isClient() && !isServer()) return;
+
 		const data = this.playerData.data;
 
 		for (const { perk, value } of this.xpBoostsToAdd) {
@@ -99,28 +103,32 @@ export abstract class Plushie implements Observer {
 	 * Method that should be called when the Plushie is equipped
 	 */
 	public subscribe() {
-		const data = this.playerData.data;
+		// In multiplayer the server applies trait and XP effects authoritatively.
+		// The client still fires the Equipped event so UI and audio hooks work.
+		if (!(isClient() && !isServer())) {
+			const data = this.playerData.data;
 
-		// Add traits that this Plushie grants, if not already added by another Plushie or present on the player
-		const toAdd = this.traitsToAdd
-			.filter((trait) => !data.addedTraits.includes(trait) && !this.hasTrait(trait))
-		
-		for (const trait of toAdd) {
-			data.addedTraits.push(trait);
-			this.playerApi.addTrait(trait);
+			// Add traits that this Plushie grants, if not already added by another Plushie or present on the player
+			const toAdd = this.traitsToAdd
+				.filter((trait) => !data.addedTraits.includes(trait) && !this.hasTrait(trait));
+
+			for (const trait of toAdd) {
+				data.addedTraits.push(trait);
+				this.playerApi.addTrait(trait);
+			}
+
+			// Remove traits that this Plushie suppresses, if not already suppressed by another Plushie or absent on the player
+			const toSuppress = this.traitsToSuppress
+				.filter((trait) => !data.suppressedTraits.includes(trait) && this.hasTrait(trait));
+
+			for (const trait of toSuppress) {
+				data.suppressedTraits.push(trait);
+				this.playerApi.removeTrait(trait);
+			}
+
+			// Apply XP boosts for this Plushie (if any)
+			this.applyBoosts(true);
 		}
-
-		// Remove traits that this Plushie suppresses, if not already suppressed by another Plushie or absent on the player
-		const toSuppress = this.traitsToSuppress
-			.filter((trait) => !data.suppressedTraits.includes(trait) && this.hasTrait(trait));
-		
-		for (const trait of toSuppress) {
-			data.suppressedTraits.push(trait);
-			this.playerApi.removeTrait(trait);
-		}
-
-		// Apply XP boosts for this Plushie (if any)
-		this.applyBoosts(true);
 
 		// Calls the event with the current traits to allow other mods to react accordingly
 		triggerEvent(EventsEnum.Equipped, {
@@ -133,27 +141,31 @@ export abstract class Plushie implements Observer {
 	 * Method that should be called when Plushie is unequipped
 	 */
 	public unsubscribe() {
-		const data = this.playerData.data;
-		
-		// Remove all the traits that are exclusive this Plushie
-		const toRemove = this.traitsToAdd
-			.filter((trait) => data.addedTraits.includes(trait));
+		// In multiplayer the server removes trait and XP effects authoritatively.
+		// The client still fires the Unequipped event so UI and audio hooks work.
+		if (!(isClient() && !isServer())) {
+			const data = this.playerData.data;
 
-		for (const trait of toRemove) {
-			data.addedTraits = data.addedTraits.filter((t) => t !== trait);
-			this.playerApi.removeTrait(trait);
+			// Remove all the traits that are exclusive this Plushie
+			const toRemove = this.traitsToAdd
+				.filter((trait) => data.addedTraits.includes(trait));
+
+			for (const trait of toRemove) {
+				data.addedTraits = data.addedTraits.filter((t) => t !== trait);
+				this.playerApi.removeTrait(trait);
+			}
+
+			// Add back the traits that are suppressed by this Plushie
+			const toRestore = this.traitsToSuppress
+				.filter((trait) => data.suppressedTraits.includes(trait));
+			for (const trait of toRestore) {
+				data.suppressedTraits = data.suppressedTraits.filter((t) => t !== trait);
+				this.playerApi.addTrait(trait);
+			}
+
+			// Remove XP boosts for this Plushie (if any)
+			this.applyBoosts(false);
 		}
-
-		// Add back the traits that are suppressed by this Plushie
-		const toRestore = this.traitsToSuppress
-			.filter((trait) => data.suppressedTraits.includes(trait));
-		for (const trait of toRestore) {
-			data.suppressedTraits = data.suppressedTraits.filter((t) => t !== trait);
-			this.playerApi.addTrait(trait);
-		}
-
-		// Remove XP boosts for this Plushie (if any)
-		this.applyBoosts(false);
 		
 		// Calls the event with the current traits to allow other mods to react accordingly
 		triggerEvent(EventsEnum.Unequipped, {

@@ -91,4 +91,85 @@ describe("NaninhasCommandHandler", () => {
 			expect(removeTraitFn).not.toHaveBeenCalledWith("ShortSighted");
 		});
 	});
+
+	describe("revision handling", () => {
+		it("accepts revision 1 after reconnect when server has persisted higher revision", () => {
+			jest.resetModules();
+
+			const sendServerCommandMock = jest.fn();
+			jest.doMock("@asledgehammer/pipewrench", () => ({
+				sendServerCommand: sendServerCommandMock,
+				Perks: {}
+			}));
+
+			const mockPlayerApi = {
+				player: {},
+				getAttachedItemNames: jest.fn().mockReturnValue(new Set(["Doll"])),
+				hasTrait: jest.fn().mockReturnValue(false),
+				addTrait: jest.fn(),
+				removeTrait: jest.fn(),
+				applyXpMultiplierDelta: jest.fn()
+			};
+
+			jest.doMock("@shared/components/PlayerApi", () => ({
+				PlayerApi: jest.fn().mockImplementation(() => mockPlayerApi)
+			}));
+
+			const initialAuthoritative = emptyAuthoritative();
+
+			const serverData = {
+				protocol: { lastClientRevision: 10, lastSchemaVersion: PROTOCOL_SCHEMA_VERSION },
+				authoritative: initialAuthoritative
+			};
+
+			jest.doMock("@shared/components/ModData", () => ({
+				ModData: jest.fn().mockImplementation(() => ({ data: serverData }))
+			}));
+
+			const { PlushieReconciler } = jest.requireMock("@shared/components/PlushieReconciler");
+			PlushieReconciler.reconcile = jest.fn().mockReturnValue({
+				traitsToAdd: [],
+				traitsToRemove: [],
+				traitsToSuppress: [],
+				traitsToRestore: [],
+				xpBoostDeltas: {},
+				newState: {
+					activePlushieNames: ["Doll"],
+					addedTraits: [],
+					suppressedTraits: [],
+					xpBoosts: {}
+				}
+			});
+
+			const { isKnownPlushie } = jest.requireMock("@shared/catalog/PlushieCatalog");
+			isKnownPlushie.mockImplementation((name: string) => name === "Doll");
+
+			const { NaninhasCommandHandler } = require("@server/components/NaninhasCommandHandler");
+			const handler = new NaninhasCommandHandler();
+
+			const payload: SyncDesiredPlushiesPayload = {
+				schemaVersion: PROTOCOL_SCHEMA_VERSION,
+				revision: 1,
+				desiredNames: ["Doll"]
+			};
+
+			handler.onSyncDesiredPlushies({
+				getUsername: jest.fn().mockReturnValue("ReconnectPlayer"),
+				getXp: jest.fn().mockReturnValue({ getMultiplier: jest.fn(), addXpMultiplier: jest.fn() })
+			} as any, payload);
+
+			expect(PlushieReconciler.reconcile).toHaveBeenCalledWith(initialAuthoritative, ["Doll"]);
+			expect(serverData.protocol.lastClientRevision).toBe(1);
+			expect(sendServerCommandMock).toHaveBeenCalledWith(
+				expect.anything(),
+				"Naninhas",
+				"SyncAppliedPlushies",
+				expect.objectContaining({
+					revision: 1,
+					appliedNames: ["Doll"],
+					rejectedNames: []
+				})
+			);
+		});
+	});
 });
