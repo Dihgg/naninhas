@@ -106,6 +106,7 @@ export abstract class Plushie implements Observer {
 		// In multiplayer the server applies trait and XP effects authoritatively.
 		// The client still fires the Equipped event so UI and audio hooks work.
 		if (!(isClient() && !isServer())) {
+			print(`[Naninhas][debug] Plushie.subscribe(${this.name}): applying direct (not pure MP client)`);
 			const data = this.playerData.data;
 
 			// Add traits that this Plushie grants, if not already added by another Plushie or present on the player
@@ -128,6 +129,8 @@ export abstract class Plushie implements Observer {
 
 			// Apply XP boosts for this Plushie (if any)
 			this.applyBoosts(true);
+		} else {
+			print(`[Naninhas][debug] Plushie.subscribe(${this.name}): skipped (pure MP client, waiting for server)`);
 		}
 
 		// Calls the event with the current traits to allow other mods to react accordingly
@@ -144,6 +147,7 @@ export abstract class Plushie implements Observer {
 		// In multiplayer the server removes trait and XP effects authoritatively.
 		// The client still fires the Unequipped event so UI and audio hooks work.
 		if (!(isClient() && !isServer())) {
+			print(`[Naninhas][debug] Plushie.unsubscribe(${this.name}): removing direct (not pure MP client)`);
 			const data = this.playerData.data;
 
 			// Remove all the traits that are exclusive this Plushie
@@ -165,6 +169,8 @@ export abstract class Plushie implements Observer {
 
 			// Remove XP boosts for this Plushie (if any)
 			this.applyBoosts(false);
+		} else {
+			print(`[Naninhas][debug] Plushie.unsubscribe(${this.name}): skipped (pure MP client, waiting for server)`);
 		}
 		
 		// Calls the event with the current traits to allow other mods to react accordingly
