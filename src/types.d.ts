@@ -17,6 +17,8 @@ export type ModDataProps<T> = {
 	modKey: string;
 	/** The data that shall be returned by default */
 	defaultData: T;
+	/** Optional normalizer for partially populated persisted data. */
+	ensure?: (data: Partial<T>) => T;
 };
 
 export type PlayerModData = {

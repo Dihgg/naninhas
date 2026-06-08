@@ -1,6 +1,6 @@
 
 import { PlayerApi } from "@shared/components/PlayerApi";
-import { ModData } from "@client/components/Plushies/ModData";
+import { ModData } from "@shared/components/ModData";
 import { Observer } from "@client/components/Observer/Observer";
 import type { EventData, PerkBoost, PlayerModData, PlushieProps } from "types";
 import { Perk, Perks, triggerEvent } from "@asledgehammer/pipewrench";
@@ -47,8 +47,17 @@ export abstract class Plushie implements Observer {
 		this.playerData = new ModData({
 			object: this.playerApi.player,
 			modKey: "Naninhas",
-			defaultData: { addedTraits: [], suppressedTraits: [], xpBoosts: {} }
+			defaultData: { addedTraits: [], suppressedTraits: [], xpBoosts: {} },
+			ensure: Plushie.ensurePlayerData
 		});
+	}
+
+	private static ensurePlayerData(data: Partial<PlayerModData>): PlayerModData {
+		const ensured = data as PlayerModData;
+		ensured.addedTraits = data.addedTraits ?? [];
+		ensured.suppressedTraits = data.suppressedTraits ?? [];
+		ensured.xpBoosts = data.xpBoosts && typeof data.xpBoosts === "object" ? data.xpBoosts : {};
+		return ensured;
 	}
 
 	/**
@@ -69,7 +78,7 @@ export abstract class Plushie implements Observer {
 	 * Uses persisted target values and delta math to avoid stacking drift.
 	 */
 	private applyBoosts(shouldApply = true) {
-		const data = this.ensureData();
+		const data = this.playerData.data;
 		const xp = this.playerApi.getXp();
 		
 		for (const { perk, value } of this.xpBoostsToAdd) {
@@ -94,7 +103,7 @@ export abstract class Plushie implements Observer {
 	 * Method that should be called when the Plushie is equipped
 	 */
 	public subscribe() {
-		const data = this.ensureData();
+		const data = this.playerData.data;
 
 		// Add traits that this Plushie grants, if not already added by another Plushie or present on the player
 		const toAdd = this.traitsToAdd
@@ -128,7 +137,7 @@ export abstract class Plushie implements Observer {
 	 * Method that should be called when Plushie is unequipped
 	 */
 	public unsubscribe() {
-		const data = this.ensureData();
+		const data = this.playerData.data;
 		
 		// Remove all the traits that are exclusive this Plushie
 		const toRemove = this.traitsToAdd
@@ -164,29 +173,6 @@ export abstract class Plushie implements Observer {
 	 */
 	private hasTrait(trait: string): boolean {
 		return this.playerApi.hasTrait(trait);
-	}
-
-	/**
-	 * Ensures the player mod data has the correct structure and default values.
-	 * This is necessary to prevent issues when accessing/modifying the data later on.
-	 * @returns The ensured player mod data object
-	 */
-	private ensureData(): PlayerModData {
-		const data = this.playerData.data as Partial<PlayerModData>;
-
-		if (!data.addedTraits) {
-			data.addedTraits = [];
-		}
-
-		if (!data.suppressedTraits) {
-			data.suppressedTraits = [];
-		}
-
-		if (!data.xpBoosts || typeof data.xpBoosts !== "object") {
-			data.xpBoosts = {};
-		}
-
-		return data as PlayerModData;
 	}
 
 	/**

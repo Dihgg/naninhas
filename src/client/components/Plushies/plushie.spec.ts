@@ -149,7 +149,7 @@ describe("Plushie", () => {
 			name: "mocked"
 		});
 
-		const data = (plushie as unknown as { ensureData: () => Record<string, unknown> }).ensureData();
+		const data = plushie.data;
 
 		expect(data.addedTraits).toEqual([]);
 		expect(data.suppressedTraits).toEqual([]);

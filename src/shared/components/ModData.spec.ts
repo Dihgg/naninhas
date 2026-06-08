@@ -1,5 +1,5 @@
 import { mock } from "jest-mock-extended";
-import { ModData } from "@client/components/Plushies/ModData";;
+import { ModData } from "@shared/components/ModData";
 
 describe("ModData", () => {
 	let mockObject: ModData<unknown>['object'];
@@ -65,5 +65,42 @@ describe("ModData", () => {
 		});
 		expect(pd.data).toBe("existing");
 		expect(modData["testKey"]).toBe("existing");
+	});
+
+	it("normalizes partial persisted objects through ensure", () => {
+		modData["testKey"] = { foo: "existing" };
+		const pd = new ModData({
+			object: mockObject,
+			modKey: "testKey",
+			defaultData: { foo: "default", bar: [] as string[] },
+			ensure: (data) => ({
+				foo: data.foo ?? "default",
+				bar: data.bar ?? []
+			})
+		});
+
+		expect(pd.data).toEqual({ foo: "existing", bar: [] });
+		expect(modData["testKey"]).toEqual({ foo: "existing", bar: [] });
+	});
+
+	it("supports KahluaTable-style get and set access", () => {
+		const tableStore: Record<string, unknown> = {};
+		const tableObject = {
+			getModData: jest.fn(() => ({
+				get: jest.fn((key: string) => tableStore[key]),
+				set: jest.fn((key: string, value: unknown) => {
+					tableStore[key] = value;
+				})
+			}))
+		};
+
+		const pd = new ModData({
+			object: tableObject,
+			modKey: "testKey",
+			defaultData: { foo: "bar" }
+		});
+
+		expect(pd.data).toEqual({ foo: "bar" });
+		expect(tableStore["testKey"]).toEqual({ foo: "bar" });
 	});
 });
