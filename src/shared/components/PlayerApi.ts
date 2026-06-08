@@ -1,4 +1,4 @@
-import type { IsoPlayer } from "@asledgehammer/pipewrench";
+import type { IsoPlayer, Perk } from "@asledgehammer/pipewrench";
 import { CharacterTraitApi } from "@shared/components/CharacterTraitApi";
 import { extractItemName } from "@shared/utils/ItemType";
 
@@ -58,6 +58,17 @@ export class PlayerApi {
 	/** Removes a trait from the player. */
 	public removeTrait(traitId: string): void {
 		CharacterTraitApi.removeTrait(this._player, traitId);
+	}
+
+	/**
+	 * Adjusts an XP multiplier for `perk` by `delta`, clamping the result to zero.
+	 * Uses the current live multiplier as the base so existing non-plushie boosts
+	 * are preserved.
+	 */
+	public applyXpMultiplierDelta(perk: Perk, delta: number): void {
+		const xp = this._player.getXp();
+		const newMultiplier = Math.max(xp.getMultiplier(perk) + delta, 0);
+		xp.addXpMultiplier(perk, newMultiplier, 0, 0);
 	}
 
 	/** Reduces boredom using Build 42 CharacterStat API. */

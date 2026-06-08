@@ -1,6 +1,6 @@
 import { mock } from "jest-mock-extended";
 import { Plushie } from "@client/components/Plushies/Plushie";
-import { IsoPlayer, Perks, triggerEvent } from "@asledgehammer/pipewrench";
+import { IsoPlayer, Perks, triggerEvent, isClient, isServer } from "@asledgehammer/pipewrench";
 import type { Perk } from "@asledgehammer/pipewrench";
 import { EventsEnum } from "@constants";
 import * as plushieCatalog from "@shared/catalog/PlushieCatalog";
@@ -9,7 +9,9 @@ jest.mock("@asledgehammer/pipewrench-events");
 jest.mock("@shared/catalog/PlushieCatalog");
 
 describe("Plushie", () => {
-    const triggerEventMock = triggerEvent as jest.MockedFunction<typeof triggerEvent>;
+	const triggerEventMock = triggerEvent as jest.MockedFunction<typeof triggerEvent>;
+	const isClientMock = isClient as jest.MockedFunction<typeof isClient>;
+	const isServerMock = isServer as jest.MockedFunction<typeof isServer>;
 	const getPlushieDefinitionMock = plushieCatalog.getPlushieDefinition as jest.MockedFunction<typeof plushieCatalog.getPlushieDefinition>;
 	const addXpMultiplier = jest.fn();
 	const getMultiplier = jest.fn();
@@ -30,6 +32,8 @@ describe("Plushie", () => {
 		addTraitFn.mockReset();
 		removeTraitFn.mockReset();
 		hasTraitFn.mockReset();
+		isClientMock.mockReturnValue(false); // default: single-player
+		isServerMock.mockReturnValue(false);
 
 		// Default mock returns a plushie with no effects
 		getPlushieDefinitionMock.mockReturnValue({
@@ -313,5 +317,73 @@ describe("Plushie", () => {
 			expect(addTraitFn).not.toHaveBeenCalled();
 		});
 	});
-	
+
+	describe("multiplayer guard (isClient)", () => {
+		const makePlushieWithTraits = () => {
+			getPlushieDefinitionMock.mockReturnValue({
+				name: "mocked",
+				traitsToAdd: ["EagleEyed"],
+				traitsToSuppress: ["ShortSighted"],
+				xpBoostsToAdd: []
+			});
+			hasTraitFn.mockReturnValue(true);
+			return new TestPlushie({ player: mockPlayer(true), name: "mocked" });
+		};
+
+		it("skips trait mutation on subscribe when isClient() is true", () => {
+			isClientMock.mockReturnValue(true);
+			isServerMock.mockReturnValue(false);
+			const plushie = makePlushieWithTraits();
+			plushie.subscribe();
+			expect(addTraitFn).not.toHaveBeenCalled();
+			expect(removeTraitFn).not.toHaveBeenCalled();
+		});
+
+		it("still fires Equipped event on subscribe in MP", () => {
+			isClientMock.mockReturnValue(true);
+			isServerMock.mockReturnValue(false);
+			const plushie = makePlushieWithTraits();
+			plushie.subscribe();
+			expect(triggerEventMock).toHaveBeenCalledWith(EventsEnum.Equipped, expect.any(Object));
+		});
+
+		it("skips trait mutation on unsubscribe when isClient() is true", () => {
+			isClientMock.mockReturnValue(false);
+			isServerMock.mockReturnValue(false);
+			const plushie = makePlushieWithTraits();
+			plushie.subscribe();
+			addTraitFn.mockClear();
+			removeTraitFn.mockClear();
+
+			isClientMock.mockReturnValue(true);
+			isServerMock.mockReturnValue(false);
+			plushie.unsubscribe();
+			expect(addTraitFn).not.toHaveBeenCalled();
+			expect(removeTraitFn).not.toHaveBeenCalled();
+		});
+
+		it("still fires Unequipped event on unsubscribe in MP", () => {
+			isClientMock.mockReturnValue(true);
+			isServerMock.mockReturnValue(false);
+			const plushie = makePlushieWithTraits();
+			plushie.unsubscribe();
+			expect(triggerEventMock).toHaveBeenCalledWith(EventsEnum.Unequipped, expect.any(Object));
+		});
+
+		it("applies traits normally in single-player (isClient false)", () => {
+			isClientMock.mockReturnValue(false);
+			isServerMock.mockReturnValue(false);
+			getPlushieDefinitionMock.mockReturnValue({
+				name: "mocked",
+				traitsToAdd: ["EagleEyed"],
+				traitsToSuppress: [],
+				xpBoostsToAdd: []
+			});
+			hasTraitFn.mockReturnValue(false);
+			const plushie = new TestPlushie({ player: mockPlayer(), name: "mocked" });
+			plushie.subscribe();
+			expect(addTraitFn).toHaveBeenCalled();
+		});
+	});
+
 });

@@ -72,6 +72,8 @@ During `npm run postbuild`:
 - Build 42 output is generated as `.json` files in `42/media/lua/shared/Translate/<LANG>/<NAMESPACE>.json`
 
 ---
+
+# Development
 ## 👩‍💻 API
 Other mods can interact with **Naninhas** by using the `Events`.
 
@@ -111,6 +113,109 @@ The `data` structure is the following
 
 
 ---
+
+## Single Player
+
+In single player, plushie effects are applied directly when attached and removed when detached.
+
+### Single Player Flow
+```mermaid
+flowchart TD
+    A["Player attaches/detaches item in inventory"] --> B["Game fires ItemEquipped or ItemUnequipped event"]
+    B --> C["Subject observer detects event"]
+    C --> D["Observer triggers Plushie behavior hook"]
+    D --> E{Attach or Detach?}
+    E -->|Attach| F["Get plushie effect metadata"]
+    E -->|Detach| G["Reverse previous effects"]
+    F --> H["Add traits"]
+    F --> I["Apply XP multipliers"]
+    G --> J["Remove traits"]
+    G --> K["Restore suppressed traits"]
+    H --> L["Fire NaninhasEquipped event"]
+    I --> L
+    J --> M["Fire NaninhasUnequipped event"]
+    K --> M
+    L --> N["Player has active buff"]
+    M --> O["Buff reverted"]
+```
+
+Notes:
+- Subject/Observer pattern detects game item events automatically.
+- Only one plushie can be equipped at a time.
+- Buffs persist until the plushie is detached or the game ends.
+- Local effects apply immediately without network sync.
+
+## Multiplayer
+
+Naninhas uses a **server-authoritative** sync model in multiplayer.
+
+- Client detects attached plushie changes and sends the desired plushie set.
+- Server validates payload version, request ordering, known plushie names, and real attached items.
+- Server applies the reconciled trait and XP state, then persists the authoritative snapshot in player modData.
+- Client receives the applied and rejected plushie names and updates local sync state.
+
+Notes:
+- Reconnect flow is handled by accepting a fresh client revision sequence restart.
+
+### Multiplayer Flow
+
+```mermaid
+sequenceDiagram
+    actor Player
+    participant Client as Client (Publisher)
+    participant Server as Server (Handler)
+    participant ModData as ModData
+
+    Player->>Client: Attach/detach plushie
+    Client->>Client: Detect attachment change
+    Client->>Client: revision++
+    Client->>Server: SyncDesiredPlushies<br/>{schemaVersion, revision, desiredNames}
+    
+    Server->>ModData: Load lastClientRevision
+    
+    alt Reconnect/Session Reset
+        Server->>Server: if revision==1 && lastClientRevision>0<br/>reset lastClientRevision=0
+    end
+    
+    alt Valid Payload
+        Server->>Server: Validate known names & attachments
+        Server->>Server: Reconcile traits/xp
+        Server->>ModData: Persist state
+        Server->>Client: SyncAppliedPlushies<br/>{appliedNames, rejectedNames}
+    else Invalid Payload
+        Server->>Client: SyncAppliedPlushies<br/>{appliedNames: [], rejectedNames: desiredNames}
+    end
+    
+    Client->>Client: Update sync reference state
+```
+
+### Network Contract
+
+Module: `Naninhas`
+
+Client -> Server command: `SyncDesiredPlushies`
+
+| Field | Type | Description |
+|---|---|---|
+| schemaVersion | `number` | Protocol compatibility version |
+| revision | `number` | Monotonic client sync counter |
+| desiredNames | `string[]` | Desired active plushie names from current attachments |
+
+Server -> Client command: `SyncAppliedPlushies`
+
+| Field | Type | Description |
+|---|---|---|
+| schemaVersion | `number` | Echoed protocol version |
+| revision | `number` | Echoed request revision |
+| appliedNames | `string[]` | Names accepted and applied by server |
+| rejectedNames | `string[]` | Names rejected by validation |
+
+Validation behavior:
+- Unsupported `schemaVersion` is rejected safely.
+- Stale `revision` is rejected to avoid out-of-order application.
+- Unknown plushie names are rejected.
+- Server verifies plushies are actually attached before applying.
+
 
 ## 👩‍💻 Repository Badges
 ### Code Coverage

@@ -1,5 +1,5 @@
 /* @noSelfInFile */
-import type { IsoPlayer, KahluaTable, Perk } from "@asledgehammer/pipewrench";
+import type { IsoPlayer, Perk } from "@asledgehammer/pipewrench";
 import { sendServerCommand, Perks } from "@asledgehammer/pipewrench";
 import { NETWORK_MODULE, NetworkCommands, PROTOCOL_SCHEMA_VERSION } from "@constants";
 import type {
@@ -31,10 +31,9 @@ export class NaninhasCommandHandler {
 	 * 6. Reply to the client with SyncAppliedPlushies
 	 *
 	 * @param player The player sending the sync request
-	 * @param args The KahluaTable payload sent by the client via `sendClientCommand`
+	 * @param payload The deserialized payload sent by the client via `sendClientCommand`
 	 */
-	onSyncDesiredPlushies(player: IsoPlayer, args: KahluaTable): void {
-		const payload = args as unknown as SyncDesiredPlushiesPayload;
+	onSyncDesiredPlushies(player: IsoPlayer, payload: SyncDesiredPlushiesPayload): void {
 
 		// Validate schemaVersion
 		if (payload.schemaVersion !== PROTOCOL_SCHEMA_VERSION) {
@@ -61,12 +60,17 @@ export class NaninhasCommandHandler {
 		}).data;
 		const { protocol, authoritative } = serverModData;
 
+		// A reconnect creates a new client publisher that restarts revision at 1.
+		// Accept that reset so one old persisted server revision does not cause
+		// permanent stale-reject loops.
+		if (payload.revision === 1 && protocol.lastClientRevision > 0) {
+			protocol.lastClientRevision = 0;
+		}
+
 		// Check revision freshness to prevent stale / out-of-order requests
 		if (payload.revision <= protocol.lastClientRevision) {
-			print(
-				`[Naninhas] SyncDesiredPlushies: stale revision from ${player.getUsername()} ` +
-				`(expected > ${protocol.lastClientRevision}, got ${payload.revision})`
-			);
+			print(`[Naninhas] SyncDesiredPlushies: stale revision from ${player.getUsername()} `);
+			print(`(last accepted: ${protocol.lastClientRevision}, got ${payload.revision})`);
 			this.sendRejectReply(player, payload);
 			return;
 		}
@@ -90,36 +94,57 @@ export class NaninhasCommandHandler {
 		// -----------------------------------------------------------------------
 		// 4. Reconcile and apply
 		// -----------------------------------------------------------------------
-		const plan = PlushieReconciler.reconcile(authoritative, validNames);
+		const {
+			traitsToAdd,
+			traitsToRemove,
+			traitsToSuppress,
+			traitsToRestore,
+			xpBoostDeltas,
+			newState
+		} = PlushieReconciler.reconcile(authoritative, validNames);
 
-		for (const trait of plan.traitsToAdd) {
+		for (const trait of traitsToAdd) {
 			playerApi.addTrait(trait);
 		}
-		for (const trait of plan.traitsToRemove) {
+		for (const trait of traitsToRemove) {
 			playerApi.removeTrait(trait);
 		}
-		for (const trait of plan.traitsToSuppress) {
-			playerApi.removeTrait(trait);
+
+		// Only suppress traits the player actually has — suppressing a trait the
+		// player never had would cause it to be granted on the next plushie removal.
+		const actuallySuppressed: string[] = [];
+		for (const trait of traitsToSuppress) {
+			if (playerApi.hasTrait(trait)) {
+				playerApi.removeTrait(trait);
+				actuallySuppressed.push(trait);
+			}
 		}
-		for (const trait of plan.traitsToRestore) {
+
+		for (const trait of traitsToRestore) {
 			playerApi.addTrait(trait);
 		}
 
 		const xp = player.getXp();
-		for (const [key, delta] of Object.entries(plan.xpBoostDeltas)) {
+		for (const [key, delta] of Object.entries(xpBoostDeltas)) {
 			const [, perkName] = key.split(":");
 			const perk = Perks[perkName as keyof typeof Perks] as Perk;
 			if (!perk) continue;
-			const newMultiplier = Math.max(xp.getMultiplier(perk) + delta, 0);
-			xp.addXpMultiplier(perk, newMultiplier, 0, 0);
+			playerApi.applyXpMultiplierDelta(perk, delta);
 		}
-
 		// -----------------------------------------------------------------------
 		// 5. Persist updated server state
 		// -----------------------------------------------------------------------
 		protocol.lastClientRevision = payload.revision;
 		protocol.lastSchemaVersion = PROTOCOL_SCHEMA_VERSION;
-		serverModData.authoritative = plan.newState;
+		// suppressedTraits must only contain traits actually removed from the player,
+		// not the full desired-suppression set from the reconciler.
+		serverModData.authoritative = {
+			...newState,
+			suppressedTraits: [
+				...authoritative.suppressedTraits.filter(t => !traitsToRestore.includes(t)),
+				...actuallySuppressed
+			]
+		};
 
 		// -----------------------------------------------------------------------
 		// 6. Reply to the client
@@ -130,7 +155,7 @@ export class NaninhasCommandHandler {
 			appliedNames: validNames,
 			rejectedNames
 		};
-		sendServerCommand(player, `${NETWORK_MODULE}:${NetworkCommands.SyncAppliedPlushies}`, reply);
+		sendServerCommand(player, NETWORK_MODULE, NetworkCommands.SyncAppliedPlushies, reply);
 	}
 
 	/**
@@ -144,7 +169,7 @@ export class NaninhasCommandHandler {
 			appliedNames: [],
 			rejectedNames: payload.desiredNames
 		};
-		sendServerCommand(player, `${NETWORK_MODULE}:${NetworkCommands.SyncAppliedPlushies}`, reply);
+		sendServerCommand(player, NETWORK_MODULE, NetworkCommands.SyncAppliedPlushies, reply);
 	}
 
 	/**
@@ -152,7 +177,19 @@ export class NaninhasCommandHandler {
 	 * creating and seeding defaults if the structure is absent or incomplete.
 	 */
 	private static ensureServerModData(data: Partial<ServerModData>): ServerModData {
-		const ensured = data as ServerModData;
+		return {
+			protocol: {
+				lastClientRevision: data.protocol?.lastClientRevision ?? 0,
+				lastSchemaVersion: data.protocol?.lastSchemaVersion ?? PROTOCOL_SCHEMA_VERSION
+			},
+			authoritative: {
+				activePlushieNames: data.authoritative?.activePlushieNames ?? [],
+				addedTraits: data.authoritative?.addedTraits ?? [],
+				suppressedTraits: data.authoritative?.suppressedTraits ?? [],
+				xpBoosts: data.authoritative?.xpBoosts ?? {}
+			}
+		};
+		/* const ensured = data as ServerModData;
 		ensured.protocol = {
 			lastClientRevision: data.protocol?.lastClientRevision ?? 0,
 			lastSchemaVersion: data.protocol?.lastSchemaVersion ?? PROTOCOL_SCHEMA_VERSION
@@ -166,6 +203,6 @@ export class NaninhasCommandHandler {
 					? data.authoritative.xpBoosts
 					: {}
 		};
-		return ensured;
+		return ensured; */
 	}
 }
