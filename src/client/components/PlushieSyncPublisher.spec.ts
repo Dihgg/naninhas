@@ -1,6 +1,6 @@
 import { mock } from "jest-mock-extended";
 import type { IsoPlayer } from "@asledgehammer/pipewrench";
-import { sendClientCommand } from "@asledgehammer/pipewrench";
+import { getSearchMode, sendClientCommand } from "@asledgehammer/pipewrench";
 import * as Events from "@asledgehammer/pipewrench-events";
 import { PROTOCOL_SCHEMA_VERSION } from "@constants";
 import type { SyncAppliedPlushiesPayload } from "types";
@@ -12,13 +12,16 @@ jest.mock("@shared/catalog/PlushieCatalog");
 jest.mock("@shared/components/PlayerApi");
 
 const sendClientCommandMock = sendClientCommand as jest.MockedFunction<typeof sendClientCommand>;
+const getSearchModeMock = getSearchMode as jest.MockedFunction<typeof getSearchMode>;
 
 describe("PlushieSyncPublisher", () => {
 	const { PlayerApi } = jest.requireMock("@shared/components/PlayerApi");
-	const { isKnownPlushie } = jest.requireMock("@shared/catalog/PlushieCatalog");
+	const { getPlushieDefinition, isKnownPlushie } = jest.requireMock("@shared/catalog/PlushieCatalog");
 
 	let replyListener: ((module: string, command: string, args: unknown) => void) | undefined;
 	let getAttachedItemNamesMock: jest.Mock;
+	let hasTraitMock: jest.Mock;
+	let blurMock: { setExterior: jest.Mock; setInterior: jest.Mock; setTargets: jest.Mock; equalise: jest.Mock };
 
 	const mockPlayer = () => mock<IsoPlayer>();
 
@@ -39,15 +42,41 @@ describe("PlushieSyncPublisher", () => {
 
 	beforeEach(() => {
 		sendClientCommandMock.mockReset();
+		getSearchModeMock.mockReset();
 		isKnownPlushie.mockReset();
+		getPlushieDefinition.mockReset();
 		replyListener = undefined;
 
 		getAttachedItemNamesMock = jest.fn(() => new Set<string>());
+		hasTraitMock = jest.fn(() => false);
+		blurMock = {
+			setExterior: jest.fn(),
+			setInterior: jest.fn(),
+			setTargets: jest.fn(),
+			equalise: jest.fn()
+		};
 
 		PlayerApi.mockImplementation(() => ({
-			player: mockPlayer(),
-			getAttachedItemNames: getAttachedItemNamesMock
+			player: {
+				...mockPlayer(),
+				getPlayerNum: jest.fn(() => 0)
+			},
+			getAttachedItemNames: getAttachedItemNamesMock,
+			hasTrait: hasTraitMock
 		}));
+
+		getPlushieDefinition.mockImplementation((name: string) => {
+			if (name === "Doll") {
+				return { traitsToSuppress: ["ShortSighted"] };
+			}
+			return { traitsToSuppress: [] };
+		});
+
+		getSearchModeMock.mockReturnValue({
+			getSearchModeForPlayer: jest.fn(() => ({
+				getBlur: jest.fn(() => blurMock)
+			}))
+		} as any);
 
 		(Events.onServerCommand as any) = {
 			addListener: jest.fn((fn: typeof replyListener) => {
@@ -217,6 +246,33 @@ describe("PlushieSyncPublisher", () => {
 			// State unchanged — no resend expected
 			pub.tick();
 			expect(sendClientCommandMock).not.toHaveBeenCalled();
+		});
+
+		it("clears blur when ShortSighted is suppressed by applied plushies", () => {
+			getAttachedItemNamesMock.mockReturnValue(new Set(["Doll"]));
+			isKnownPlushie.mockReturnValue(true);
+			hasTraitMock.mockReturnValue(false);
+
+			const pub = makePublisher();
+			pub.tick();
+			fireReply({ appliedNames: ["Doll"] });
+
+			expect(blurMock.setExterior).toHaveBeenCalledWith(0);
+			expect(blurMock.setInterior).toHaveBeenCalledWith(0);
+			expect(blurMock.setTargets).toHaveBeenCalledWith(0, 0);
+			expect(blurMock.equalise).toHaveBeenCalled();
+		});
+
+		it("does not clear blur when player still has ShortSighted", () => {
+			getAttachedItemNamesMock.mockReturnValue(new Set(["Doll"]));
+			isKnownPlushie.mockReturnValue(true);
+			hasTraitMock.mockReturnValue(true);
+
+			const pub = makePublisher();
+			pub.tick();
+			fireReply({ appliedNames: ["Doll"] });
+
+			expect(blurMock.setTargets).not.toHaveBeenCalled();
 		});
 	});
 

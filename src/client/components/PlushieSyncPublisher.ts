@@ -1,10 +1,10 @@
 /* @noSelfInFile */
 import type { IsoPlayer } from "@asledgehammer/pipewrench";
-import { sendClientCommand } from "@asledgehammer/pipewrench";
+import { getSearchMode, sendClientCommand } from "@asledgehammer/pipewrench";
 import * as Events from "@asledgehammer/pipewrench-events";
 import { NETWORK_MODULE, NetworkCommands, PROTOCOL_SCHEMA_VERSION } from "@constants";
 import type { SyncAppliedPlushiesPayload, SyncDesiredPlushiesPayload } from "types";
-import { isKnownPlushie } from "@shared/catalog/PlushieCatalog";
+import { getPlushieDefinition, isKnownPlushie } from "@shared/catalog/PlushieCatalog";
 import { PlayerApi } from "@shared/components/PlayerApi";
 
 /**
@@ -108,6 +108,8 @@ export class PlushieSyncPublisher {
 				print(`[Naninhas] SyncAppliedPlushies: rejected names: ${payload.rejectedNames.join(", ")}`);
 			}
 
+			this.clearShortSightedBlurIfSuppressed(payload.appliedNames);
+
 			// Update our reference. If a corrective send already updated
 			// lastKnownNames ahead of this reply, the reply may contain a
 			// stale set — leave it as-is so the next tick re-evaluates correctly.
@@ -118,6 +120,58 @@ export class PlushieSyncPublisher {
 			}
 			this.lastKnownNames = replyNames;
 		});
+	}
+
+	/**
+	 * Clears the search-mode blur shader if a synced plushie suppresses
+	 * ShortSighted and the trait is currently absent on the player.
+	 */
+	private clearShortSightedBlurIfSuppressed(appliedNames: readonly string[]): void {
+		if (!this.hasSuppressionForTrait(appliedNames, "ShortSighted")) {
+			return;
+		}
+
+		if (this.playerApi.hasTrait("ShortSighted")) {
+			return;
+		}
+
+		if (typeof getSearchMode !== "function") {
+			return;
+		}
+
+		const playerNum = this.playerApi.player.getPlayerNum();
+		if (playerNum < 0) {
+			return;
+		}
+
+		const searchMode = getSearchMode();
+		const playerSearchMode = searchMode?.getSearchModeForPlayer(playerNum);
+		const blur = playerSearchMode?.getBlur();
+
+		if (!blur) {
+			return;
+		}
+
+		// Keep both live and target blur at 0 to prevent stale short-sighted blur.
+		blur.setExterior(0);
+		blur.setInterior(0);
+		blur.setTargets(0, 0);
+		blur.equalise();
+	}
+
+	private hasSuppressionForTrait(appliedNames: readonly string[], traitId: string): boolean {
+		for (const name of appliedNames) {
+			const def = getPlushieDefinition(name);
+			if (!def) {
+				continue;
+			}
+
+			if (def.traitsToSuppress.includes(traitId)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/** Returns true if `names` differs from `lastKnownNames`. */

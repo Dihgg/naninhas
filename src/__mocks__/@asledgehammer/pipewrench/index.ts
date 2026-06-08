@@ -8,6 +8,7 @@ export const addXPBoost = jest.fn();
 
 export const sendClientCommand = jest.fn();
 export const sendServerCommand = jest.fn();
+export const getSearchMode = jest.fn();
 
 /** Default: single-player. Override per-test with mockReturnValue(true) to simulate MP client. */
 export const isClient = jest.fn().mockReturnValue(false);
