@@ -3,7 +3,7 @@
 ## Project Zomboid Plushie Buffs
 
 <p align="center">
-  <img src="./contents/preview.png">
+  <img src="./steam/preview.png">
 </p>
 
 This mod introduces the concept of "naninhas" to AuthenticZ attachable plushies!
@@ -114,80 +114,48 @@ The `data` structure is the following
 
 ---
 
-## Single Player
+## Architecture
 
-In single player, plushie effects are applied directly when attached and removed when detached.
+Naninhas uses a **unified server-authoritative model** for all game modes (single player / multiplayer).
 
-### Single Player Flow
+**Key principles:**
+- Client detects attachment changes and publishes desired plushie set
+- Server validates and reconciles trait/XP state authoritatively
+- Observer pattern handles event emission for external mods
+- Trait and XP application is **ALWAYS** server-side, never client-side
+
+### Logic Flow (All game Modes)
+
 ```mermaid
 flowchart TD
-    A["Player attaches/detaches item in inventory"] --> B["Game fires ItemEquipped or ItemUnequipped event"]
-    B --> C["Subject observer detects event"]
-    C --> D["Observer triggers Plushie behavior hook"]
-    D --> E{Attach or Detach?}
-    E -->|Attach| F["Get plushie effect metadata"]
-    E -->|Detach| G["Reverse previous effects"]
-    F --> H["Add traits"]
-    F --> I["Apply XP multipliers"]
-    G --> J["Remove traits"]
-    G --> K["Restore suppressed traits"]
-    H --> L["Fire NaninhasEquipped event"]
-    I --> L
-    J --> M["Fire NaninhasUnequipped event"]
-    K --> M
-    L --> N["Player has active buff"]
-    M --> O["Buff reverted"]
+    T["⏱ everyOneMinute"] --> U["Naninhas.update()"]
+    U --> C["Scan currently attached plushies"]
+    C --> D{"Compare against known active set"}
+    D -->|Newly attached| E["Fire <code>NaninhasEquipped</code> event"]
+    D -->|Newly detached| F["Fire <code>NaninhasUnequipped</code> event"]
+    D -->|Still active| G["Fire <code>NaninhasUpdate</code> event"]
+    E --> H["syncPublisher.tick()"]
+    F --> H
+    G --> H
+    H --> I["Attachment set changed since last sync?"]
+    I -->|No| J["Wait for next cycle"]
+    I -->|Yes| K["Send <code>SyncDesiredPlushies</code> to Server"]
+    K --> L["<strong>Server:</strong> Validate schema and revision"]
+    L --> M["<strong>Server:</strong> Verify attachments server-side"]
+    M --> N["<strong>Server:</strong> Reconcile traits/XP"]
+    N --> O["<strong>Server:</strong> Apply to player and persist <code>modData</code>"]
+    O --> P["<strong>Server:</strong> Reply <code>SyncAppliedPlushies</code>"]
+    P --> Q["<strong>Client:</strong> Update <code>lastKnownNames</code>"]
+    Q --> J
 ```
 
-Notes:
-- Subject/Observer pattern detects game item events automatically.
-- Only one plushie can be equipped at a time.
-- Buffs persist until the plushie is detached or the game ends.
-- Local effects apply immediately without network sync.
+### Single Player
 
-## Multiplayer
+In single player, plushie buffs are still applied *server-authoritatively*, as the single player is also a server that runs in the local game process.
 
-Naninhas uses a **server-authoritative** sync model in multiplayer.
+### Multiplayer
 
-- Client detects attached plushie changes and sends the desired plushie set.
-- Server validates payload version, request ordering, known plushie names, and real attached items.
-- Server applies the reconciled trait and XP state, then persists the authoritative snapshot in player modData.
-- Client receives the applied and rejected plushie names and updates local sync state.
-
-Notes:
-- Reconnect flow is handled by accepting a fresh client revision sequence restart.
-
-### Multiplayer Flow
-
-```mermaid
-sequenceDiagram
-    actor Player
-    participant Client as Client (Publisher)
-    participant Server as Server (Handler)
-    participant ModData as ModData
-
-    Player->>Client: Attach/detach plushie
-    Client->>Client: Detect attachment change
-    Client->>Client: revision++
-    Client->>Server: SyncDesiredPlushies<br/>{schemaVersion, revision, desiredNames}
-    
-    Server->>ModData: Load lastClientRevision
-    
-    alt Reconnect/Session Reset
-        Server->>Server: if revision==1 && lastClientRevision>0<br/>reset lastClientRevision=0
-    end
-    
-    alt Valid Payload
-        Server->>Server: Validate known names & attachments
-        Server->>Server: Reconcile traits/xp
-        Server->>ModData: Persist state
-        Server->>Client: SyncAppliedPlushies<br/>{appliedNames, rejectedNames}
-    else Invalid Payload
-        Server->>Client: SyncAppliedPlushies<br/>{appliedNames: [], rejectedNames: desiredNames}
-    end
-    
-    Client->>Client: Update sync reference state
-```
+Multiplayer introduces latency, so the flow should be able to handle stale or out of order requests, this is done by usage of a `revision` number that is synced between server / client
 
 ### Network Contract
 

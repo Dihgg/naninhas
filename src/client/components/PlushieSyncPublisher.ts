@@ -1,6 +1,6 @@
 /* @noSelfInFile */
 import type { IsoPlayer } from "@asledgehammer/pipewrench";
-import { sendClientCommand, isClient, isServer } from "@asledgehammer/pipewrench";
+import { sendClientCommand } from "@asledgehammer/pipewrench";
 import * as Events from "@asledgehammer/pipewrench-events";
 import { NETWORK_MODULE, NetworkCommands, PROTOCOL_SCHEMA_VERSION } from "@constants";
 import type { SyncAppliedPlushiesPayload, SyncDesiredPlushiesPayload } from "types";
@@ -39,7 +39,6 @@ export class PlushieSyncPublisher {
 	 * sends a sync request to the server when a change is detected.
 	 */
 	tick(): void {
-		if (!isClient() || isServer()) return;
 		const currentNames = this.getAttachedPlushieNames();
 
 		if (!this.hasChanged(currentNames)) {

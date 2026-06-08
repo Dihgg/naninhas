@@ -34,7 +34,6 @@ export class NaninhasCommandHandler {
 	 * @param payload The deserialized payload sent by the client via `sendClientCommand`
 	 */
 	onSyncDesiredPlushies(player: IsoPlayer, payload: SyncDesiredPlushiesPayload): void {
-
 		// Validate schemaVersion
 		if (payload.schemaVersion !== PROTOCOL_SCHEMA_VERSION) {
 			print(
