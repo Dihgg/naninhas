@@ -7,6 +7,7 @@ import { Plushie } from "@client/components/Plushies/Plushie";
 jest.mock("@asledgehammer/pipewrench-events");
 jest.mock("@client/components/Plushies/List");
 jest.mock("@client/components/Observer/Subject");
+jest.mock("@client/components/PlushieSyncPublisher");
 
 describe("Naninhas.class", () => {
 	it("Should instantiate", () => {

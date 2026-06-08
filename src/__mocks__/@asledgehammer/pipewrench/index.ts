@@ -6,6 +6,9 @@ export const getText = jest.fn((...args: string[]) => args.join());
 
 export const addXPBoost = jest.fn();
 
+export const sendClientCommand = jest.fn();
+export const sendServerCommand = jest.fn();
+
 export const TraitFactory = {
 	addTrait: jest.fn(() =>
 		mock<Trait>({

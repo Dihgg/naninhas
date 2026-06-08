@@ -1,5 +1,5 @@
 /* @noSelfInFile */
-import type { IsoPlayer, KahluaTable, Perk } from "@asledgehammer/pipewrench";
+import type { IsoPlayer, Perk } from "@asledgehammer/pipewrench";
 import { sendServerCommand, Perks } from "@asledgehammer/pipewrench";
 import { NETWORK_MODULE, NetworkCommands, PROTOCOL_SCHEMA_VERSION } from "@constants";
 import type {
@@ -31,10 +31,9 @@ export class NaninhasCommandHandler {
 	 * 6. Reply to the client with SyncAppliedPlushies
 	 *
 	 * @param player The player sending the sync request
-	 * @param args The KahluaTable payload sent by the client via `sendClientCommand`
+	 * @param payload The deserialized payload sent by the client via `sendClientCommand`
 	 */
-	onSyncDesiredPlushies(player: IsoPlayer, args: KahluaTable): void {
-		const payload = args as unknown as SyncDesiredPlushiesPayload;
+	onSyncDesiredPlushies(player: IsoPlayer, payload: SyncDesiredPlushiesPayload): void {
 
 		// Validate schemaVersion
 		if (payload.schemaVersion !== PROTOCOL_SCHEMA_VERSION) {
@@ -90,23 +89,30 @@ export class NaninhasCommandHandler {
 		// -----------------------------------------------------------------------
 		// 4. Reconcile and apply
 		// -----------------------------------------------------------------------
-		const plan = PlushieReconciler.reconcile(authoritative, validNames);
+		const {
+			traitsToAdd,
+			traitsToRemove,
+			traitsToSuppress,
+			traitsToRestore,
+			xpBoostDeltas,
+			newState
+		} = PlushieReconciler.reconcile(authoritative, validNames);
 
-		for (const trait of plan.traitsToAdd) {
+		for (const trait of traitsToAdd) {
 			playerApi.addTrait(trait);
 		}
-		for (const trait of plan.traitsToRemove) {
+		for (const trait of traitsToRemove) {
 			playerApi.removeTrait(trait);
 		}
-		for (const trait of plan.traitsToSuppress) {
+		for (const trait of traitsToSuppress) {
 			playerApi.removeTrait(trait);
 		}
-		for (const trait of plan.traitsToRestore) {
+		for (const trait of traitsToRestore) {
 			playerApi.addTrait(trait);
 		}
 
 		const xp = player.getXp();
-		for (const [key, delta] of Object.entries(plan.xpBoostDeltas)) {
+		for (const [key, delta] of Object.entries(xpBoostDeltas)) {
 			const [, perkName] = key.split(":");
 			const perk = Perks[perkName as keyof typeof Perks] as Perk;
 			if (!perk) continue;
@@ -119,7 +125,7 @@ export class NaninhasCommandHandler {
 		// -----------------------------------------------------------------------
 		protocol.lastClientRevision = payload.revision;
 		protocol.lastSchemaVersion = PROTOCOL_SCHEMA_VERSION;
-		serverModData.authoritative = plan.newState;
+		serverModData.authoritative = newState;
 
 		// -----------------------------------------------------------------------
 		// 6. Reply to the client
@@ -152,7 +158,19 @@ export class NaninhasCommandHandler {
 	 * creating and seeding defaults if the structure is absent or incomplete.
 	 */
 	private static ensureServerModData(data: Partial<ServerModData>): ServerModData {
-		const ensured = data as ServerModData;
+		return {
+			protocol: {
+				lastClientRevision: data.protocol?.lastClientRevision ?? 0,
+				lastSchemaVersion: data.protocol?.lastSchemaVersion ?? PROTOCOL_SCHEMA_VERSION
+			},
+			authoritative: {
+				activePlushieNames: data.authoritative?.activePlushieNames ?? [],
+				addedTraits: data.authoritative?.addedTraits ?? [],
+				suppressedTraits: data.authoritative?.suppressedTraits ?? [],
+				xpBoosts: data.authoritative?.xpBoosts ?? {}
+			}
+		};
+		/* const ensured = data as ServerModData;
 		ensured.protocol = {
 			lastClientRevision: data.protocol?.lastClientRevision ?? 0,
 			lastSchemaVersion: data.protocol?.lastSchemaVersion ?? PROTOCOL_SCHEMA_VERSION
@@ -166,6 +184,6 @@ export class NaninhasCommandHandler {
 					? data.authoritative.xpBoosts
 					: {}
 		};
-		return ensured;
+		return ensured; */
 	}
 }
