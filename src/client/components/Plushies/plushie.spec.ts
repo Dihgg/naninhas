@@ -3,11 +3,14 @@ import { Plushie } from "@client/components/Plushies/Plushie";
 import { IsoPlayer, Perks, triggerEvent } from "@asledgehammer/pipewrench";
 import type { Perk } from "@asledgehammer/pipewrench";
 import { EventsEnum } from "@constants";
+import * as plushieCatalog from "@shared/catalog/PlushieCatalog";
 jest.mock("@asledgehammer/pipewrench");
 jest.mock("@asledgehammer/pipewrench-events");
+jest.mock("@shared/catalog/PlushieCatalog");
 
 describe("Plushie", () => {
     const triggerEventMock = triggerEvent as jest.MockedFunction<typeof triggerEvent>;
+	const getPlushieDefinitionMock = plushieCatalog.getPlushieDefinition as jest.MockedFunction<typeof plushieCatalog.getPlushieDefinition>;
 	const addXpMultiplier = jest.fn();
 	const getMultiplier = jest.fn();
 	const addTraitFn = jest.fn();
@@ -20,12 +23,21 @@ describe("Plushie", () => {
 
 	beforeEach(() => {
 		triggerEventMock.mockReset();
+		getPlushieDefinitionMock.mockReset();
 		addXpMultiplier.mockReset();
 		getMultiplier.mockReset();
 		getMultiplier.mockReturnValue(0);
 		addTraitFn.mockReset();
 		removeTraitFn.mockReset();
 		hasTraitFn.mockReset();
+
+		// Default mock returns a plushie with no effects
+		getPlushieDefinitionMock.mockReturnValue({
+			name: "mocked",
+			traitsToAdd: [],
+			traitsToSuppress: [],
+			xpBoostsToAdd: []
+		});
 
 		(globalThis as unknown as {
 			CharacterTrait?: { get: (id: unknown) => typeof runtimeTrait };
@@ -80,11 +92,16 @@ describe("Plushie", () => {
 
 	it("Should add the Plushie bonus on top of existing multipliers", () => {
 		getMultiplier.mockReturnValue(2);
+		getPlushieDefinitionMock.mockReturnValue({
+			name: "mocked",
+			traitsToAdd: [],
+			traitsToSuppress: [],
+			xpBoostsToAdd: [{ perk: "Woodwork", value: 1 }]
+		});
 		const player = mockPlayer();
 		const plushie = new TestPlushie({
 			player,
-			name: "mocked",
-			xpBoostsToAdd: [{ perk: Perks.Woodwork as Perk, value: 1 }]
+			name: "mocked"
 		});
 		
 		plushie.subscribe();
@@ -108,11 +125,16 @@ describe("Plushie", () => {
 	});
 
 	it("Uses the default boost behavior when 'shouldApply' argument is omitted", () => {
+		getPlushieDefinitionMock.mockReturnValue({
+			name: "mocked",
+			traitsToAdd: [],
+			traitsToSuppress: [],
+			xpBoostsToAdd: [{ perk: "Woodwork", value: 1 }]
+		});
 		const player = mockPlayer();
 		const plushie = new TestPlushie({
 			player,
-			name: "mocked",
-			xpBoostsToAdd: [{ perk: Perks.Woodwork as Perk, value: 1 }]
+			name: "mocked"
 		});
 
 		(plushie as unknown as { applyBoosts: () => void }).applyBoosts();
@@ -147,11 +169,16 @@ describe("Plushie", () => {
 
 	it("Should keep existing multipliers when removing the Plushie bonus", () => {
 		getMultiplier.mockReturnValueOnce(2).mockReturnValueOnce(3);
+		getPlushieDefinitionMock.mockReturnValue({
+			name: "mocked",
+			traitsToAdd: [],
+			traitsToSuppress: [],
+			xpBoostsToAdd: [{ perk: "Woodwork", value: 1 }]
+		});
 		const player = mockPlayer();
 		const plushie = new TestPlushie({
 			player,
-			name: "mocked",
-			xpBoostsToAdd: [{ perk: Perks.Woodwork as Perk, value: 1 }]
+			name: "mocked"
 		});
 		
 		plushie.subscribe();
@@ -163,6 +190,12 @@ describe("Plushie", () => {
 	});
 
 	it("Should skip applying multiplier when persisted boost already matches target", () => {
+		getPlushieDefinitionMock.mockReturnValue({
+			name: "mocked",
+			traitsToAdd: [],
+			traitsToSuppress: [],
+			xpBoostsToAdd: [{ perk: "Woodwork", value: 1 }]
+		});
 		const player = mockPlayer(false, {
 			addedTraits: [],
 			suppressedTraits: [],
@@ -170,8 +203,7 @@ describe("Plushie", () => {
 		});
 		const plushie = new TestPlushie({
 			player,
-			name: "mocked",
-			xpBoostsToAdd: [{ perk: Perks.Woodwork as Perk, value: 1 }]
+			name: "mocked"
 		});
 
 		plushie.subscribe();
@@ -182,33 +214,48 @@ describe("Plushie", () => {
 	describe("Player does not have the Trait", () => {
 
 		it("Should add trait if player does not have it", () => {
+			getPlushieDefinitionMock.mockReturnValue({
+				name: "mocked",
+				traitsToAdd: ["mockedTrait"],
+				traitsToSuppress: [],
+				xpBoostsToAdd: []
+			});
 			const player = mockPlayer(false);
 			const plushie = new TestPlushie({
 				player,
-				name: "mocked",
-				traitsToAdd: ["mockedTrait"]
+				name: "mocked"
 			});
 			plushie.subscribe();
 			expect(addTraitFn).toHaveBeenCalledWith(runtimeTrait);
 		});
 
 		it("Should suppress trait if player has it", () => {
+			getPlushieDefinitionMock.mockReturnValue({
+				name: "mocked",
+				traitsToAdd: [],
+				traitsToSuppress: ["mockedTrait"],
+				xpBoostsToAdd: []
+			});
 			const player = mockPlayer(true);
 			const plushie = new TestPlushie({
 				player,
-				name: "mocked",
-				traitsToSuppress: ["mockedTrait"]
+				name: "mocked"
 			});
 			plushie.subscribe();
 			expect(removeTraitFn).toHaveBeenCalledWith(runtimeTrait);
 		});
 
 		it("Should add Plushie exclusive trait only once", () => {
+			getPlushieDefinitionMock.mockReturnValue({
+				name: "mocked",
+				traitsToAdd: ["mockedTrait"],
+				traitsToSuppress: [],
+				xpBoostsToAdd: []
+			});
 			const player = mockPlayer(false);
 			const plushie = new TestPlushie({
 				player,
-				name: "mocked",
-				traitsToAdd: ["mockedTrait"]
+				name: "mocked"
 			});
 			plushie.subscribe();
 			plushie.subscribe();
@@ -217,11 +264,16 @@ describe("Plushie", () => {
 		});
 
 		it("Should remove Plushie exclusive trait", () => {
+			getPlushieDefinitionMock.mockReturnValue({
+				name: "mocked",
+				traitsToAdd: ["mockedTrait"],
+				traitsToSuppress: [],
+				xpBoostsToAdd: []
+			});
 			const player = mockPlayer(false);
 			const plushie = new TestPlushie({
 				player,
-				name: "mocked",
-				traitsToAdd: ["mockedTrait"]
+				name: "mocked"
 			});
 			plushie.subscribe();
 			plushie.unsubscribe();
@@ -229,11 +281,16 @@ describe("Plushie", () => {
 		});
 
 		it("Should restore suppressed traits on unsubscribe", () => {
+			getPlushieDefinitionMock.mockReturnValue({
+				name: "mocked",
+				traitsToAdd: [],
+				traitsToSuppress: ["mockedTrait"],
+				xpBoostsToAdd: []
+			});
 			const player = mockPlayer(true);
 			const plushie = new TestPlushie({
 				player,
-				name: "mocked",
-				traitsToSuppress: ["mockedTrait"]
+				name: "mocked"
 			});
 			plushie.subscribe();
 			plushie.unsubscribe();
@@ -241,11 +298,16 @@ describe("Plushie", () => {
 		});
 
 		it("Do not add Trait if Player has the Trait", () => {
+			getPlushieDefinitionMock.mockReturnValue({
+				name: "mocked",
+				traitsToAdd: ["mockedTrait"],
+				traitsToSuppress: [],
+				xpBoostsToAdd: []
+			});
 			const player = mockPlayer(true);
 			const plushie = new TestPlushie({
 				player,
-				name: "mocked",
-				traitsToAdd: ["mockedTrait"]
+				name: "mocked"
 			});
 			plushie.subscribe();
 			expect(addTraitFn).not.toHaveBeenCalled();
