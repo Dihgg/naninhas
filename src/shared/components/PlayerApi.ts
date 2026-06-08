@@ -1,5 +1,6 @@
 import type { IsoPlayer } from "@asledgehammer/pipewrench";
 import { CharacterTraitApi } from "@shared/components/CharacterTraitApi";
+import { extractItemName } from "@shared/utils/ItemType";
 
 /**
  * Wrapper around IsoPlayer that centralizes Build 42 player operations.
@@ -29,6 +30,19 @@ export class PlayerApi {
 	/** Returns the player's mod data table. */
 	public getModData(): ReturnType<IsoPlayer["getModData"]> {
 		return this._player.getModData();
+	}
+
+	/** Returns the extracted item names from all currently attached items. */
+	public getAttachedItemNames(): Set<string> {
+		const names = new Set<string>();
+		const attachedItems = this._player.getAttachedItems();
+
+		for (let i = 0; i < attachedItems.size(); i++) {
+			const fullType = attachedItems.get(i).getItem().getFullType();
+			names.add(extractItemName(fullType));
+		}
+
+		return names;
 	}
 
 	/** Returns whether the player currently has the given trait. */

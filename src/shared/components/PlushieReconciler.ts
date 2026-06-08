@@ -27,87 +27,92 @@ export type ReconcilePlan = {
 };
 
 /**
- * Computes a minimal {@link ReconcilePlan} that transitions `currentState` to
- * the effects implied by `newActivePlushieNames`.
+ * Pure reconciliation engine that computes minimal trait and XP multiplier
+ * diffs between a current authoritative state and a desired plushie set.
  *
- * This function is **pure**: it produces no side effects and does not interact
- * with the PZ runtime. The server handler is responsible for applying the plan
- * to the live player object.
- *
- * Unknown plushie names are silently skipped — the caller is expected to
- * validate names against the catalog before invoking this function.
- *
- * @param currentState - The server's current authoritative state for the player.
- * @param newActivePlushieNames - The verified list of plushies to make active.
- * @returns A plan describing what to change and the resulting new state.
+ * Stateless and side-effect-free — safe to use in tests and shared code paths.
  */
-export function reconcile(
-	currentState: ServerAuthoritativeState,
-	newActivePlushieNames: string[]
-): ReconcilePlan {
-	// -----------------------------------------------------------------------
-	// 1. Build desired aggregate from the new active set
-	// -----------------------------------------------------------------------
-	const desiredAddedTraits = new Set<string>();
-	const desiredSuppressedTraits = new Set<string>();
-	const desiredXpBoosts: Record<string, number> = {};
+export class PlushieReconciler {
+	/**
+	 * Computes a minimal {@link ReconcilePlan} that transitions `currentState` to
+	 * the effects implied by `newActivePlushieNames`.
+	 *
+	 * Unknown plushie names are silently skipped — the caller is expected to
+	 * validate names against the catalog before invoking this method.
+	 *
+	 * @param currentState - The server's current authoritative state for the player.
+	 * @param newActivePlushieNames - The verified list of plushies to make active.
+	 * @returns A plan describing what to change and the resulting new state.
+	 */
+	static reconcile(currentState: ServerAuthoritativeState, newActivePlushieNames: string[]): ReconcilePlan {
+		// -----------------------------------------------------------------------
+		// 1. Build desired aggregate from the new active set
+		// -----------------------------------------------------------------------
+		const desiredAddedTraits = new Set<string>();
+		const desiredSuppressedTraits = new Set<string>();
+		const desiredXpBoosts: Record<string, number> = {};
 
-	for (const name of newActivePlushieNames) {
-		const def = getPlushieDefinition(name);
-		if (!def) continue;
+		for (const name of newActivePlushieNames) {
+			const definitions = getPlushieDefinition(name);
+			if (!definitions) continue;
+			
+			const { traitsToAdd, traitsToSuppress, xpBoostsToAdd } = definitions;
 
-		for (const trait of def.traitsToAdd) {
-			desiredAddedTraits.add(trait);
+			for (const trait of traitsToAdd) {
+				desiredAddedTraits.add(trait);
+			}
+
+			for (const trait of traitsToSuppress) {
+				desiredSuppressedTraits.add(trait);
+			}
+			
+			for (const boost of xpBoostsToAdd) {
+				const key = `${name}:${boost.perk}`;
+				desiredXpBoosts[key] = boost.value;
+			}
 		}
-		for (const trait of def.traitsToSuppress) {
-			desiredSuppressedTraits.add(trait);
+
+		// -----------------------------------------------------------------------
+		// 2. Diff against current state
+		// -----------------------------------------------------------------------
+		const currentAddedTraits = new Set(currentState.addedTraits);
+		const currentSuppressedTraits = new Set(currentState.suppressedTraits);
+
+		const traitsToAdd = [...desiredAddedTraits].filter(t => !currentAddedTraits.has(t));
+		const traitsToRemove = [...currentAddedTraits].filter(t => !desiredAddedTraits.has(t));
+		const traitsToSuppress = [...desiredSuppressedTraits].filter(t => !currentSuppressedTraits.has(t));
+		const traitsToRestore = [...currentSuppressedTraits].filter(t => !desiredSuppressedTraits.has(t));
+
+		// XP deltas: add new boosts (positive delta) and remove dropped boosts (negative delta)
+		const xpBoostDeltas: Record<string, number> = {};
+		for (const [key, value] of Object.entries(desiredXpBoosts)) {
+			if (currentState.xpBoosts[key] !== value) {
+				xpBoostDeltas[key] = value - (currentState.xpBoosts[key] ?? 0);
+			}
 		}
-		for (const boost of def.xpBoostsToAdd) {
-			const key = `${name}:${boost.perk}`;
-			desiredXpBoosts[key] = boost.value;
+		for (const key of Object.keys(currentState.xpBoosts)) {
+			if (!(key in desiredXpBoosts)) {
+				xpBoostDeltas[key] = -(currentState.xpBoosts[key]);
+			}
 		}
+
+		// -----------------------------------------------------------------------
+		// 3. Build the new authoritative state
+		// -----------------------------------------------------------------------
+		const newState: ServerAuthoritativeState = {
+			activePlushieNames: [...newActivePlushieNames],
+			addedTraits: [...desiredAddedTraits],
+			suppressedTraits: [...desiredSuppressedTraits],
+			xpBoosts: { ...desiredXpBoosts }
+		};
+
+		return {
+			traitsToAdd,
+			traitsToRemove,
+			traitsToSuppress,
+			traitsToRestore,
+			xpBoostDeltas,
+			newState
+		};
 	}
-
-	// -----------------------------------------------------------------------
-	// 2. Diff against current state
-	// -----------------------------------------------------------------------
-	const currentAddedTraits = new Set(currentState.addedTraits);
-	const currentSuppressedTraits = new Set(currentState.suppressedTraits);
-
-	const traitsToAdd = [...desiredAddedTraits].filter(t => !currentAddedTraits.has(t));
-	const traitsToRemove = [...currentAddedTraits].filter(t => !desiredAddedTraits.has(t));
-	const traitsToSuppress = [...desiredSuppressedTraits].filter(t => !currentSuppressedTraits.has(t));
-	const traitsToRestore = [...currentSuppressedTraits].filter(t => !desiredSuppressedTraits.has(t));
-
-	// XP deltas: add new boosts (positive delta) and remove dropped boosts (negative delta)
-	const xpBoostDeltas: Record<string, number> = {};
-	for (const [key, value] of Object.entries(desiredXpBoosts)) {
-		if (currentState.xpBoosts[key] !== value) {
-			xpBoostDeltas[key] = value - (currentState.xpBoosts[key] ?? 0);
-		}
-	}
-	for (const key of Object.keys(currentState.xpBoosts)) {
-		if (!(key in desiredXpBoosts)) {
-			xpBoostDeltas[key] = -(currentState.xpBoosts[key]);
-		}
-	}
-
-	// -----------------------------------------------------------------------
-	// 3. Build the new authoritative state
-	// -----------------------------------------------------------------------
-	const newState: ServerAuthoritativeState = {
-		activePlushieNames: [...newActivePlushieNames],
-		addedTraits: [...desiredAddedTraits],
-		suppressedTraits: [...desiredSuppressedTraits],
-		xpBoosts: { ...desiredXpBoosts }
-	};
-
-	return {
-		traitsToAdd,
-		traitsToRemove,
-		traitsToSuppress,
-		traitsToRestore,
-		xpBoostDeltas,
-		newState
-	};
 }

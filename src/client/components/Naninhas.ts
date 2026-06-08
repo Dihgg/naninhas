@@ -3,7 +3,7 @@ import { AttachedItem, InventoryItem, IsoPlayer } from "@asledgehammer/pipewrenc
 import * as Events from "@asledgehammer/pipewrench-events";
 import { Subject } from "@client/components/Observer/Subject";
 import { Plushie } from "@client/components/Plushies/Plushie";
-import { extractItemName } from "@shared/utils/ItemType";
+import { PlayerApi } from "@shared/components/PlayerApi";
 import {
 	BorisBadger,
 	Doll,
@@ -77,11 +77,8 @@ export class Naninhas {
 		const attachedSet = new Set<string>();
 
 		// Step 1: Scan all attached items and track plushie names
-		const attachedItems = this.player.getAttachedItems();
-		for (let i = 0; i < attachedItems.size(); i++) {
-			const attachedItem: AttachedItem = attachedItems.get(i);
-			const fullType = attachedItem.getItem().getFullType();
-			const name = extractItemName(fullType);
+		const attachedNames = new PlayerApi(this.player).getAttachedItemNames();
+		for (const name of attachedNames) {
 			// Check if the item is a plushie
 			if (this.PLUSHIES.some(p => p.name === name)) {
 				attachedSet.add(name);
