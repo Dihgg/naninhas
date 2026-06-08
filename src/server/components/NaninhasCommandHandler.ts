@@ -104,9 +104,17 @@ export class NaninhasCommandHandler {
 		for (const trait of traitsToRemove) {
 			playerApi.removeTrait(trait);
 		}
+
+		// Only suppress traits the player actually has — suppressing a trait the
+		// player never had would cause it to be granted on the next plushie removal.
+		const actuallySuppressed: string[] = [];
 		for (const trait of traitsToSuppress) {
-			playerApi.removeTrait(trait);
+			if (playerApi.hasTrait(trait)) {
+				playerApi.removeTrait(trait);
+				actuallySuppressed.push(trait);
+			}
 		}
+
 		for (const trait of traitsToRestore) {
 			playerApi.addTrait(trait);
 		}
@@ -123,7 +131,15 @@ export class NaninhasCommandHandler {
 		// -----------------------------------------------------------------------
 		protocol.lastClientRevision = payload.revision;
 		protocol.lastSchemaVersion = PROTOCOL_SCHEMA_VERSION;
-		serverModData.authoritative = newState;
+		// suppressedTraits must only contain traits actually removed from the player,
+		// not the full desired-suppression set from the reconciler.
+		serverModData.authoritative = {
+			...newState,
+			suppressedTraits: [
+				...authoritative.suppressedTraits.filter(t => !traitsToRestore.includes(t)),
+				...actuallySuppressed
+			]
+		};
 
 		// -----------------------------------------------------------------------
 		// 6. Reply to the client

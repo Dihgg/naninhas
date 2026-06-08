@@ -122,6 +122,26 @@ describe("PlushieSyncPublisher", () => {
 			expect(sendClientCommandMock).toHaveBeenCalledTimes(1);
 		});
 
+		it("sends corrective empty sync when plushie is detached before server reply arrives", () => {
+			// Tick A: Doll attached, sends revision=1, no reply yet
+			getAttachedItemNamesMock.mockReturnValue(new Set(["Doll"]));
+			isKnownPlushie.mockReturnValue(true);
+			const pub = makePublisher();
+			pub.tick();
+			sendClientCommandMock.mockClear();
+
+			// Player detaches before reply arrives (lastKnownNames still {Doll} from send)
+			getAttachedItemNamesMock.mockReturnValue(new Set());
+
+			// Tick B: must detect the change and send revision=2 with []
+			pub.tick();
+
+			expect(sendClientCommandMock).toHaveBeenCalledTimes(1);
+			const [, , , payload] = sendClientCommandMock.mock.calls[0];
+			expect((payload as any).desiredNames).toHaveLength(0);
+			expect((payload as any).revision).toBe(2);
+		});
+
 		it("increments revision on each send", () => {
 			getAttachedItemNamesMock.mockReturnValue(new Set(["Doll"]));
 			isKnownPlushie.mockReturnValue(true);
@@ -150,7 +170,7 @@ describe("PlushieSyncPublisher", () => {
 	});
 
 	describe("reply handling", () => {
-		it("ignores replies for other modules", () => {
+		it("ignores replies for other modules without triggering a resend", () => {
 			getAttachedItemNamesMock.mockReturnValue(new Set(["Doll"]));
 			isKnownPlushie.mockReturnValue(true);
 			const pub = makePublisher();
@@ -164,12 +184,12 @@ describe("PlushieSyncPublisher", () => {
 				rejectedNames: []
 			});
 
+			// State unchanged — no resend expected
 			pub.tick();
-			// lastKnownNames was not updated, so same set still triggers resend
-			expect(sendClientCommandMock).toHaveBeenCalledTimes(1);
+			expect(sendClientCommandMock).not.toHaveBeenCalled();
 		});
 
-		it("ignores replies with schema mismatch", () => {
+		it("ignores replies with schema mismatch without triggering a resend", () => {
 			getAttachedItemNamesMock.mockReturnValue(new Set(["Doll"]));
 			isKnownPlushie.mockReturnValue(true);
 			const pub = makePublisher();
@@ -178,8 +198,9 @@ describe("PlushieSyncPublisher", () => {
 
 			fireReply({ schemaVersion: 99, appliedNames: ["Doll"] });
 
+			// State unchanged — no resend expected
 			pub.tick();
-			expect(sendClientCommandMock).toHaveBeenCalledTimes(1);
+			expect(sendClientCommandMock).not.toHaveBeenCalled();
 		});
 	});
 

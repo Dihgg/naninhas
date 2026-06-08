@@ -67,9 +67,14 @@ export class PlushieSyncPublisher {
 	 * Sends a `SyncDesiredPlushies` command to the server with the current
 	 * plushie set. The revision is incremented before sending so the server
 	 * can reject stale replays.
+	 *
+	 * `lastKnownNames` is updated eagerly here so that a subsequent attachment
+	 * change within the same reply window is still detected on the next tick,
+	 * even if the server reply for this send has not yet arrived.
 	 */
 	private send(names: Set<string>): void {
 		this.revision++;
+		this.lastKnownNames = new Set(names);
 
 		const payload: SyncDesiredPlushiesPayload = {
 			schemaVersion: PROTOCOL_SCHEMA_VERSION,
@@ -105,8 +110,15 @@ export class PlushieSyncPublisher {
 				print(`[Naninhas] SyncAppliedPlushies: rejected names: ${payload.rejectedNames.join(", ")}`);
 			}
 
-			// Update our reference so we don't resend an identical list next tick
-			this.lastKnownNames = new Set([...payload.appliedNames, ...payload.rejectedNames]);
+			// Update our reference. If a corrective send already updated
+			// lastKnownNames ahead of this reply, the reply may contain a
+			// stale set — leave it as-is so the next tick re-evaluates correctly.
+			const replyNames = new Set([...payload.appliedNames, ...payload.rejectedNames]);
+			if (!this.hasChanged(replyNames)) {
+				// Reply matches our current expectation — nothing to do
+				return;
+			}
+			this.lastKnownNames = replyNames;
 		});
 	}
 
