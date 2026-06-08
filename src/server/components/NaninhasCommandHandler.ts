@@ -34,10 +34,6 @@ export class NaninhasCommandHandler {
 	 * @param payload The deserialized payload sent by the client via `sendClientCommand`
 	 */
 	onSyncDesiredPlushies(player: IsoPlayer, payload: SyncDesiredPlushiesPayload): void {
-		print(
-			`[Naninhas][debug] Server reconcile for ${player.getUsername()}: desired=${JSON.stringify(payload.desiredNames)}`
-		);
-
 		// Validate schemaVersion
 		if (payload.schemaVersion !== PROTOCOL_SCHEMA_VERSION) {
 			print(

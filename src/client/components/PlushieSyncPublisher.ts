@@ -39,17 +39,13 @@ export class PlushieSyncPublisher {
 	 * sends a sync request to the server when a change is detected.
 	 */
 	tick(): void {
-		if (!isClient() || isServer()) {
-			print(`[Naninhas][debug] PlushieSyncPublisher.tick: skipped (not pure client)`);
-			return;
-		}
+		if (!isClient() || isServer()) return;
 		const currentNames = this.getAttachedPlushieNames();
 
 		if (!this.hasChanged(currentNames)) {
 			return;
 		}
 
-		print(`[Naninhas][debug] PlushieSyncPublisher.tick: sending sync for ${[...currentNames].join(",")}`);
 		this.send(currentNames);
 	}
 
