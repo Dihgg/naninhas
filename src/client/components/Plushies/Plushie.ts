@@ -79,8 +79,7 @@ export abstract class Plushie implements Observer {
 	 */
 	private applyBoosts(shouldApply = true) {
 		const data = this.playerData.data;
-		const xp = this.playerApi.getXp();
-		
+
 		for (const { perk, value } of this.xpBoostsToAdd) {
 			const key = `${this.name}:${perk}`;
 			const appliedValue = data.xpBoosts[key] ?? 0;
@@ -91,10 +90,7 @@ export abstract class Plushie implements Observer {
 				continue;
 			}
 
-			const currentMultiplier = xp.getMultiplier(perk);
-			const newMultiplier = Math.max(currentMultiplier + delta, 0);
-
-			xp.addXpMultiplier(perk, newMultiplier, 0, 0);
+			this.playerApi.applyXpMultiplierDelta(perk, delta);
 			data.xpBoosts[key] = targetValue;
 		}
 	}

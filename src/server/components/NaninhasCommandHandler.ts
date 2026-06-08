@@ -116,10 +116,8 @@ export class NaninhasCommandHandler {
 			const [, perkName] = key.split(":");
 			const perk = Perks[perkName as keyof typeof Perks] as Perk;
 			if (!perk) continue;
-			const newMultiplier = Math.max(xp.getMultiplier(perk) + delta, 0);
-			xp.addXpMultiplier(perk, newMultiplier, 0, 0);
+			playerApi.applyXpMultiplierDelta(perk, delta);
 		}
-
 		// -----------------------------------------------------------------------
 		// 5. Persist updated server state
 		// -----------------------------------------------------------------------
