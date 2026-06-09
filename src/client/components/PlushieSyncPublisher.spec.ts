@@ -218,6 +218,40 @@ describe("PlushieSyncPublisher", () => {
 			pub.tick();
 			expect(sendClientCommandMock).not.toHaveBeenCalled();
 		});
+
+		it("logs rejected names when server reply includes rejections", () => {
+			const printSpy = jest.spyOn(globalThis as any, "print").mockImplementation(() => undefined);
+
+			getAttachedItemNamesMock.mockReturnValue(new Set(["Doll"]));
+			isKnownPlushie.mockReturnValue(true);
+			const pub = makePublisher();
+			pub.tick();
+
+			fireReply({ appliedNames: [], rejectedNames: ["Doll"] });
+
+			expect(printSpy).toHaveBeenCalledWith(
+				"[Naninhas] SyncAppliedPlushies: rejected names: Doll"
+			);
+
+			printSpy.mockRestore();
+		});
+
+		it("updates last known names from a differing reply and avoids an unnecessary resend", () => {
+			getAttachedItemNamesMock.mockReturnValue(new Set(["Doll"]));
+			isKnownPlushie.mockReturnValue(true);
+			const pub = makePublisher();
+			pub.tick();
+
+			// Server replies with an empty applied/rejected set, which differs from
+			// the optimistic local expectation ({Doll}).
+			fireReply({ appliedNames: [], rejectedNames: [] });
+
+			sendClientCommandMock.mockClear();
+			getAttachedItemNamesMock.mockReturnValue(new Set());
+			pub.tick();
+
+			expect(sendClientCommandMock).not.toHaveBeenCalled();
+		});
 	});
 
 	describe("getAttachedPlushieNames()", () => {
