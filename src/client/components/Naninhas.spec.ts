@@ -7,6 +7,7 @@ import { Plushie } from "@client/components/Plushies/Plushie";
 jest.mock("@asledgehammer/pipewrench-events");
 jest.mock("@client/components/Plushies/List");
 jest.mock("@client/components/Observer/Subject");
+jest.mock("@client/components/PlushieSyncPublisher");
 
 describe("Naninhas.class", () => {
 	it("Should instantiate", () => {
@@ -20,7 +21,7 @@ describe("Naninhas.class", () => {
 	});
 
 	describe("Plushies attachement effects", () => {
-		const mockPlayer = () =>
+		const mockPlayer = (fullType = "AuthenticZClothing.SpiffoSanta") =>
 			mock<IsoPlayer>({
 				getAttachedItems: jest.fn().mockReturnValue(
 					mock({
@@ -31,7 +32,7 @@ describe("Naninhas.class", () => {
 									mock<InventoryItem>({
 										getFullType: jest
 											.fn()
-											.mockReturnValue("AuthenticZClothing.SpiffoSanta")
+											.mockReturnValue(fullType)
 									})
 								)
 							})
@@ -43,6 +44,12 @@ describe("Naninhas.class", () => {
 		it("Should apply Plushie buff when plushie is attached", () => {
 			const player = mockPlayer();
 			new Naninhas(player, [mock({ name: "SpiffoSanta" })]);
+			expect(Subject.prototype.subscribe).toHaveBeenCalled();
+		});
+
+		it("Should apply Plushie buff when module prefix is different", () => {
+			const player = mockPlayer("AuthenticZBackpacksPlus.Doll");
+			new Naninhas(player, [mock({ name: "Doll" })]);
 			expect(Subject.prototype.subscribe).toHaveBeenCalled();
 		});
 
