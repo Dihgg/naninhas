@@ -102,8 +102,14 @@ export class NaninhasCommandHandler {
 			newState
 		} = PlushieReconciler.reconcile(authoritative, validNames);
 
+		// Only add traits the player does not already have; adding an existing
+		// trait can create duplicate entries in Build 42 trait lists.
+		const actuallyAdded: string[] = [];
 		for (const trait of traitsToAdd) {
-			playerApi.addTrait(trait);
+			if (!playerApi.hasTrait(trait)) {
+				playerApi.addTrait(trait);
+				actuallyAdded.push(trait);
+			}
 		}
 		for (const trait of traitsToRemove) {
 			playerApi.removeTrait(trait);
@@ -137,8 +143,14 @@ export class NaninhasCommandHandler {
 		protocol.lastSchemaVersion = PROTOCOL_SCHEMA_VERSION;
 		// suppressedTraits must only contain traits actually removed from the player,
 		// not the full desired-suppression set from the reconciler.
+		// addedTraits must only contain traits that were actually added by the mod,
+		// so detaching plushies never removes a trait the player had originally.
 		serverModData.authoritative = {
 			...newState,
+			addedTraits: [
+				...authoritative.addedTraits.filter(t => !traitsToRemove.includes(t)),
+				...actuallyAdded
+			],
 			suppressedTraits: [
 				...authoritative.suppressedTraits.filter(t => !traitsToRestore.includes(t)),
 				...actuallySuppressed

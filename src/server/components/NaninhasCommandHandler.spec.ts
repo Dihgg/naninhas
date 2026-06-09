@@ -90,6 +90,74 @@ describe("NaninhasCommandHandler", () => {
 			// Player never had ShortSighted — removeTrait should not be called for it
 			expect(removeTraitFn).not.toHaveBeenCalledWith("ShortSighted");
 		});
+
+		it("does not add or persist a positive trait the player already has", () => {
+			jest.resetModules();
+
+			const addTraitFn = jest.fn();
+			const removeTraitFn = jest.fn();
+			const hasTraitFn = jest.fn((traitId: string) => traitId === "Organized");
+
+			const mockPlayerApi = {
+				player: {},
+				getAttachedItemNames: jest.fn().mockReturnValue(new Set(["SpiffoCherry"])),
+				hasTrait: hasTraitFn,
+				addTrait: addTraitFn,
+				removeTrait: removeTraitFn,
+				applyXpMultiplierDelta: jest.fn()
+			};
+
+			jest.doMock("@shared/components/PlayerApi", () => ({
+				PlayerApi: jest.fn().mockImplementation(() => mockPlayerApi)
+			}));
+
+			const serverData = {
+				protocol: { lastClientRevision: 0, lastSchemaVersion: PROTOCOL_SCHEMA_VERSION },
+				authoritative: {
+					activePlushieNames: [],
+					addedTraits: [],
+					suppressedTraits: [],
+					xpBoosts: {}
+				}
+			};
+
+			jest.doMock("@shared/components/ModData", () => ({
+				ModData: jest.fn().mockImplementation(() => ({ data: serverData }))
+			}));
+
+			const { PlushieReconciler } = jest.requireMock("@shared/components/PlushieReconciler");
+			PlushieReconciler.reconcile = jest.fn().mockReturnValue({
+				traitsToAdd: ["Organized"],
+				traitsToRemove: [],
+				traitsToSuppress: [],
+				traitsToRestore: [],
+				xpBoostDeltas: {},
+				newState: {
+					activePlushieNames: ["SpiffoCherry"],
+					addedTraits: ["Organized"],
+					suppressedTraits: [],
+					xpBoosts: {}
+				}
+			});
+
+			const { NaninhasCommandHandler } = require("@server/components/NaninhasCommandHandler");
+			const handler = new NaninhasCommandHandler();
+
+			const payload: SyncDesiredPlushiesPayload = {
+				schemaVersion: PROTOCOL_SCHEMA_VERSION,
+				revision: 1,
+				desiredNames: ["SpiffoCherry"]
+			};
+
+			handler.onSyncDesiredPlushies({
+				getUsername: jest.fn().mockReturnValue("TestPlayer"),
+				getXp: jest.fn().mockReturnValue({ getMultiplier: jest.fn(), addXpMultiplier: jest.fn() })
+			} as any, payload);
+
+			expect(addTraitFn).not.toHaveBeenCalledWith("Organized");
+			expect(removeTraitFn).not.toHaveBeenCalledWith("Organized");
+			expect(serverData.authoritative.addedTraits).toEqual([]);
+		});
 	});
 
 	describe("revision handling", () => {
