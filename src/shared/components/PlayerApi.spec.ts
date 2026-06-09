@@ -1,4 +1,4 @@
-import type { IsoPlayer } from "@asledgehammer/pipewrench";
+import type { IsoPlayer, Perk } from "@asledgehammer/pipewrench";
 import { PlayerApi } from "@shared/components/PlayerApi";
 
 const buildMockStats = () => ({
@@ -198,5 +198,44 @@ describe("PlayerApi", () => {
 
 		delete (globalThis as unknown as { CharacterTrait?: unknown }).CharacterTrait;
 		delete (globalThis as unknown as { ResourceLocation?: unknown }).ResourceLocation;
+	});
+
+	describe("applyXpMultiplierDelta", () => {
+		const buildXpPlayer = (currentMultiplier: number) => {
+			const addXpMultiplier = jest.fn();
+			const getMultiplier = jest.fn().mockReturnValue(currentMultiplier);
+			const mockPlayer = {
+				...buildPlayer(buildMockStats()),
+				getXp: jest.fn().mockReturnValue({ addXpMultiplier, getMultiplier })
+			} as unknown as IsoPlayer;
+			return { mockPlayer, addXpMultiplier, getMultiplier };
+		};
+
+		it("adds a positive delta to the current multiplier", () => {
+			const { mockPlayer, addXpMultiplier } = buildXpPlayer(1);
+			const perk = "Woodwork" as unknown as Perk;
+
+			new PlayerApi(mockPlayer).applyXpMultiplierDelta(perk, 2);
+
+			expect(addXpMultiplier).toHaveBeenCalledWith(perk, 3, 0, 0);
+		});
+
+		it("subtracts a negative delta from the current multiplier", () => {
+			const { mockPlayer, addXpMultiplier } = buildXpPlayer(3);
+			const perk = "Woodwork" as unknown as Perk;
+
+			new PlayerApi(mockPlayer).applyXpMultiplierDelta(perk, -2);
+
+			expect(addXpMultiplier).toHaveBeenCalledWith(perk, 1, 0, 0);
+		});
+
+		it("clamps the result to zero when delta would go negative", () => {
+			const { mockPlayer, addXpMultiplier } = buildXpPlayer(1);
+			const perk = "Woodwork" as unknown as Perk;
+
+			new PlayerApi(mockPlayer).applyXpMultiplierDelta(perk, -5);
+
+			expect(addXpMultiplier).toHaveBeenCalledWith(perk, 0, 0, 0);
+		});
 	});
 });

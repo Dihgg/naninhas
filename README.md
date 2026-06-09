@@ -3,7 +3,7 @@
 ## Project Zomboid Plushie Buffs
 
 <p align="center">
-  <img src="./contents/preview.png">
+  <img src="./steam/preview.png">
 </p>
 
 This mod introduces the concept of "naninhas" to AuthenticZ attachable plushies!
@@ -72,6 +72,8 @@ During `npm run postbuild`:
 - Build 42 output is generated as `.json` files in `42/media/lua/shared/Translate/<LANG>/<NAMESPACE>.json`
 
 ---
+
+# Development
 ## 👩‍💻 API
 Other mods can interact with **Naninhas** by using the `Events`.
 
@@ -111,6 +113,77 @@ The `data` structure is the following
 
 
 ---
+
+## Architecture
+
+Naninhas uses a **unified server-authoritative model** for all game modes (single player / multiplayer).
+
+**Key principles:**
+- Client detects attachment changes and publishes desired plushie set
+- Server validates and reconciles trait/XP state authoritatively
+- Observer pattern handles event emission for external mods
+- Trait and XP application is **ALWAYS** server-side, never client-side
+
+### Logic Flow (All game Modes)
+
+```mermaid
+flowchart TD
+    T["⏱ everyOneMinute"] --> U["Naninhas.update()"]
+    U --> C["Scan currently attached plushies"]
+    C --> D{"Compare against known active set"}
+    D -->|Newly attached| E["Fire <code>NaninhasEquipped</code> event"]
+    D -->|Newly detached| F["Fire <code>NaninhasUnequipped</code> event"]
+    D -->|Still active| G["Fire <code>NaninhasUpdate</code> event"]
+    E --> H["syncPublisher.tick()"]
+    F --> H
+    G --> H
+    H --> I["Attachment set changed since last sync?"]
+    I -->|No| J["Wait for next cycle"]
+    I -->|Yes| K["Send <code>SyncDesiredPlushies</code> to Server"]
+    K --> L["<strong>Server:</strong> Validate schema and revision"]
+    L --> M["<strong>Server:</strong> Verify attachments server-side"]
+    M --> N["<strong>Server:</strong> Reconcile traits/XP"]
+    N --> O["<strong>Server:</strong> Apply to player and persist <code>modData</code>"]
+    O --> P["<strong>Server:</strong> Reply <code>SyncAppliedPlushies</code>"]
+    P --> Q["<strong>Client:</strong> Update <code>lastKnownNames</code>"]
+    Q --> J
+```
+
+### Single Player
+
+In single player, plushie buffs are still applied *server-authoritatively*, as the single player is also a server that runs in the local game process.
+
+### Multiplayer
+
+Multiplayer introduces latency, so the flow should be able to handle stale or out of order requests, this is done by usage of a `revision` number that is synced between server / client
+
+### Network Contract
+
+Module: `Naninhas`
+
+Client -> Server command: `SyncDesiredPlushies`
+
+| Field | Type | Description |
+|---|---|---|
+| schemaVersion | `number` | Protocol compatibility version |
+| revision | `number` | Monotonic client sync counter |
+| desiredNames | `string[]` | Desired active plushie names from current attachments |
+
+Server -> Client command: `SyncAppliedPlushies`
+
+| Field | Type | Description |
+|---|---|---|
+| schemaVersion | `number` | Echoed protocol version |
+| revision | `number` | Echoed request revision |
+| appliedNames | `string[]` | Names accepted and applied by server |
+| rejectedNames | `string[]` | Names rejected by validation |
+
+Validation behavior:
+- Unsupported `schemaVersion` is rejected safely.
+- Stale `revision` is rejected to avoid out-of-order application.
+- Unknown plushie names are rejected.
+- Server verifies plushies are actually attached before applying.
+
 
 ## 👩‍💻 Repository Badges
 ### Code Coverage

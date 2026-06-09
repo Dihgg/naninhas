@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.9.1](https://github.com/dihgg/naninhas/compare/v1.9.0...v1.9.1) (2026-06-09)
+
+## [1.9.0](https://github.com/dihgg/naninhas/compare/v1.8.1...v1.9.0) (2026-06-09)
+
+
+### Features
+
+* **multiplayer:** add network protocol constants and payload types ([0946b94](https://github.com/dihgg/naninhas/commit/0946b94ee72c0538e3b1e57a2473c453b5d5a6c8))
+* **multiplayer:** add shared plushie catalog and reconcile engine ([be06bf1](https://github.com/dihgg/naninhas/commit/be06bf1521691ab25c8b869f97711f3221399711))
+* **multiplayer:** creating plushie reconciler ([68a146a](https://github.com/dihgg/naninhas/commit/68a146aa7c60de850961ecc82625c2781e8aa462))
+* **multiplayer:** creating plushie sync publisher ([fea2409](https://github.com/dihgg/naninhas/commit/fea2409bee155bddbf6732361d7df0dae6e8663d))
+* **multiplayer:** handling server reconnections ([4b8abd5](https://github.com/dihgg/naninhas/commit/4b8abd54e4358e565c03fd7e6a0400a29ab8d74d))
+* **multiplayer:** making command and publisher handle traits and effects correctly ([2b3fa27](https://github.com/dihgg/naninhas/commit/2b3fa276a7210b7dbb26b7e29712cebaaeeb782b))
+* **player:** moving applyXpMultiplierDelta to player API for reuse ([6fd720d](https://github.com/dihgg/naninhas/commit/6fd720d74cce652c97e778f728dbb4b6fedc8683))
+* **single player:** streamline plushie logic between single player and multiplayer ([0df9672](https://github.com/dihgg/naninhas/commit/0df9672757e7e00053d491c72183f6b34610972f))
+
+
+### Bug Fixes
+
+* **items:** hardening item identification ([606a257](https://github.com/dihgg/naninhas/commit/606a25780a92bea410cdc74aef313bf2c64b7f22))
+* **traits:** handling good traits duplications ([8db65b8](https://github.com/dihgg/naninhas/commit/8db65b843d5342da11ec8fdf805a671ca11cf3b7))
+
 ### [1.8.1](https://github.com/dihgg/naninhas/compare/v1.8.0...v1.8.1) (2026-06-02)
 
 

@@ -3,6 +3,8 @@ import { AttachedItem, InventoryItem, IsoPlayer } from "@asledgehammer/pipewrenc
 import * as Events from "@asledgehammer/pipewrench-events";
 import { Subject } from "@client/components/Observer/Subject";
 import { Plushie } from "@client/components/Plushies/Plushie";
+import { PlushieSyncPublisher } from "@client/components/PlushieSyncPublisher";
+import { PlayerApi } from "@shared/components/PlayerApi";
 import {
 	BorisBadger,
 	Doll,
@@ -35,9 +37,12 @@ export class Naninhas {
 
 	private subject: Subject;
 
+	private readonly syncPublisher: PlushieSyncPublisher;
+
 	constructor(player: IsoPlayer, plushies: Plushie[] = []) {
 		this.player = player;
 		this.subject = new Subject();
+		this.syncPublisher = new PlushieSyncPublisher(player);
 		this.PLUSHIES =
 			plushies.length > 0
 				? plushies
@@ -76,11 +81,8 @@ export class Naninhas {
 		const attachedSet = new Set<string>();
 
 		// Step 1: Scan all attached items and track plushie names
-		const attachedItems = this.player.getAttachedItems();
-		for (let i = 0; i < attachedItems.size(); i++) {
-			const attachedItem: AttachedItem = attachedItems.get(i);
-			const fullType = attachedItem.getItem().getFullType();
-			const name = fullType.replace("AuthenticZClothing.", "");
+		const attachedNames = new PlayerApi(this.player).getAttachedItemNames();
+		for (const name of attachedNames) {
 			// Check if the item is a plushie
 			if (this.PLUSHIES.some(p => p.name === name)) {
 				attachedSet.add(name);
@@ -100,6 +102,9 @@ export class Naninhas {
 
 		// Step 4: Update all active plushie effects
 		this.subject.update();
+
+		// Step 5: Notify server of current plushie set (no-op in single-player)
+		this.syncPublisher.tick();
 	}
 
 	/**
