@@ -23,7 +23,7 @@ export class NaninhasCommandHandler {
 	 * Processes a SyncDesiredPlushies request from a client.
 	 *
 	 * Responsibilities:
-	 * 1. Validate schemaVersion and revision to ensure freshness
+	 * 1. Validate revision to ensure freshness
 	 * 2. Verify player has the items they claim to have attached
 	 * 3. Call the reconciler to compute trait/XP deltas
 	 * 4. Apply those changes to the live player
@@ -34,18 +34,8 @@ export class NaninhasCommandHandler {
 	 * @param payload The deserialized payload sent by the client via `sendClientCommand`
 	 */
 	onSyncDesiredPlushies(player: IsoPlayer, payload: SyncDesiredPlushiesPayload): void {
-		// Validate schemaVersion
-		if (payload.schemaVersion !== PROTOCOL_SCHEMA_VERSION) {
-			print(
-				`[Naninhas] SyncDesiredPlushies: schema mismatch from ${player.getUsername()} ` +
-				`(expected ${PROTOCOL_SCHEMA_VERSION}, got ${payload.schemaVersion})`
-			);
-			this.sendRejectReply(player, payload);
-			return;
-		}
-
 		// -----------------------------------------------------------------------
-		// 2. Load or initialize server state
+		// 1. Load or initialize server state
 		// -----------------------------------------------------------------------
 		const playerApi = new PlayerApi(player);
 		const serverModData = new ModData<ServerModData>({
@@ -75,7 +65,7 @@ export class NaninhasCommandHandler {
 		}
 
 		// -----------------------------------------------------------------------
-		// 3. Verify attachment and validate plushie names
+		// 2. Verify attachment and validate plushie names
 		// -----------------------------------------------------------------------
 		const attachedSet = playerApi.getAttachedItemNames();
 
@@ -91,7 +81,7 @@ export class NaninhasCommandHandler {
 		}
 
 		// -----------------------------------------------------------------------
-		// 4. Reconcile and apply
+		// 3. Reconcile and apply
 		// -----------------------------------------------------------------------
 		const {
 			traitsToAdd,
@@ -137,7 +127,7 @@ export class NaninhasCommandHandler {
 			playerApi.applyXpMultiplierDelta(perk, delta);
 		}
 		// -----------------------------------------------------------------------
-		// 5. Persist updated server state
+		// 4. Persist updated server state
 		// -----------------------------------------------------------------------
 		protocol.lastClientRevision = payload.revision;
 		protocol.lastSchemaVersion = PROTOCOL_SCHEMA_VERSION;
@@ -158,7 +148,7 @@ export class NaninhasCommandHandler {
 		};
 
 		// -----------------------------------------------------------------------
-		// 6. Reply to the client
+		// 5. Reply to the client
 		// -----------------------------------------------------------------------
 		const reply: SyncAppliedPlushiesPayload = {
 			schemaVersion: payload.schemaVersion,
@@ -188,6 +178,14 @@ export class NaninhasCommandHandler {
 	 * creating and seeding defaults if the structure is absent or incomplete.
 	 */
 	private static ensureServerModData(data: Partial<ServerModData>): ServerModData {
+		const persistedVersion = data.protocol?.lastSchemaVersion ?? 0;
+		if (persistedVersion < PROTOCOL_SCHEMA_VERSION) {
+			print(`[Naninhas] Migrating server mod data from schema v${persistedVersion} to v${PROTOCOL_SCHEMA_VERSION}`);
+			//TODO: Add migration logic here when a breaking schema change is introduced:
+			// if (persistedVersion < 2) { /* reshape fields for schema 2 */ }
+			// if (persistedVersion < 3) { /* reshape fields for schema 3 */ }
+		}
+
 		return {
 			protocol: {
 				lastClientRevision: data.protocol?.lastClientRevision ?? 0,
@@ -200,20 +198,5 @@ export class NaninhasCommandHandler {
 				xpBoosts: data.authoritative?.xpBoosts ?? {}
 			}
 		};
-		/* const ensured = data as ServerModData;
-		ensured.protocol = {
-			lastClientRevision: data.protocol?.lastClientRevision ?? 0,
-			lastSchemaVersion: data.protocol?.lastSchemaVersion ?? PROTOCOL_SCHEMA_VERSION
-		};
-		ensured.authoritative = {
-			activePlushieNames: data.authoritative?.activePlushieNames ?? [],
-			addedTraits: data.authoritative?.addedTraits ?? [],
-			suppressedTraits: data.authoritative?.suppressedTraits ?? [],
-			xpBoosts:
-				data.authoritative?.xpBoosts && typeof data.authoritative.xpBoosts === "object"
-					? data.authoritative.xpBoosts
-					: {}
-		};
-		return ensured; */
 	}
 }

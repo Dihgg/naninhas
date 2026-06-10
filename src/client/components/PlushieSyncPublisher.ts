@@ -87,8 +87,8 @@ export class PlushieSyncPublisher {
 
 	/**
 	 * Registers the `OnServerCommand` listener for `SyncAppliedPlushies` replies.
-	 * Updates `lastKnownNames` on a successful (non-schema-mismatch) response so
-	 * the next tick does not re-send needlessly.
+	 * Updates `lastKnownNames` on a successful response so the next tick does
+	 * not re-send needlessly.
 	 */
 	private registerReplyListener(): void {
 		Events.onServerCommand.addListener((module, command, args) => {
@@ -97,12 +97,6 @@ export class PlushieSyncPublisher {
 			}
 
 			const payload = args as unknown as SyncAppliedPlushiesPayload;
-
-			if (payload.schemaVersion !== PROTOCOL_SCHEMA_VERSION) {
-				print(`[Naninhas] SyncAppliedPlushies: schema mismatch `);
-				print(`(expected ${PROTOCOL_SCHEMA_VERSION}, got ${payload.schemaVersion})`);
-				return;
-			}
 
 			if (payload.rejectedNames.length > 0) {
 				print(`[Naninhas] SyncAppliedPlushies: rejected names: ${payload.rejectedNames.join(", ")}`);

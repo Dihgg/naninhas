@@ -240,51 +240,6 @@ describe("NaninhasCommandHandler", () => {
 			);
 		});
 
-		it("rejects payload when schema version mismatches", () => {
-			jest.resetModules();
-
-			const sendServerCommandMock = jest.fn();
-			const playerApiCtor = jest.fn();
-
-			jest.doMock("@asledgehammer/pipewrench", () => ({
-				sendServerCommand: sendServerCommandMock,
-				Perks: {}
-			}));
-			jest.doMock("@shared/components/PlayerApi", () => ({
-				PlayerApi: playerApiCtor
-			}));
-
-			const { NaninhasCommandHandler } = require("@server/components/NaninhasCommandHandler");
-			const handler = new NaninhasCommandHandler();
-
-			const payload: SyncDesiredPlushiesPayload = {
-				schemaVersion: PROTOCOL_SCHEMA_VERSION + 1,
-				revision: 3,
-				desiredNames: ["Doll", "Flamingo"]
-			};
-
-			handler.onSyncDesiredPlushies(
-				{
-					getUsername: jest.fn().mockReturnValue("SchemaMismatchPlayer"),
-					getXp: jest.fn().mockReturnValue({ getMultiplier: jest.fn(), addXpMultiplier: jest.fn() })
-				} as any,
-				payload
-			);
-
-			expect(playerApiCtor).not.toHaveBeenCalled();
-			expect(sendServerCommandMock).toHaveBeenCalledWith(
-				expect.anything(),
-				"Naninhas",
-				"SyncAppliedPlushies",
-				expect.objectContaining({
-					schemaVersion: payload.schemaVersion,
-					revision: payload.revision,
-					appliedNames: [],
-					rejectedNames: payload.desiredNames
-				})
-			);
-		});
-
 		it("rejects stale revisions without reconciling", () => {
 			jest.resetModules();
 
