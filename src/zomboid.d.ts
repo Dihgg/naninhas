@@ -62,6 +62,25 @@ declare global {
 }
 
 declare module "@asledgehammer/pipewrench" {
+	export namespace zombie.scripting {
+		interface ScriptManager {
+			/**
+			 * Runtime can return null when a fullType is unknown or unavailable,
+			 * even though upstream declarations currently mark this as always present.
+			 */
+			getItem(arg0: string): zombie.scripting.objects.Item | undefined;
+		}
+	}
+
+	export namespace zombie.scripting.objects {
+		interface ScriptModule {
+			/**
+			 * Runtime can return null when a module-local item id does not exist.
+			 */
+			getItem(arg0: string): zombie.scripting.objects.Item | undefined;
+		}
+	}
+
 	export namespace zombie.characters {
 		interface IsoGameCharacter$CharacterTraits {
 			/** Build 42 overload using CharacterTrait object. */
