@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.10.0](https://github.com/dihgg/naninhas/compare/v1.9.1...v1.10.0) (2026-06-10)
+
+
+### Features
+
+* **multiplayer:** improve server schema validation logic ([cfe8780](https://github.com/dihgg/naninhas/commit/cfe87809ac579ff19f24a0a9e10f54cc03ccd761))
+* **translations:** adding flags to the translations mods preview images ([3d56a90](https://github.com/dihgg/naninhas/commit/3d56a90543145e2e7ba8143b8f7459251748231b))
+* **translations:** adding steam generation script ([34f6b5e](https://github.com/dihgg/naninhas/commit/34f6b5ef3ca5c0a642d11ad0baf8c78e5924177f))
+
 ### [1.9.1](https://github.com/dihgg/naninhas/compare/v1.9.0...v1.9.1) (2026-06-09)
 
 ## [1.9.0](https://github.com/dihgg/naninhas/compare/v1.8.1...v1.9.0) (2026-06-09)
