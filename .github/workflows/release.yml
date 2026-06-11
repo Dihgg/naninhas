@@ -21,12 +21,12 @@ jobs:
 
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v4.2
+              uses: actions/checkout@v4
               with:
                   fetch-depth: 0
 
             - name: Set up Node.js
-              uses: actions/setup-node@v4.1
+              uses: actions/setup-node@v4
               with:
                   node-version: "22"
                   cache: npm
@@ -106,7 +106,7 @@ jobs:
                   NODE
 
             - name: Upload main zip artifact
-              uses: actions/upload-artifact@v4.4
+              uses: actions/upload-artifact@v4
               with:
                   name: main-zip
                   path: ./${{ steps.get_zip_name.outputs.ZIPNAME }}
@@ -122,12 +122,12 @@ jobs:
 
         steps:
             - name: Checkout release tag
-              uses: actions/checkout@v4.2
+              uses: actions/checkout@v4
               with:
                   ref: ${{ needs.prepare_release.outputs.latest_tag }}
 
             - name: Set up Node.js
-              uses: actions/setup-node@v4.1
+              uses: actions/setup-node@v4
               with:
                   node-version: "22"
                   cache: npm
@@ -166,7 +166,7 @@ jobs:
 
             - name: Upload translation zip artifact
               if: steps.build_translation_zip.outputs.should_upload == 'true'
-              uses: actions/upload-artifact@v4.4
+              uses: actions/upload-artifact@v4
               with:
                   name: translation-zip-${{ matrix.language }}
                   path: ./${{ steps.build_translation_zip.outputs.zipname }}
@@ -183,19 +183,19 @@ jobs:
 
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v4.2
+              uses: actions/checkout@v4
               with:
                   ref: ${{ needs.prepare_release.outputs.latest_tag }}
 
             - name: Download main zip artifact
-              uses: actions/download-artifact@v4.1
+              uses: actions/download-artifact@v4
               with:
                   name: main-zip
                   path: release-assets
 
             - name: Download translation zip artifacts
               if: needs.prepare_release.outputs.has_translations == 'true'
-              uses: actions/download-artifact@v4.1
+              uses: actions/download-artifact@v4
               with:
                   pattern: translation-zip-*
                   path: release-assets
