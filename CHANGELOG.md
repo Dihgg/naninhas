@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.11.2](https://github.com/dihgg/naninhas/compare/v1.11.1...v1.11.2) (2026-06-11)
+
+
+### Bug Fixes
+
+* **steam:** rendering steam description in one line ([6a44187](https://github.com/dihgg/naninhas/commit/6a441879753c9815da8c6ac7db01713be0fc439e))
+
 ### [1.11.1](https://github.com/dihgg/naninhas/compare/v1.11.0...v1.11.1) (2026-06-11)
 
 
