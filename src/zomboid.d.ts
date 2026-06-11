@@ -8,7 +8,10 @@
 // `declare module` augmentation side-by-side.
 export {};
 
-/** Opaque type representing a CharacterStat enum value (Java-backed). */
+/**
+ * Nominal marker type for Build 42 CharacterStat enum values.
+ * Kept opaque so raw strings/numbers cannot be passed to Stats APIs by accident.
+ */
 declare type CharacterStatValue = { readonly __brand: "CharacterStatValue" };
 
 declare global {
