@@ -8,7 +8,7 @@ module.exports = {
 	testEnvironment: "node",
 	preset: "ts-jest",
 	rootDir: "src",
-	setupFiles: ["./test/mock.ts"],
+	setupFiles: ["./__mocks__/setup.ts"],
 	transform,
 	moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths, {
 		prefix: "<rootDir>"

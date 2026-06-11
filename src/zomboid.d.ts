@@ -16,7 +16,7 @@ declare global {
 	 * Build 42 CharacterStat enum - global accessible from Lua.
 	 * Replaces the legacy direct stat getter/setter methods on Stats.
 	 */
-	var CharacterStat: {
+	const CharacterStat: {
 		readonly ANGER: CharacterStatValue;
 		readonly BOREDOM: CharacterStatValue;
 		readonly DISCOMFORT: CharacterStatValue;
@@ -53,10 +53,10 @@ declare global {
 		get(index: number): CharacterTraitRef;
 	};
 
-	var CharacterTrait: {
+	const CharacterTrait: {
 		get: (this: void, id: unknown) => CharacterTraitRef | undefined
 	};
-	var ResourceLocation: {
+	const ResourceLocation: {
 		of: (this: void, id: string) => unknown;
 	};
 }
