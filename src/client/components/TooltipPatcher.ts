@@ -2,25 +2,20 @@ import { getScriptManager } from "@asledgehammer/pipewrench";
 import { PlushieNames } from "@constants";
 
 /**
- * Authentic Z module ids that can provide plushie script items.
- *
- * We patch all known variants so tooltip behavior is consistent regardless
- * of which Authentic Z package the user enabled.
- */
-const AUTHENTIC_Z_MODULES = ["AuthenticZClothing", "AuthenticZBackpacksPlus", "AuthenticZLite"] as const;
-
-/**
  * Applies Naninhas tooltip localization keys to Authentic Z plushie script
  * items at client startup.
  */
-export class TooltipPatcher {
+export class TooltipPatcher {   
+
     /**
      * Creates the patcher and immediately applies tooltip params.
      *
-     * @param scriptManager - Optional injected script manager for tests.
+     * @param scriptManager - Script manager instance
+     * @param AUTHENTIC_Z_MODULES - List of Authentic Z modules to patch
      */
     constructor(
-        private readonly scriptManager = getScriptManager()
+        private readonly scriptManager = getScriptManager(),
+        private readonly AUTHENTIC_Z_MODULES = ["AuthenticZClothing", "AuthenticZBackpacksPlus", "AuthenticZLite"]
     ) {
         this.applyTooltips();
     }
@@ -31,7 +26,7 @@ export class TooltipPatcher {
      */
     private applyTooltips() {
         for (const plushieName of Object.values(PlushieNames)) {
-            for (const moduleName of AUTHENTIC_Z_MODULES) {
+            for (const moduleName of this.AUTHENTIC_Z_MODULES) {
                 const fullType = `${moduleName}.${plushieName}`;
                 const scriptItem = this.scriptManager.getItem(fullType);
                 scriptItem?.DoParam(`Tooltip = Tooltip_${plushieName}`);
