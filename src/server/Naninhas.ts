@@ -2,7 +2,7 @@
 import * as Events from "@asledgehammer/pipewrench-events";
 import { NaninhasCommandHandler } from "@server/components/NaninhasCommandHandler";
 import { NETWORK_MODULE, NetworkCommands } from "@constants";
-import type { SyncDesiredPlushiesPayload } from "types";
+import type { SyncDesiredPlushiesPayload } from "@types";
 
 /**
  * Server-side entry point for the Naninhas mod.

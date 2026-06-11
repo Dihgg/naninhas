@@ -1,5 +1,5 @@
 import { PlushieReconciler } from "@shared/components/PlushieReconciler";
-import type { ServerAuthoritativeState } from "types";
+import type { ServerAuthoritativeState } from "@types";
 import { PlushieNames } from "@constants";
 
 const emptyState = (): ServerAuthoritativeState => ({

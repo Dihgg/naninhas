@@ -93,7 +93,7 @@ On Typescript, this is how it would looks like:
 
 import * as Events from "@asledgehammer/pipewrench-events";
 import { EventsEnum } from "@constants";
-import type { EventData } from "types";
+import type { EventData } from "@types";
 
 new Events.EventEmitter<(data: EventData) => void>(EventsEnum.Update)
   .addListener((data) => {

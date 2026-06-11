@@ -3,7 +3,7 @@ import type { IsoPlayer } from "@asledgehammer/pipewrench";
 import { sendClientCommand } from "@asledgehammer/pipewrench";
 import * as Events from "@asledgehammer/pipewrench-events";
 import { PROTOCOL_SCHEMA_VERSION } from "@constants";
-import type { SyncAppliedPlushiesPayload } from "types";
+import type { SyncAppliedPlushiesPayload } from "@types";
 import { PlushieSyncPublisher } from "@client/components/PlushieSyncPublisher";
 
 jest.mock("@asledgehammer/pipewrench");

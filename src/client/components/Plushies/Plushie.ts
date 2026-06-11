@@ -1,7 +1,7 @@
 
 import { PlayerApi } from "@shared/components/PlayerApi";
 import { Observer } from "@client/components/Observer/Observer";
-import type { EventData, PerkBoost, PlushieProps } from "types";
+import type { EventData, PerkBoost, PlushieProps } from "@types";
 import { Perk, Perks, triggerEvent } from "@asledgehammer/pipewrench";
 import { EventsEnum } from "@constants";
 import { getPlushieDefinition } from "@shared/catalog/PlushieCatalog";

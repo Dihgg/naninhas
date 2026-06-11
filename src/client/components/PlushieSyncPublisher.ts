@@ -3,7 +3,7 @@ import type { IsoPlayer } from "@asledgehammer/pipewrench";
 import { sendClientCommand } from "@asledgehammer/pipewrench";
 import * as Events from "@asledgehammer/pipewrench-events";
 import { NETWORK_MODULE, NetworkCommands, PROTOCOL_SCHEMA_VERSION } from "@constants";
-import type { SyncAppliedPlushiesPayload, SyncDesiredPlushiesPayload } from "types";
+import type { SyncAppliedPlushiesPayload, SyncDesiredPlushiesPayload } from "@types";
 import { isKnownPlushie } from "@shared/catalog/PlushieCatalog";
 import { PlayerApi } from "@shared/components/PlayerApi";
 

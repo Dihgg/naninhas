@@ -1,4 +1,4 @@
-import type { ServerAuthoritativeState } from "types";
+import type { ServerAuthoritativeState } from "@types";
 import { getPlushieDefinition } from "@shared/catalog/PlushieCatalog";
 
 /**
@@ -75,13 +75,13 @@ export class PlushieReconciler {
 		// -----------------------------------------------------------------------
 		// 2. Diff against current state
 		// -----------------------------------------------------------------------
-		const currentAddedTraits = new Set(currentState.addedTraits);
-		const currentSuppressedTraits = new Set(currentState.suppressedTraits);
+		const currentAddedTraits = new Set<string>(currentState.addedTraits);
+		const currentSuppressedTraits = new Set<string>(currentState.suppressedTraits);
 
 		const traitsToAdd = [...desiredAddedTraits].filter(t => !currentAddedTraits.has(t));
-		const traitsToRemove = [...currentAddedTraits].filter(t => !desiredAddedTraits.has(t));
+		const traitsToRemove = [...currentAddedTraits].filter((t): t is string => !desiredAddedTraits.has(t));
 		const traitsToSuppress = [...desiredSuppressedTraits].filter(t => !currentSuppressedTraits.has(t));
-		const traitsToRestore = [...currentSuppressedTraits].filter(t => !desiredSuppressedTraits.has(t));
+		const traitsToRestore = [...currentSuppressedTraits].filter((t): t is string => !desiredSuppressedTraits.has(t));
 
 		// XP deltas: add new boosts (positive delta) and remove dropped boosts (negative delta)
 		const xpBoostDeltas: Record<string, number> = {};
@@ -90,9 +90,9 @@ export class PlushieReconciler {
 				xpBoostDeltas[key] = value - (currentState.xpBoosts[key] ?? 0);
 			}
 		}
-		for (const key of Object.keys(currentState.xpBoosts)) {
+		for (const key of Object.keys(currentState.xpBoosts) as string[]) {
 			if (!(key in desiredXpBoosts)) {
-				xpBoostDeltas[key] = -(currentState.xpBoosts[key]);
+				xpBoostDeltas[key] = -(currentState.xpBoosts[key] as number);
 			}
 		}
 

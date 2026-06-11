@@ -4,11 +4,12 @@
 		"experimentalDecorators": true,
 		"lib": ["ESNext"],
 		"module": "ESNext",
-		"moduleResolution": "node",
+		"moduleResolution": "bundler",
 		"outDir": "dist",
 		"rootDir": "src",
 		"strict": true,
 		"target": "ESNext",
+		"ignoreDeprecations": "6.0",
 		"baseUrl": "./src/",
 		"types": [
 			"lua-types/5.1",
@@ -17,6 +18,7 @@
 			"jest"
 		],
 		"paths": {
+			"@types": ["types.d.ts"],
 			"@constants": ["shared/constants.ts"],
 			"@shared/catalog/*": ["shared/catalog/*"],
 			"@shared/components/*": ["shared/components/*"],
