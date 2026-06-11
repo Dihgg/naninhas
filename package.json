@@ -86,8 +86,5 @@
 		"ts-node": "^10.9.1",
 		"typescript": "^6.0.2",
 		"typescript-to-lua": "^1.26.0"
-	},
-	"overrides": {
-		"minimatch": ">=9.0.7"
 	}
 }
