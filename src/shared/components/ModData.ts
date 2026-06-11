@@ -1,4 +1,4 @@
-import type { ModDataProps } from "types";
+import type { ModDataProps } from "@types";
 
 /**
  * Wrapper around `object.getModData()` that supports both plain objects and

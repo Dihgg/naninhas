@@ -1,6 +1,5 @@
-import { IsoPlayer } from "@asledgehammer/pipewrench";
+import type { PlushieProps } from "@types";
 import { PlayerApi } from "@shared/components/PlayerApi";
-import type { PlushieProps } from "types";
 
 export class Plushie {
 	name = "";
