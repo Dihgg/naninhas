@@ -212,7 +212,7 @@ const generateTranslationWorkshopTxt = async (language, locale, workshopMdPath, 
 		? extracted.title
 		: `${extracted.title} ${titleSuffix}`.trim();
 
-	const description = `[quote]${excerpt}[/quote]\n\n${descriptionBbcode}`;
+	const description = `[quote]${excerpt}[/quote]${descriptionBbcode}`;
 	const modId = translationWorkshopMetadata.id !== "0" ? `${name.toLowerCase()}-${locale.toLowerCase()}` : name;
 	const workshopTxt = [
 		`version=${version}`,
