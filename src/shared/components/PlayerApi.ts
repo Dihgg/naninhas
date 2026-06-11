@@ -17,25 +17,34 @@ export class PlayerApi {
 		this._player = player;
 	}
 
-	/** Returns the underlying Project Zomboid player. */
+	/** Returns the underlying Project Zomboid player.
+	 * @returns The IsoPlayer instance wrapped by this API
+	 */
 	public get player(): IsoPlayer {
 		return this._player;
 	}
 
+	/** Returns the underlying Stats instance.
+	 * @returns The Stats object for the player
+	*/
+	private get stats() {
+		return this.player.getStats();
+	}
+
 	/** Returns the underlying XP tracker. */
 	public getXp(): ReturnType<IsoPlayer["getXp"]> {
-		return this._player.getXp();
+		return this.player.getXp();
 	}
 
 	/** Returns the player's mod data table. */
 	public getModData(): ReturnType<IsoPlayer["getModData"]> {
-		return this._player.getModData();
+		return this.player.getModData();
 	}
 
 	/** Returns the extracted item names from all currently attached items. */
 	public getAttachedItemNames(): Set<string> {
 		const names = new Set<string>();
-		const attachedItems = this._player.getAttachedItems();
+		const attachedItems = this.player.getAttachedItems();
 
 		for (let i = 0; i < attachedItems.size(); i++) {
 			const fullType = attachedItems.get(i).getItem().getFullType();
@@ -66,32 +75,28 @@ export class PlayerApi {
 	 * are preserved.
 	 */
 	public applyXpMultiplierDelta(perk: Perk, delta: number): void {
-		const xp = this._player.getXp();
+		const xp = this.player.getXp();
 		const newMultiplier = Math.max(xp.getMultiplier(perk) + delta, 0);
 		xp.addXpMultiplier(perk, newMultiplier, 0, 0);
 	}
 
 	/** Reduces boredom using Build 42 CharacterStat API. */
 	public reduceBoredom(amount: number): void {
-		const stats = this._player.getStats();
-		stats.remove(CharacterStat.BOREDOM, amount);
+		this.stats.remove(CharacterStat.BOREDOM, amount);
 	}
 
 	/** Increases endurance using Build 42 CharacterStat API. */
 	public increaseEndurance(amount: number): void {
-		const stats = this._player.getStats();
-		stats.add(CharacterStat.ENDURANCE, amount);
+		this.stats.add(CharacterStat.ENDURANCE, amount);
 	}
 
 	/** Reduces fatigue using Build 42 CharacterStat API. */
 	public reduceFatigue(amount: number): void {
-		const stats = this._player.getStats();
-		stats.remove(CharacterStat.FATIGUE, amount);
+		this.stats.remove(CharacterStat.FATIGUE, amount);
 	}
 
 	/** Reduces panic using Build 42 CharacterStat API. */
 	public reducePanic(amount: number): void {
-		const stats = this._player.getStats();
-		stats.remove(CharacterStat.PANIC, amount);
+		this.stats.remove(CharacterStat.PANIC, amount);
 	}
 }

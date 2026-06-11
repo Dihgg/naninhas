@@ -23,8 +23,8 @@
 			"@shared/utils/*": ["shared/utils/*"],
 			"@server/components/*": ["server/components/*"],
 			"@client/components/*": ["client/components/*"],
-			"@test/*": [
-				"test/*"
+			"@mocks/*": [
+				"__mocks__/*"
 			]
 		}
 	},

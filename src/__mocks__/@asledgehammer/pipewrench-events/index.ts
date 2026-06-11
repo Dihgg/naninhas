@@ -1,16 +1,19 @@
-import { addListenerMock } from "@test/mock";
+const addListener = jest.fn(callback => {
+	// Simulate the event firing
+	callback();
+});
 
 export const onGameStart = {
-	addListener: addListenerMock
+	addListener
 };
 
 export const everyOneMinute = {
-	addListener: addListenerMock
+	addListener
 };
 export const onCreatePlayer = {
-	addListener: jest.fn()
+	addListener
 };
 
 export const onGameBoot = {
-	addListener: addListenerMock
+	addListener
 };
