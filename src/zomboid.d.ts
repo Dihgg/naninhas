@@ -8,7 +8,10 @@
 // `declare module` augmentation side-by-side.
 export {};
 
-/** Opaque type representing a CharacterStat enum value (Java-backed). */
+/**
+ * Nominal marker type for Build 42 CharacterStat enum values.
+ * Kept opaque so raw strings/numbers cannot be passed to Stats APIs by accident.
+ */
 declare type CharacterStatValue = { readonly __brand: "CharacterStatValue" };
 
 declare global {
@@ -16,7 +19,7 @@ declare global {
 	 * Build 42 CharacterStat enum - global accessible from Lua.
 	 * Replaces the legacy direct stat getter/setter methods on Stats.
 	 */
-	var CharacterStat: {
+	const CharacterStat: {
 		readonly ANGER: CharacterStatValue;
 		readonly BOREDOM: CharacterStatValue;
 		readonly DISCOMFORT: CharacterStatValue;
@@ -53,15 +56,34 @@ declare global {
 		get(index: number): CharacterTraitRef;
 	};
 
-	var CharacterTrait: {
+	const CharacterTrait: {
 		get: (this: void, id: unknown) => CharacterTraitRef | undefined
 	};
-	var ResourceLocation: {
+	const ResourceLocation: {
 		of: (this: void, id: string) => unknown;
 	};
 }
 
 declare module "@asledgehammer/pipewrench" {
+	export namespace zombie.scripting {
+		interface ScriptManager {
+			/**
+			 * Runtime can return null when a fullType is unknown or unavailable,
+			 * even though upstream declarations currently mark this as always present.
+			 */
+			getItem(arg0: string): zombie.scripting.objects.Item | undefined;
+		}
+	}
+
+	export namespace zombie.scripting.objects {
+		interface ScriptModule {
+			/**
+			 * Runtime can return null when a module-local item id does not exist.
+			 */
+			getItem(arg0: string): zombie.scripting.objects.Item | undefined;
+		}
+	}
+
 	export namespace zombie.characters {
 		interface IsoGameCharacter$CharacterTraits {
 			/** Build 42 overload using CharacterTrait object. */

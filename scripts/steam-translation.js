@@ -96,7 +96,7 @@ const getArgs = () => {
 };
 
 /**
- * Returns an excerpt (translation notice) for the blockquote.
+ * Returns an excerpt (translation notice) for the quote.
  * Priority:
  * 1) excerpt field from translations.json
  * 2) Auto-translated "This is a translation package for..."
@@ -212,7 +212,7 @@ const generateTranslationWorkshopTxt = async (language, locale, workshopMdPath, 
 		? extracted.title
 		: `${extracted.title} ${titleSuffix}`.trim();
 
-	const description = `[blockquote]${excerpt}[/blockquote]\n\n${descriptionBbcode}`;
+	const description = `[quote]${excerpt}[/quote]\n\n${descriptionBbcode}`;
 	const modId = translationWorkshopMetadata.id !== "0" ? `${name.toLowerCase()}-${locale.toLowerCase()}` : name;
 	const workshopTxt = [
 		`version=${version}`,
