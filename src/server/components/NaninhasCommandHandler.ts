@@ -6,7 +6,7 @@ import type {
 	SyncAppliedPlushiesPayload,
 	SyncDesiredPlushiesPayload,
 	ServerModData
-} from "types";
+} from "@types";
 import { PlushieReconciler } from "@shared/components/PlushieReconciler";
 import { isKnownPlushie } from "@shared/catalog/PlushieCatalog";
 import { ModData } from "@shared/components/ModData";
@@ -138,11 +138,11 @@ export class NaninhasCommandHandler {
 		serverModData.authoritative = {
 			...newState,
 			addedTraits: [
-				...authoritative.addedTraits.filter(t => !traitsToRemove.includes(t)),
+				...authoritative.addedTraits.filter((t: string) => !traitsToRemove.includes(t)),
 				...actuallyAdded
 			],
 			suppressedTraits: [
-				...authoritative.suppressedTraits.filter(t => !traitsToRestore.includes(t)),
+				...authoritative.suppressedTraits.filter((t: string) => !traitsToRestore.includes(t)),
 				...actuallySuppressed
 			]
 		};

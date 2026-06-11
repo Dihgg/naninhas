@@ -1,5 +1,5 @@
 import { mock } from "jest-mock-extended";
-import type { SyncDesiredPlushiesPayload, ServerAuthoritativeState } from "types";
+import type { SyncDesiredPlushiesPayload, ServerAuthoritativeState } from "@types";
 import { PROTOCOL_SCHEMA_VERSION, PlushieNames } from "@constants";
 
 jest.mock("@asledgehammer/pipewrench");
