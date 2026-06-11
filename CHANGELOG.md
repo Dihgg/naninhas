@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.11.1](https://github.com/dihgg/naninhas/compare/v1.11.0...v1.11.1) (2026-06-11)
+
+
+### Bug Fixes
+
+* **dependencies:** updating broken dependencies ([c2ff005](https://github.com/dihgg/naninhas/commit/c2ff005d403c76c11df4c8b98de0fc286edc1655))
+* **dependencies:** updating dependencies ([7af7c06](https://github.com/dihgg/naninhas/commit/7af7c06ba3c9b5aa7bdcda3222950103af51097a))
+* **pipeline:** changing actions versions ([7a6cbdc](https://github.com/dihgg/naninhas/commit/7a6cbdc3fab6ce13d0c12e1bad4cabf1c02c019e))
+
 ## [1.11.0](https://github.com/dihgg/naninhas/compare/v1.10.0...v1.11.0) (2026-06-11)
 
 
