@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.11.0](https://github.com/dihgg/naninhas/compare/v1.10.0...v1.11.0) (2026-06-11)
+
+
+### Features
+
+* **items:** adding tooltip patcher ([b97fe9a](https://github.com/dihgg/naninhas/commit/b97fe9a08ecb88b7afa0aa383a0b4613232c005c))
+* **items:** converting tooltip patcher into a class ([c99bf0b](https://github.com/dihgg/naninhas/commit/c99bf0b7a4ecdd8cb190ba8c306eacb80719e00a))
+
+
+### Bug Fixes
+
+* **items:** removed the unnecessary overrides for the authentic z items ([dbf73e7](https://github.com/dihgg/naninhas/commit/dbf73e74c1b55bb63932b1e4b3d085bd041cb413))
+* **translations:** changed blockquote to quote to compile on steam description ([2992a78](https://github.com/dihgg/naninhas/commit/2992a781f275b02807f1169b46a9a45e51530b1c))
+
 ## [1.10.0](https://github.com/dihgg/naninhas/compare/v1.9.1...v1.10.0) (2026-06-10)
 
 
