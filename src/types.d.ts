@@ -72,6 +72,14 @@ export type SyncAppliedPlushiesPayload = SyncProtocolPayload & {
 	appliedNames: string[];
 	/** Names of plushies that were rejected (unknown name, not attached, etc.). */
 	rejectedNames: string[];
+	/** Optional response status for protocol-aware handling. */
+	status?: "ACCEPTED" | "REJECTED";
+	/** Optional protocol rejection reason when status is REJECTED. */
+	reason?: "INVALID_PAYLOAD" | "SCHEMA_MISMATCH" | "STALE_REVISION";
+	/** Server schema expected by this handler. */
+	expectedSchemaVersion?: number;
+	/** Last accepted client revision persisted on the server. */
+	lastAcceptedRevision?: number;
 };
 
 // ---------------------------------------------------------------------------

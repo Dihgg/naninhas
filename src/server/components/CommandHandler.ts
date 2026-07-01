@@ -22,6 +22,43 @@ export type CommandPersistedState<TAuthoritative> = {
 };
 
 /**
+ * Context passed to protocol-level rejection builders.
+ */
+export type CommandRejectedContext<
+	TRequest extends SyncProtocolPayload,
+	TAuthoritative
+> = {
+	player: IsoPlayer;
+	requestCommand: string;
+	payload: TRequest;
+	reason: Exclude<CommandRejectReason, "INVALID_PAYLOAD">;
+	state: CommandPersistedState<TAuthoritative>;
+};
+
+/**
+ * Context passed to invalid-payload rejection builders.
+ */
+export type CommandInvalidPayloadContext<TAuthoritative> = {
+	player: IsoPlayer;
+	requestCommand: string;
+	rawArgs: unknown;
+	state: CommandPersistedState<TAuthoritative>;
+};
+
+/**
+ * Context passed to accepted-response builders.
+ */
+export type CommandAcceptedContext<
+	TRequest extends SyncProtocolPayload,
+	TAuthoritative
+> = {
+	player: IsoPlayer;
+	requestCommand: string;
+	payload: TRequest;
+	state: CommandPersistedState<TAuthoritative>;
+};
+
+/**
  * Result returned from protocol validation.
  */
 type CommandValidationResult = {
@@ -83,16 +120,23 @@ export abstract class CommandHandler<
 		}
 
 		const username = player.getUsername();
+		const state = this.readState(player);
 
 		if (!this.isValidRequestPayload(args)) {
 			print(
 				`[${this.moduleName}][MP][Server] reject ${command} player=${username} reason=INVALID_PAYLOAD`
 			);
+			const rejected = this.buildInvalidPayloadResponse({
+				player,
+				requestCommand: command,
+				rawArgs: args,
+				state
+			});
+			this.sendResponse(player, command, rejected);
 			return true;
 		}
 
 		const payload = args as TRequest;
-		const state = this.readState(player);
 
 		print(
 			`[${this.moduleName}][MP][Server] received ${command} player=${username} revision=${payload.revision} schema=${payload.schemaVersion}`
@@ -100,18 +144,23 @@ export abstract class CommandHandler<
 
 		const validation = this.validateAndAdvanceProtocol(command, payload, state.protocol, username);
 		if (!validation.ok) {
-			const rejected = this.buildRejectedResponse(
+			const rejected = this.buildRejectedResponse({
 				player,
-				command,
+				requestCommand: command,
 				payload,
-				validation.reason as Exclude<CommandRejectReason, "INVALID_PAYLOAD">,
+				reason: validation.reason as Exclude<CommandRejectReason, "INVALID_PAYLOAD">,
 				state
-			);
+			});
 			this.sendResponse(player, command, rejected);
 			return true;
 		}
 
-		const accepted = this.buildAcceptedResponse(player, command, payload, state);
+		const accepted = this.buildAcceptedResponse({
+			player,
+			requestCommand: command,
+			payload,
+			state
+		});
 		this.sendResponse(player, command, accepted);
 		return true;
 	}
@@ -174,21 +223,23 @@ export abstract class CommandHandler<
 	 * Builds accepted response and performs accepted-path side effects.
 	 */
 	protected abstract buildAcceptedResponse(
-		player: IsoPlayer,
-		requestCommand: string,
-		payload: TRequest,
-		state: CommandPersistedState<TAuthoritative>
+		context: CommandAcceptedContext<TRequest, TAuthoritative>
 	): TResponse;
 
 	/**
 	 * Builds rejection response payload for protocol-level rejections.
 	 */
 	protected abstract buildRejectedResponse(
-		player: IsoPlayer,
-		requestCommand: string,
-		payload: TRequest,
-		reason: Exclude<CommandRejectReason, "INVALID_PAYLOAD">,
-		state: CommandPersistedState<TAuthoritative>
+		context: CommandRejectedContext<TRequest, TAuthoritative>
+	): TResponse;
+
+	/**
+	 * Builds rejection response payload for payload-shape validation failures.
+	 *
+	 * `rawArgs` is untrusted and may have any shape.
+	 */
+	protected abstract buildInvalidPayloadResponse(
+		context: CommandInvalidPayloadContext<TAuthoritative>
 	): TResponse;
 
 	/**

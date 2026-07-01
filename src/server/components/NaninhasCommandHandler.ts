@@ -1,5 +1,5 @@
 /* @noSelfInFile */
-import type { IsoPlayer, Perk } from "@asledgehammer/pipewrench";
+import type { Perk } from "@asledgehammer/pipewrench";
 import { Perks } from "@asledgehammer/pipewrench";
 import { NETWORK_MODULE, NetworkCommands, PROTOCOL_SCHEMA_VERSION } from "@constants";
 import type {
@@ -11,9 +11,10 @@ import { PlushieReconciler } from "@shared/components/PlushieReconciler";
 import { isKnownPlushie } from "@shared/catalog/PlushieCatalog";
 import { PlayerApi } from "@shared/components/PlayerApi";
 import {
+	CommandAcceptedContext,
 	CommandHandler,
-	CommandPersistedState,
-	CommandRejectReason
+	CommandInvalidPayloadContext,
+	CommandRejectedContext
 } from "@server/components/CommandHandler";
 
 /**
@@ -32,10 +33,12 @@ export class NaninhasCommandHandler extends CommandHandler<
 	}
 
 	protected getResponseCommand(requestCommand: string): string {
-		if (requestCommand === NetworkCommands.SyncDesiredPlushies) {
-			return NetworkCommands.SyncAppliedPlushies;
+		switch (requestCommand) {
+			case NetworkCommands.SyncDesiredPlushies:
+				return NetworkCommands.SyncAppliedPlushies;
+			default:
+				return requestCommand;
 		}
-		return requestCommand;
 	}
 
 	protected isValidRequestPayload(value: unknown): value is SyncDesiredPlushiesPayload {
@@ -85,11 +88,9 @@ export class NaninhasCommandHandler extends CommandHandler<
 	 * @param payload The deserialized payload sent by the client via `sendClientCommand`
 	 */
 	protected buildAcceptedResponse(
-		player: IsoPlayer,
-		requestCommand: string,
-		payload: SyncDesiredPlushiesPayload,
-		state: CommandPersistedState<ServerAuthoritativeState>
+		context: CommandAcceptedContext<SyncDesiredPlushiesPayload, ServerAuthoritativeState>
 	): SyncAppliedPlushiesPayload {
+		const { player, payload, state } = context;
 		const playerApi = new PlayerApi(player);
 		const { authoritative } = state;
 
@@ -190,17 +191,43 @@ export class NaninhasCommandHandler extends CommandHandler<
 	 * all desired names moved to `rejectedNames`.
 	 */
 	protected buildRejectedResponse(
-		player: IsoPlayer,
-		requestCommand: string,
-		payload: SyncDesiredPlushiesPayload,
-		reason: Exclude<CommandRejectReason, "INVALID_PAYLOAD">,
-		state: CommandPersistedState<ServerAuthoritativeState>
+		context: CommandRejectedContext<SyncDesiredPlushiesPayload, ServerAuthoritativeState>
 	): SyncAppliedPlushiesPayload {
+		const { payload, reason, state } = context;
+
 		return {
 			schemaVersion: payload.schemaVersion,
 			revision: payload.revision,
 			appliedNames: [],
-			rejectedNames: payload.desiredNames
+			rejectedNames: payload.desiredNames,
+			status: "REJECTED",
+			reason,
+			expectedSchemaVersion: this.schemaVersion,
+			lastAcceptedRevision: state.protocol.lastClientRevision
+		};
+	}
+
+	/**
+	 * Sends a canonical rejection reply for malformed payloads.
+	 *
+	 * Because request args failed validation, the response does not echo
+	 * client-provided protocol metadata and instead uses a server-authored
+	 * sentinel revision (`0`) with empty applied/rejected lists.
+	 */
+	protected buildInvalidPayloadResponse(
+		context: CommandInvalidPayloadContext<ServerAuthoritativeState>
+	): SyncAppliedPlushiesPayload {
+		const { state } = context;
+
+		return {
+			schemaVersion: this.schemaVersion,
+			revision: 0,
+			appliedNames: [],
+			rejectedNames: [],
+			status: "REJECTED",
+			reason: "INVALID_PAYLOAD",
+			expectedSchemaVersion: this.schemaVersion,
+			lastAcceptedRevision: state.protocol.lastClientRevision
 		};
 	}
 }

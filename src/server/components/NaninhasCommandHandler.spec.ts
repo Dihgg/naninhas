@@ -161,6 +161,58 @@ describe("NaninhasCommandHandler", () => {
 	});
 
 	describe("revision handling", () => {
+		it("sends explicit rejection reply for invalid payloads with revision sentinel 0", () => {
+			jest.resetModules();
+
+			const sendServerCommandMock = jest.fn();
+			jest.doMock("@asledgehammer/pipewrench", () => ({
+				sendServerCommand: sendServerCommandMock,
+				Perks: {}
+			}));
+
+			const serverData = {
+				protocol: { lastClientRevision: 3, lastSchemaVersion: PROTOCOL_SCHEMA_VERSION },
+				authoritative: emptyAuthoritative()
+			};
+
+			jest.doMock("@shared/components/ModData", () => ({
+				ModData: jest.fn().mockImplementation(() => ({ data: serverData }))
+			}));
+
+			const { PlushieReconciler } = jest.requireMock("@shared/components/PlushieReconciler");
+			PlushieReconciler.reconcile = jest.fn();
+
+			const { NaninhasCommandHandler } = require("@server/components/NaninhasCommandHandler");
+			const handler = new NaninhasCommandHandler();
+
+			handler.handle(
+				NETWORK_MODULE,
+				NetworkCommands.SyncDesiredPlushies,
+				{
+					getUsername: jest.fn().mockReturnValue("BadPayloadPlayer"),
+					getXp: jest.fn().mockReturnValue({ getMultiplier: jest.fn(), addXpMultiplier: jest.fn() })
+				} as any,
+				{ bad: true }
+			);
+
+			expect(PlushieReconciler.reconcile).not.toHaveBeenCalled();
+			expect(sendServerCommandMock).toHaveBeenCalledWith(
+				expect.anything(),
+				"Naninhas",
+				"SyncAppliedPlushies",
+				expect.objectContaining({
+					schemaVersion: PROTOCOL_SCHEMA_VERSION,
+					revision: 0,
+					appliedNames: [],
+					rejectedNames: [],
+					status: "REJECTED",
+					reason: "INVALID_PAYLOAD",
+					expectedSchemaVersion: PROTOCOL_SCHEMA_VERSION,
+					lastAcceptedRevision: 3
+				})
+			);
+		});
+
 		it("accepts revision 1 after reconnect when server has persisted higher revision", () => {
 			jest.resetModules();
 
