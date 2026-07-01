@@ -6,8 +6,8 @@ describe("server Naninhas event registration", () => {
 	});
 
 	it("registers OnClientCommand and forwards matching sync commands to the handler", () => {
-		const onSyncDesiredPlushies = jest.fn();
-		const handlerCtor = jest.fn(() => ({ onSyncDesiredPlushies }));
+		const handle = jest.fn();
+		const handlerCtor = jest.fn(() => ({ handle }));
 		const addListener = jest.fn();
 
 		jest.doMock("@server/components/NaninhasCommandHandler", () => ({
@@ -29,15 +29,20 @@ describe("server Naninhas event registration", () => {
 		const args = { revision: 7, desiredNames: ["Doll"], schemaVersion: 1 };
 
 		listener(NETWORK_MODULE, NetworkCommands.SyncDesiredPlushies, player, args);
-		expect(onSyncDesiredPlushies).toHaveBeenCalledWith(player, args);
+		expect(handle).toHaveBeenCalledWith(
+			NETWORK_MODULE,
+			NetworkCommands.SyncDesiredPlushies,
+			player,
+			args
+		);
 	});
 
 	it("ignores unrelated client commands", () => {
-		const onSyncDesiredPlushies = jest.fn();
+		const handle = jest.fn();
 		const addListener = jest.fn();
 
 		jest.doMock("@server/components/NaninhasCommandHandler", () => ({
-			NaninhasCommandHandler: jest.fn(() => ({ onSyncDesiredPlushies }))
+			NaninhasCommandHandler: jest.fn(() => ({ handle }))
 		}));
 		jest.doMock("@asledgehammer/pipewrench-events", () => ({
 			onClientCommand: { addListener }
@@ -52,6 +57,8 @@ describe("server Naninhas event registration", () => {
 		listener("OtherModule", NetworkCommands.SyncDesiredPlushies, {}, {});
 		listener(NETWORK_MODULE, "OtherCommand", {}, {});
 
-		expect(onSyncDesiredPlushies).not.toHaveBeenCalled();
+		expect(handle).toHaveBeenCalledTimes(2);
+		expect(handle).toHaveBeenNthCalledWith(1, "OtherModule", NetworkCommands.SyncDesiredPlushies, {}, {});
+		expect(handle).toHaveBeenNthCalledWith(2, NETWORK_MODULE, "OtherCommand", {}, {});
 	});
 });

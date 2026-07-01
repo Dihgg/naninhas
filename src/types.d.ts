@@ -36,12 +36,12 @@ export type EventData = PlayerModData & {
 // ---------------------------------------------------------------------------
 
 /**
- * Payload sent from the client to the server to request a set of plushie
- * effects be applied authoritatively.
+ * Shared protocol envelope for all synced command payloads.
  *
- * Handlers must reject payloads whose `schemaVersion` they do not recognise.
+ * Request and response payloads should extend this type so protocol metadata
+ * has a single source of truth across the codebase.
  */
-export type SyncDesiredPlushiesPayload = {
+export type SyncProtocolPayload = {
 	/** Protocol version — must equal `PROTOCOL_SCHEMA_VERSION`. */
 	schemaVersion: number;
 	/**
@@ -50,6 +50,15 @@ export type SyncDesiredPlushiesPayload = {
 	 * the last accepted revision to prevent stale / out-of-order processing.
 	 */
 	revision: number;
+};
+
+/**
+ * Payload sent from the client to the server to request a set of plushie
+ * effects be applied authoritatively.
+ *
+ * Handlers must reject payloads whose `schemaVersion` they do not recognise.
+ */
+export type SyncDesiredPlushiesPayload = SyncProtocolPayload & {
 	/** Item names the client currently has attached. */
 	desiredNames: string[];
 };
@@ -58,11 +67,7 @@ export type SyncDesiredPlushiesPayload = {
  * Payload sent from the server back to the requesting client confirming
  * which plushie effects were applied and which were rejected.
  */
-export type SyncAppliedPlushiesPayload = {
-	/** Echo of the `schemaVersion` from the originating request. */
-	schemaVersion: number;
-	/** Echo of the `revision` from the originating request. */
-	revision: number;
+export type SyncAppliedPlushiesPayload = SyncProtocolPayload & {
 	/** Names of plushies whose effects were successfully applied. */
 	appliedNames: string[];
 	/** Names of plushies that were rejected (unknown name, not attached, etc.). */
@@ -70,7 +75,7 @@ export type SyncAppliedPlushiesPayload = {
 };
 
 // ---------------------------------------------------------------------------
-// Server-side authoritative state (stored in player modData under "Naninhas")
+// Server-side protocol and persistence types
 // ---------------------------------------------------------------------------
 
 /**
@@ -83,6 +88,18 @@ export type ServerProtocolState = {
 	/** The `schemaVersion` that was in effect when state was last written. */
 	lastSchemaVersion: number;
 };
+
+/**
+ * Generic server-side modData shape used by command handlers.
+ */
+export type GenericServerModData<TAuthoritative> = {
+	protocol: ServerProtocolState;
+	authoritative: TAuthoritative;
+};
+
+// ---------------------------------------------------------------------------
+// Naninhas-specific authoritative state
+// ---------------------------------------------------------------------------
 
 /**
  * Authoritative snapshot of which plushie effects are currently active for a
@@ -103,7 +120,4 @@ export type ServerAuthoritativeState = {
  * Full server-side modData structure stored under the `"Naninhas"` key in
  * `player.getModData()` on the server.
  */
-export type ServerModData = {
-	protocol: ServerProtocolState;
-	authoritative: ServerAuthoritativeState;
-};
+export type ServerModData = GenericServerModData<ServerAuthoritativeState>;
