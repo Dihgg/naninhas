@@ -1,8 +1,7 @@
 /* @noSelfInFile */
 import type { SyncAppliedPlushiesPayload } from "@types";
 import type { IsoPlayer } from "@asledgehammer/pipewrench";
-import { NETWORK_MODULE, NetworkCommands } from "@constants";
-import { isKnownPlushie } from "@shared/catalog/PlushieCatalog";
+import { NETWORK_MODULE, NetworkRequestCommands } from "@constants";
 import { PlayerApi } from "@shared/components/PlayerApi";
 import { CommandPublisher } from "@client/components/CommandPublisher";
 
@@ -17,7 +16,7 @@ export class PlushieCommandPublisher extends CommandPublisher {
         super(
 			player,
 			NETWORK_MODULE,
-			NetworkCommands.SYNC_APPLIED_PLUSHIES
+			NetworkRequestCommands.SYNC_DESIRED_PLUSHIES
 		);
 		this.playerApi = new PlayerApi(player);
     }
@@ -39,29 +38,15 @@ export class PlushieCommandPublisher extends CommandPublisher {
 			this.lastKnownNames = replyNames;
     }
 
-	override send(): void {
-		const currentNames = this.getAttachedPlushieNames();
+	public sendIfChanged(attachedSet: Set<string>): void {
 
-		if (!this.hasChanged(currentNames)) return;
+		if (!this.hasChanged(attachedSet)) return;
 
 		super.send({
-			desiredNames: [...currentNames]
+			desiredNames: [...attachedSet]
 		});
-	}
 
-	/**
-	 * Filters all attached item names down to those that are known plushies.
-	 */
-	getAttachedPlushieNames(): Set<string> {
-		const result = new Set<string>();
-
-		for (const name of this.playerApi.getAttachedItemNames()) {
-			if (isKnownPlushie(name)) {
-				result.add(name);
-			}
-		}
-
-		return result;
+		this.lastKnownNames = attachedSet;
 	}
 	
 	/** Returns true if `names` differs from `lastKnownNames`. */

@@ -1,6 +1,6 @@
 import { IsoPlayer } from "@asledgehammer/pipewrench";
 import * as Events from "@asledgehammer/pipewrench-events";
-import { PROTOCOL_SCHEMA_VERSION } from "@constants";
+import { getResponseCommand, PROTOCOL_SCHEMA_VERSION } from "@constants";
 import { sendClientCommand } from "@asledgehammer/pipewrench";
 import { SyncProtocolPayload } from "@types";
 /**
@@ -22,7 +22,7 @@ export abstract class CommandPublisher {
     /** Registers a listener for server commands. */
     private registerListener() {
         Events.onServerCommand.addListener((module, command, args) => {
-            if (module !== this.module || command !== this.command) return;
+            if (module !== this.module || command !== getResponseCommand(this.command)) return;
 
             this.onCommandReceived(args);
         });
@@ -38,7 +38,7 @@ export abstract class CommandPublisher {
      * The arguments will be merged with the protocol envelope containing the schema version and revision number.
      * @param args The arguments to send to the server. This will be merged with the protocol envelope.
      */
-    public send<T>(args: T) {
+    protected send<T>(args: T) {
         this.revistion++;
         const payload: T & SyncProtocolPayload = {
             ...args,

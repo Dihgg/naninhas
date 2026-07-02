@@ -1,7 +1,7 @@
 /* @noSelfInFile */
 import type { Perk } from "@asledgehammer/pipewrench";
 import { Perks } from "@asledgehammer/pipewrench";
-import { NETWORK_MODULE, NetworkCommands, PROTOCOL_SCHEMA_VERSION } from "@constants";
+import { NETWORK_MODULE, NetworkRequestCommands, PROTOCOL_SCHEMA_VERSION } from "@constants";
 import type {
 	SyncAppliedPlushiesPayload,
 	SyncDesiredPlushiesPayload,
@@ -27,16 +27,7 @@ export class NaninhasCommandHandler extends CommandHandler<
 	ServerAuthoritativeState
 > {
 	constructor() {
-		super(NETWORK_MODULE, "Naninhas", [NetworkCommands.SYNC_DESIRED_PLUSHIES], PROTOCOL_SCHEMA_VERSION);
-	}
-
-	protected getResponseCommand(requestCommand: string): string {
-		switch (requestCommand) {
-			case NetworkCommands.SYNC_DESIRED_PLUSHIES:
-				return NetworkCommands.SYNC_APPLIED_PLUSHIES;
-			default:
-				return requestCommand;
-		}
+		super(NETWORK_MODULE, "Naninhas", [ NetworkRequestCommands.SYNC_DESIRED_PLUSHIES ], PROTOCOL_SCHEMA_VERSION);
 	}
 
 	protected isValidRequestPayload(value: unknown): value is SyncDesiredPlushiesPayload {

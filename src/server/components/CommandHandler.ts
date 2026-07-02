@@ -2,7 +2,7 @@
 
 import type { IsoPlayer } from "@asledgehammer/pipewrench";
 import { sendServerCommand } from "@asledgehammer/pipewrench";
-import { PROTOCOL_SCHEMA_VERSION } from "@constants";
+import { getResponseCommand, PROTOCOL_SCHEMA_VERSION } from "@constants";
 import { ModData } from "@shared/components/ModData";
 import type {
 	ResponseStatus,
@@ -204,16 +204,8 @@ export abstract class CommandHandler<
 	 * still be overridden for advanced custom transport behavior.
 	 */
 	protected sendResponse(player: IsoPlayer, requestCommand: string, response: TResponse): void {
-		sendServerCommand(player, this.moduleName, this.getResponseCommand(requestCommand), response);
+		sendServerCommand(player, this.moduleName, getResponseCommand(requestCommand), response);
 	}
-
-	/**
-	 * Returns response command name for a given request command.
-	 * @abstract
-	 * @param requestCommand Incoming request command name.
-	 * @returns Response command name used by `sendServerCommand`.
-	 */
-	protected abstract getResponseCommand(requestCommand: string): string;
 
 	/**
 	 * Runtime guard for incoming request payload.

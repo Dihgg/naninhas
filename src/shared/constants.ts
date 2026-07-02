@@ -48,20 +48,33 @@ export const NETWORK_MODULE = "Naninhas";
 export const PROTOCOL_SCHEMA_VERSION = 1;
 
 /**
- * Network command names shared between client and server.
+ * Network command names used for client-server communication.
  *
  * Client -> Server: `SyncDesiredPlushies`
+ */
+export enum NetworkRequestCommands {
+    SYNC_DESIRED_PLUSHIES = "SyncDesiredPlushies",
+}
+
+/**
+ * Network command names used for server-client communication.
+ *
  * Server -> Client: `SyncAppliedPlushies`
  */
-export enum NetworkCommands {
-    /**
-     * Sent by the client to request a specific set of plushie effects be
-     * applied authoritatively. The server validates, reconciles, and applies.
-     */
-    SYNC_DESIRED_PLUSHIES = "SyncDesiredPlushies",
-    /**
-     * Sent by the server back to the requesting client confirming which
-     * plushie effects were applied or rejected.
-     */
+export enum NetworkResponseCommands {
     SYNC_APPLIED_PLUSHIES = "SyncAppliedPlushies",
-};
+}
+
+/**
+ * Returns response command name for a given request command.
+ * @param requestCommand Incoming request command name.
+ * @returns Response command name used by `sendServerCommand`.
+ */
+export const getResponseCommand = (command: string): NetworkResponseCommands | string => {
+    switch (command) {
+        case NetworkRequestCommands.SYNC_DESIRED_PLUSHIES:
+            return NetworkResponseCommands.SYNC_APPLIED_PLUSHIES;
+        default:
+            return command;
+    }
+}

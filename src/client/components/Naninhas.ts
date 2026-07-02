@@ -104,7 +104,7 @@ export class Naninhas {
 		this.subject.update();
 
 		// Step 5: Notify server of current plushie set (no-op in single-player)
-		this.syncPublisher.send();
+		this.syncPublisher.sendIfChanged(attachedSet);
 	}
 
 	/**
