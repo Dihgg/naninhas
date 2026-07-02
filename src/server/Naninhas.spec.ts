@@ -28,10 +28,10 @@ describe("server Naninhas event registration", () => {
 		const player = { getUsername: jest.fn(() => "server-player") };
 		const args = { revision: 7, desiredNames: ["Doll"], schemaVersion: 1 };
 
-		listener(NETWORK_MODULE, NetworkCommands.SyncDesiredPlushies, player, args);
+		listener(NETWORK_MODULE, NetworkCommands.SYNC_DESIRED_PLUSHIES, player, args);
 		expect(handle).toHaveBeenCalledWith(
 			NETWORK_MODULE,
-			NetworkCommands.SyncDesiredPlushies,
+			NetworkCommands.SYNC_DESIRED_PLUSHIES,
 			player,
 			args
 		);
@@ -54,11 +54,11 @@ describe("server Naninhas event registration", () => {
 			(module: string, command: string, player: unknown, args: unknown) => void
 		];
 
-		listener("OtherModule", NetworkCommands.SyncDesiredPlushies, {}, {});
+		listener("OtherModule", NetworkCommands.SYNC_DESIRED_PLUSHIES, {}, {});
 		listener(NETWORK_MODULE, "OtherCommand", {}, {});
 
 		expect(handle).toHaveBeenCalledTimes(2);
-		expect(handle).toHaveBeenNthCalledWith(1, "OtherModule", NetworkCommands.SyncDesiredPlushies, {}, {});
+		expect(handle).toHaveBeenNthCalledWith(1, "OtherModule", NetworkCommands.SYNC_DESIRED_PLUSHIES, {}, {});
 		expect(handle).toHaveBeenNthCalledWith(2, NETWORK_MODULE, "OtherCommand", {}, {});
 	});
 });

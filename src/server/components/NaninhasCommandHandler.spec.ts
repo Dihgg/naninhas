@@ -82,7 +82,7 @@ describe("NaninhasCommandHandler", () => {
 				desiredNames: ["Doll"]
 			};
 
-			handler.handle(NETWORK_MODULE, NetworkCommands.SyncDesiredPlushies, {
+			handler.handle(NETWORK_MODULE, NetworkCommands.SYNC_DESIRED_PLUSHIES, {
 				getUsername: jest.fn().mockReturnValue("TestPlayer"),
 				getXp: jest.fn().mockReturnValue({ getMultiplier: jest.fn(), addXpMultiplier: jest.fn() })
 			} as any, payload);
@@ -149,7 +149,7 @@ describe("NaninhasCommandHandler", () => {
 				desiredNames: ["SpiffoCherry"]
 			};
 
-			handler.handle(NETWORK_MODULE, NetworkCommands.SyncDesiredPlushies, {
+			handler.handle(NETWORK_MODULE, NetworkCommands.SYNC_DESIRED_PLUSHIES, {
 				getUsername: jest.fn().mockReturnValue("TestPlayer"),
 				getXp: jest.fn().mockReturnValue({ getMultiplier: jest.fn(), addXpMultiplier: jest.fn() })
 			} as any, payload);
@@ -187,7 +187,7 @@ describe("NaninhasCommandHandler", () => {
 
 			handler.handle(
 				NETWORK_MODULE,
-				NetworkCommands.SyncDesiredPlushies,
+				NetworkCommands.SYNC_DESIRED_PLUSHIES,
 				{
 					getUsername: jest.fn().mockReturnValue("BadPayloadPlayer"),
 					getXp: jest.fn().mockReturnValue({ getMultiplier: jest.fn(), addXpMultiplier: jest.fn() })
@@ -273,7 +273,7 @@ describe("NaninhasCommandHandler", () => {
 				desiredNames: ["Doll"]
 			};
 
-			handler.handle(NETWORK_MODULE, NetworkCommands.SyncDesiredPlushies, {
+			handler.handle(NETWORK_MODULE, NetworkCommands.SYNC_DESIRED_PLUSHIES, {
 				getUsername: jest.fn().mockReturnValue("ReconnectPlayer"),
 				getXp: jest.fn().mockReturnValue({ getMultiplier: jest.fn(), addXpMultiplier: jest.fn() })
 			} as any, payload);
@@ -337,7 +337,7 @@ describe("NaninhasCommandHandler", () => {
 
 			handler.handle(
 				NETWORK_MODULE,
-				NetworkCommands.SyncDesiredPlushies,
+				NetworkCommands.SYNC_DESIRED_PLUSHIES,
 				{
 					getUsername: jest.fn().mockReturnValue("StaleRevisionPlayer"),
 					getXp: jest.fn().mockReturnValue({ getMultiplier: jest.fn(), addXpMultiplier: jest.fn() })
@@ -437,7 +437,7 @@ describe("NaninhasCommandHandler", () => {
 
 			handler.handle(
 				NETWORK_MODULE,
-				NetworkCommands.SyncDesiredPlushies,
+				NetworkCommands.SYNC_DESIRED_PLUSHIES,
 				{
 					getUsername: jest.fn().mockReturnValue("XPPlayer"),
 					getXp: jest.fn().mockReturnValue({ getMultiplier: jest.fn(), addXpMultiplier: jest.fn() })
@@ -538,8 +538,8 @@ describe("NaninhasCommandHandler", () => {
 			const { NaninhasCommandHandler } = require("@server/components/NaninhasCommandHandler");
 			const handler = new NaninhasCommandHandler();
 
-			expect((handler as any).getResponseCommand(NetworkCommands.SyncDesiredPlushies)).toBe(
-				NetworkCommands.SyncAppliedPlushies
+			expect((handler as any).getResponseCommand(NetworkCommands.SYNC_DESIRED_PLUSHIES)).toBe(
+				NetworkCommands.SYNC_APPLIED_PLUSHIES
 			);
 			expect((handler as any).getResponseCommand("UnmappedCommand")).toBe("UnmappedCommand");
 		});
@@ -576,7 +576,7 @@ describe("NaninhasCommandHandler", () => {
 
 			const response = (handler as any).buildRejectedResponse({
 				player: {},
-				requestCommand: NetworkCommands.SyncDesiredPlushies,
+				requestCommand: NetworkCommands.SYNC_DESIRED_PLUSHIES,
 				reason: "STALE_REVISION",
 				state: {
 					protocol: { lastClientRevision: 2, lastSchemaVersion: PROTOCOL_SCHEMA_VERSION },
@@ -624,7 +624,7 @@ describe("NaninhasCommandHandler", () => {
 
 			const response = (handler as any).buildAcceptedResponse({
 				player: {},
-				requestCommand: NetworkCommands.SyncDesiredPlushies,
+				requestCommand: NetworkCommands.SYNC_DESIRED_PLUSHIES,
 				state: {
 					protocol: { lastClientRevision: 4, lastSchemaVersion: PROTOCOL_SCHEMA_VERSION },
 					authoritative: emptyAuthoritative()
@@ -676,7 +676,7 @@ describe("NaninhasCommandHandler", () => {
 
 			const response = (handler as any).buildAcceptedResponse({
 				player: {},
-				requestCommand: NetworkCommands.SyncDesiredPlushies,
+				requestCommand: NetworkCommands.SYNC_DESIRED_PLUSHIES,
 				payload: {
 					schemaVersion: PROTOCOL_SCHEMA_VERSION,
 					revision: 3,

@@ -4,7 +4,7 @@ import { sendClientCommand } from "@asledgehammer/pipewrench";
 import * as Events from "@asledgehammer/pipewrench-events";
 import { PROTOCOL_SCHEMA_VERSION } from "@constants";
 import type { SyncAppliedPlushiesPayload } from "@types";
-import { PlushieSyncPublisher } from "@client/components/PlushieSyncPublisher";
+import { PlushieSyncPublisher } from "@client/components/PlushieCommandPublisher";
 
 jest.mock("@asledgehammer/pipewrench");
 jest.mock("@asledgehammer/pipewrench-events");
@@ -60,7 +60,7 @@ describe("PlushieSyncPublisher", () => {
 		it("does not send when no plushies are attached", () => {
 			getAttachedItemNamesMock.mockReturnValue(new Set());
 			const pub = makePublisher();
-			pub.tick();
+			pub.update();
 			expect(sendClientCommandMock).not.toHaveBeenCalled();
 		});
 
@@ -68,7 +68,7 @@ describe("PlushieSyncPublisher", () => {
 			getAttachedItemNamesMock.mockReturnValue(new Set(["Doll"]));
 			isKnownPlushie.mockReturnValue(true);
 			const pub = makePublisher();
-			pub.tick();
+			pub.update();
 			expect(sendClientCommandMock).toHaveBeenCalledTimes(1);
 		});
 
@@ -76,7 +76,7 @@ describe("PlushieSyncPublisher", () => {
 			getAttachedItemNamesMock.mockReturnValue(new Set(["Doll"]));
 			isKnownPlushie.mockReturnValue(true);
 			const pub = makePublisher();
-			pub.tick();
+			pub.update();
 			expect(sendClientCommandMock).toHaveBeenCalledTimes(1);
 		});
 
@@ -85,7 +85,7 @@ describe("PlushieSyncPublisher", () => {
 			isKnownPlushie.mockImplementation((n: string) => n === "Doll");
 
 			const pub = makePublisher();
-			pub.tick();
+			pub.update();
 
 			expect(sendClientCommandMock).toHaveBeenCalledTimes(1);
 			const [, , , payload] = sendClientCommandMock.mock.calls[0];
@@ -99,11 +99,11 @@ describe("PlushieSyncPublisher", () => {
 			isKnownPlushie.mockReturnValue(true);
 
 			const pub = makePublisher();
-			pub.tick();
+			pub.update();
 			fireReply({ appliedNames: ["Doll"] });
 
 			sendClientCommandMock.mockClear();
-			pub.tick();
+			pub.update();
 
 			expect(sendClientCommandMock).not.toHaveBeenCalled();
 		});
@@ -113,12 +113,12 @@ describe("PlushieSyncPublisher", () => {
 			isKnownPlushie.mockReturnValue(true);
 
 			const pub = makePublisher();
-			pub.tick();
+			pub.update();
 			fireReply({ appliedNames: ["Doll"] });
 			sendClientCommandMock.mockClear();
 
 			getAttachedItemNamesMock.mockReturnValue(new Set(["Doll", "Flamingo"]));
-			pub.tick();
+			pub.update();
 
 			expect(sendClientCommandMock).toHaveBeenCalledTimes(1);
 		});
@@ -128,12 +128,12 @@ describe("PlushieSyncPublisher", () => {
 			isKnownPlushie.mockReturnValue(true);
 
 			const pub = makePublisher();
-			pub.tick();
+			pub.update();
 			fireReply({ appliedNames: ["Doll"] });
 			sendClientCommandMock.mockClear();
 
 			getAttachedItemNamesMock.mockReturnValue(new Set());
-			pub.tick();
+			pub.update();
 
 			expect(sendClientCommandMock).toHaveBeenCalledTimes(1);
 		});
@@ -143,14 +143,14 @@ describe("PlushieSyncPublisher", () => {
 			getAttachedItemNamesMock.mockReturnValue(new Set(["Doll"]));
 			isKnownPlushie.mockReturnValue(true);
 			const pub = makePublisher();
-			pub.tick();
+			pub.update();
 			sendClientCommandMock.mockClear();
 
 			// Player detaches before reply arrives (lastKnownNames still {Doll} from send)
 			getAttachedItemNamesMock.mockReturnValue(new Set());
 
 			// Tick B: must detect the change and send revision=2 with []
-			pub.tick();
+			pub.update();
 
 			expect(sendClientCommandMock).toHaveBeenCalledTimes(1);
 			const [, , , payload] = sendClientCommandMock.mock.calls[0];
@@ -163,10 +163,10 @@ describe("PlushieSyncPublisher", () => {
 			isKnownPlushie.mockReturnValue(true);
 
 			const pub = makePublisher();
-			pub.tick();
+			pub.update();
 			// Force change by returning different set (no reply in between)
 			getAttachedItemNamesMock.mockReturnValue(new Set(["Flamingo"]));
-			pub.tick();
+			pub.update();
 
 			const revisions = sendClientCommandMock.mock.calls.map(c => (c[3] as any).revision);
 			expect(revisions).toEqual([1, 2]);
@@ -177,7 +177,7 @@ describe("PlushieSyncPublisher", () => {
 			isKnownPlushie.mockImplementation((n: string) => n === "Doll");
 
 			const pub = makePublisher();
-			pub.tick();
+			pub.update();
 
 			const [, , , payload] = sendClientCommandMock.mock.calls[0];
 			expect((payload as any).desiredNames).toContain("Doll");
@@ -190,7 +190,7 @@ describe("PlushieSyncPublisher", () => {
 			getAttachedItemNamesMock.mockReturnValue(new Set(["Doll"]));
 			isKnownPlushie.mockReturnValue(true);
 			const pub = makePublisher();
-			pub.tick();
+			pub.update();
 			sendClientCommandMock.mockClear();
 
 			replyListener?.("OtherMod", "SyncAppliedPlushies", {
@@ -201,7 +201,7 @@ describe("PlushieSyncPublisher", () => {
 			});
 
 			// State unchanged — no resend expected
-			pub.tick();
+			pub.update();
 			expect(sendClientCommandMock).not.toHaveBeenCalled();
 		});
 
@@ -209,13 +209,13 @@ describe("PlushieSyncPublisher", () => {
 			getAttachedItemNamesMock.mockReturnValue(new Set(["Doll"]));
 			isKnownPlushie.mockReturnValue(true);
 			const pub = makePublisher();
-			pub.tick();
+			pub.update();
 			sendClientCommandMock.mockClear();
 
 			fireReply({ schemaVersion: 99, appliedNames: ["Doll"] });
 
 			// State unchanged — no resend expected
-			pub.tick();
+			pub.update();
 			expect(sendClientCommandMock).not.toHaveBeenCalled();
 		});
 
@@ -225,7 +225,7 @@ describe("PlushieSyncPublisher", () => {
 			getAttachedItemNamesMock.mockReturnValue(new Set(["Doll"]));
 			isKnownPlushie.mockReturnValue(true);
 			const pub = makePublisher();
-			pub.tick();
+			pub.update();
 
 			fireReply({ appliedNames: [], rejectedNames: ["Doll"] });
 
@@ -240,7 +240,7 @@ describe("PlushieSyncPublisher", () => {
 			getAttachedItemNamesMock.mockReturnValue(new Set(["Doll"]));
 			isKnownPlushie.mockReturnValue(true);
 			const pub = makePublisher();
-			pub.tick();
+			pub.update();
 
 			// Server replies with an empty applied/rejected set, which differs from
 			// the optimistic local expectation ({Doll}).
@@ -248,7 +248,7 @@ describe("PlushieSyncPublisher", () => {
 
 			sendClientCommandMock.mockClear();
 			getAttachedItemNamesMock.mockReturnValue(new Set());
-			pub.tick();
+			pub.update();
 
 			expect(sendClientCommandMock).not.toHaveBeenCalled();
 		});

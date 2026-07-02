@@ -27,13 +27,13 @@ export class NaninhasCommandHandler extends CommandHandler<
 	ServerAuthoritativeState
 > {
 	constructor() {
-		super(NETWORK_MODULE, "Naninhas", [NetworkCommands.SyncDesiredPlushies], PROTOCOL_SCHEMA_VERSION);
+		super(NETWORK_MODULE, "Naninhas", [NetworkCommands.SYNC_DESIRED_PLUSHIES], PROTOCOL_SCHEMA_VERSION);
 	}
 
 	protected getResponseCommand(requestCommand: string): string {
 		switch (requestCommand) {
-			case NetworkCommands.SyncDesiredPlushies:
-				return NetworkCommands.SyncAppliedPlushies;
+			case NetworkCommands.SYNC_DESIRED_PLUSHIES:
+				return NetworkCommands.SYNC_APPLIED_PLUSHIES;
 			default:
 				return requestCommand;
 		}

@@ -3,7 +3,7 @@ import { AttachedItem, InventoryItem, IsoPlayer } from "@asledgehammer/pipewrenc
 import * as Events from "@asledgehammer/pipewrench-events";
 import { Subject } from "@client/components/Observer/Subject";
 import { Plushie } from "@client/components/Plushies/Plushie";
-import { PlushieSyncPublisher } from "@client/components/PlushieSyncPublisher";
+import { PlushieCommandPublisher } from "@client/components/PlushieCommandPublisher";
 import { PlayerApi } from "@shared/components/PlayerApi";
 import {
 	BorisBadger,
@@ -37,12 +37,12 @@ export class Naninhas {
 
 	private subject: Subject;
 
-	private readonly syncPublisher: PlushieSyncPublisher;
+	private readonly syncPublisher: PlushieCommandPublisher;
 
 	constructor(player: IsoPlayer, plushies: Plushie[] = []) {
 		this.player = player;
 		this.subject = new Subject();
-		this.syncPublisher = new PlushieSyncPublisher(player);
+		this.syncPublisher = new PlushieCommandPublisher(player);
 		this.PLUSHIES =
 			plushies.length > 0
 				? plushies
@@ -104,7 +104,7 @@ export class Naninhas {
 		this.subject.update();
 
 		// Step 5: Notify server of current plushie set (no-op in single-player)
-		this.syncPublisher.tick();
+		this.syncPublisher.send();
 	}
 
 	/**

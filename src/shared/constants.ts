@@ -58,10 +58,10 @@ export enum NetworkCommands {
      * Sent by the client to request a specific set of plushie effects be
      * applied authoritatively. The server validates, reconciles, and applies.
      */
-    SyncDesiredPlushies = "SyncDesiredPlushies",
+    SYNC_DESIRED_PLUSHIES = "SyncDesiredPlushies",
     /**
      * Sent by the server back to the requesting client confirming which
      * plushie effects were applied or rejected.
      */
-    SyncAppliedPlushies = "SyncAppliedPlushies",
+    SYNC_APPLIED_PLUSHIES = "SyncAppliedPlushies",
 };
