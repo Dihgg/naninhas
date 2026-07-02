@@ -11,10 +11,8 @@ import { PlushieReconciler } from "@shared/components/PlushieReconciler";
 import { isKnownPlushie } from "@shared/catalog/PlushieCatalog";
 import { PlayerApi } from "@shared/components/PlayerApi";
 import {
-	CommandAcceptedContext,
 	CommandHandler,
-	CommandInvalidPayloadContext,
-	CommandRejectedContext
+	CommandRequestContext
 } from "@server/components/CommandHandler";
 
 /**
@@ -88,7 +86,7 @@ export class NaninhasCommandHandler extends CommandHandler<
 	 * @param payload The deserialized payload sent by the client via `sendClientCommand`
 	 */
 	protected buildAcceptedResponse(
-		context: CommandAcceptedContext<SyncDesiredPlushiesPayload, ServerAuthoritativeState>
+		context: CommandRequestContext<ServerAuthoritativeState, SyncDesiredPlushiesPayload>
 	): SyncAppliedPlushiesPayload {
 		const { player, payload, state } = context;
 		const playerApi = new PlayerApi(player);
@@ -101,8 +99,9 @@ export class NaninhasCommandHandler extends CommandHandler<
 
 		const validNames: string[] = [];
 		const rejectedNames: string[] = [];
+		const desiredNames = payload?.desiredNames ?? [];
 
-		for (const name of payload.desiredNames) {
+		for (const name of desiredNames) {
 			if (!isKnownPlushie(name) || !attachedSet.has(name)) {
 				rejectedNames.push(name);
 			} else {
@@ -149,7 +148,6 @@ export class NaninhasCommandHandler extends CommandHandler<
 			playerApi.addTrait(trait);
 		}
 
-		const xp = player.getXp();
 		for (const [key, delta] of Object.entries(xpBoostDeltas)) {
 			const [, perkName] = key.split(":");
 			const perk = Perks[perkName as keyof typeof Perks] as Perk;
@@ -179,8 +177,7 @@ export class NaninhasCommandHandler extends CommandHandler<
 		// 5. Reply to the client
 		// -----------------------------------------------------------------------
 		return {
-			schemaVersion: payload.schemaVersion,
-			revision: payload.revision,
+			...super.buildResponse(context, "ACCEPTED"),
 			appliedNames: validNames,
 			rejectedNames
 		};
@@ -191,19 +188,13 @@ export class NaninhasCommandHandler extends CommandHandler<
 	 * all desired names moved to `rejectedNames`.
 	 */
 	protected buildRejectedResponse(
-		context: CommandRejectedContext<SyncDesiredPlushiesPayload, ServerAuthoritativeState>
+		context: CommandRequestContext<ServerAuthoritativeState, SyncDesiredPlushiesPayload>
 	): SyncAppliedPlushiesPayload {
-		const { payload, reason, state } = context;
-
+		const { payload } = context;
 		return {
-			schemaVersion: payload.schemaVersion,
-			revision: payload.revision,
+			...this.buildResponse(context, "REJECTED"),
 			appliedNames: [],
-			rejectedNames: payload.desiredNames,
-			status: "REJECTED",
-			reason,
-			expectedSchemaVersion: this.schemaVersion,
-			lastAcceptedRevision: state.protocol.lastClientRevision
+			rejectedNames: payload?.desiredNames ?? []
 		};
 	}
 
@@ -215,19 +206,14 @@ export class NaninhasCommandHandler extends CommandHandler<
 	 * sentinel revision (`0`) with empty applied/rejected lists.
 	 */
 	protected buildInvalidPayloadResponse(
-		context: CommandInvalidPayloadContext<ServerAuthoritativeState>
+		context: CommandRequestContext<ServerAuthoritativeState, SyncDesiredPlushiesPayload>
 	): SyncAppliedPlushiesPayload {
-		const { state } = context;
 
 		return {
-			schemaVersion: this.schemaVersion,
+			...super.buildResponse(context, "REJECTED"),
 			revision: 0,
 			appliedNames: [],
-			rejectedNames: [],
-			status: "REJECTED",
-			reason: "INVALID_PAYLOAD",
-			expectedSchemaVersion: this.schemaVersion,
-			lastAcceptedRevision: state.protocol.lastClientRevision
+			rejectedNames: []
 		};
 	}
 }

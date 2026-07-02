@@ -53,6 +53,24 @@ export type SyncProtocolPayload = {
 };
 
 /**
+ * Reasons why a request can be rejected by protocol guard rails.
+ */
+export type CommandRejectReason = "INVALID_PAYLOAD" | "SCHEMA_MISMATCH" | "STALE_REVISION";
+
+export type ResponseStatus = "ACCEPTED" | "REJECTED";
+/** Shared protocol envelope for all synced command responses. */
+export type SyncProtocolResponse = SyncProtocolPayload & {
+	/** Optional response status for protocol-aware handling. */
+	status?: ResponseStatus;
+	/** Optional protocol rejection reason when status is REJECTED. */
+	reason?: CommandRejectReason;
+	/** Optional response status for protocol-aware handling. */
+	expectedSchemaVersion?: number;
+	/** Optional response status for protocol-aware handling. */
+	lastAcceptedRevision?: number;
+};
+
+/**
  * Payload sent from the client to the server to request a set of plushie
  * effects be applied authoritatively.
  *
@@ -67,19 +85,11 @@ export type SyncDesiredPlushiesPayload = SyncProtocolPayload & {
  * Payload sent from the server back to the requesting client confirming
  * which plushie effects were applied and which were rejected.
  */
-export type SyncAppliedPlushiesPayload = SyncProtocolPayload & {
+export type SyncAppliedPlushiesPayload = SyncProtocolResponse & {
 	/** Names of plushies whose effects were successfully applied. */
 	appliedNames: string[];
 	/** Names of plushies that were rejected (unknown name, not attached, etc.). */
 	rejectedNames: string[];
-	/** Optional response status for protocol-aware handling. */
-	status?: "ACCEPTED" | "REJECTED";
-	/** Optional protocol rejection reason when status is REJECTED. */
-	reason?: "INVALID_PAYLOAD" | "SCHEMA_MISMATCH" | "STALE_REVISION";
-	/** Server schema expected by this handler. */
-	expectedSchemaVersion?: number;
-	/** Last accepted client revision persisted on the server. */
-	lastAcceptedRevision?: number;
 };
 
 // ---------------------------------------------------------------------------
