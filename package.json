@@ -1,6 +1,6 @@
 {
 	"name": "naninhas",
-	"version": "1.11.0",
+	"version": "1.11.2",
 	"scripts": {
 		"prebuild": "npm run clean",
 		"build": "tstl -p ./tsconfig.build.json",
