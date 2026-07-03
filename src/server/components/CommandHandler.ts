@@ -2,7 +2,7 @@
 
 import type { IsoPlayer } from "@asledgehammer/pipewrench";
 import { sendServerCommand } from "@asledgehammer/pipewrench";
-import { getResponseCommand, PROTOCOL_SCHEMA_VERSION } from "@constants";
+import { getResponseCommand, NetworkRequestCommands, PROTOCOL_SCHEMA_VERSION } from "@constants";
 import { ModData } from "@shared/components/ModData";
 import type {
 	ResponseStatus,
@@ -102,7 +102,7 @@ export abstract class CommandHandler<
 	constructor(
 		protected readonly moduleName: string,
 		protected readonly modDataKey: string,
-		protected readonly handledCommands: readonly string[],
+		protected readonly handledCommands: readonly NetworkRequestCommands[],
 		protected readonly schemaVersion: number = PROTOCOL_SCHEMA_VERSION
 	) {}
 
@@ -110,7 +110,7 @@ export abstract class CommandHandler<
 	 * Checks whether this handler should process a specific incoming command.
 	 */
 	public canHandle(module: string, command: string): boolean {
-		return module === this.moduleName && this.handledCommands.includes(command);
+		return module === this.moduleName && this.handledCommands.includes(command as NetworkRequestCommands);
 	}
 
 	/**
@@ -120,6 +120,7 @@ export abstract class CommandHandler<
 	 *          `false` when module/command does not belong to this handler.
 	 */
 	public handle(module: string, command: string, player: IsoPlayer, args: unknown): boolean {
+
 		if (!this.canHandle(module, command)) {
 			return false;
 		}
@@ -203,8 +204,8 @@ export abstract class CommandHandler<
 	 * Implementations usually only override `getResponseCommand`; this method can
 	 * still be overridden for advanced custom transport behavior.
 	 */
-	protected sendResponse(player: IsoPlayer, requestCommand: string, response: TResponse): void {
-		sendServerCommand(player, this.moduleName, getResponseCommand(requestCommand), response);
+	protected sendResponse(player: IsoPlayer, command: string, response: TResponse): void {
+		sendServerCommand(player, this.moduleName, getResponseCommand(command as NetworkRequestCommands), response);
 	}
 
 	/**

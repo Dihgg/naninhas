@@ -70,11 +70,11 @@ export enum NetworkResponseCommands {
  * @param requestCommand Incoming request command name.
  * @returns Response command name used by `sendServerCommand`.
  */
-export const getResponseCommand = (command: string): NetworkResponseCommands | string => {
+export const getResponseCommand = (command: NetworkRequestCommands): NetworkResponseCommands | null => {
     switch (command) {
         case NetworkRequestCommands.SYNC_DESIRED_PLUSHIES:
             return NetworkResponseCommands.SYNC_APPLIED_PLUSHIES;
         default:
-            return command;
+            return null;
     }
 }

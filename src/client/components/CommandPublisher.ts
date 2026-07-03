@@ -1,6 +1,6 @@
 import { IsoPlayer } from "@asledgehammer/pipewrench";
 import * as Events from "@asledgehammer/pipewrench-events";
-import { getResponseCommand, PROTOCOL_SCHEMA_VERSION } from "@constants";
+import { getResponseCommand, NetworkRequestCommands, PROTOCOL_SCHEMA_VERSION } from "@constants";
 import { sendClientCommand } from "@asledgehammer/pipewrench";
 import { SyncProtocolPayload } from "@types";
 /**
@@ -13,7 +13,7 @@ export abstract class CommandPublisher {
     constructor(
         private readonly player: IsoPlayer,
         private readonly module: string,
-        private readonly command: string,
+        private readonly command: NetworkRequestCommands,
         private readonly schemaVersion = PROTOCOL_SCHEMA_VERSION
     ) {
         this.registerListener();
