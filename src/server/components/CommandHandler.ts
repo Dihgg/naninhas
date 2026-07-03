@@ -173,6 +173,7 @@ export abstract class CommandHandler<
 			payload,
 			state
 		});
+		this.writeState(player, state);
 		this.sendResponse(player, command, accepted);
 		return true;
 	}
@@ -196,6 +197,19 @@ export abstract class CommandHandler<
 				authoritative: this.ensureAuthoritativeState(data.authoritative)
 			})
 		}).data;
+	}
+
+	/** Persists the latest protocol and authoritative state back into ModData. */
+	protected writeState(player: IsoPlayer, state: CommandPersistedState<TAuthoritative>): void {
+		new ModData<CommandPersistedState<TAuthoritative>>({
+			object: player,
+			modKey: this.modDataKey,
+			defaultData: state,
+			ensure: (data: Partial<CommandPersistedState<TAuthoritative>>) => ({
+				protocol: this.ensureProtocolState(data.protocol),
+				authoritative: this.ensureAuthoritativeState(data.authoritative)
+			})
+		}).data = state;
 	}
 
 	/**

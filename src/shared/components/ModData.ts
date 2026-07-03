@@ -54,4 +54,11 @@ export class ModData<T> {
 
 		return value as T;
 	}
+
+	/** Persists a value back into `object.getModData()`. */
+	set data(value: T) {
+		const store = this.object.getModData();
+		const normalizedValue = this.ensure ? this.ensure(value as Partial<T>) : value;
+		this.setValue(store, normalizedValue);
+	}
 }
