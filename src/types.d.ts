@@ -78,7 +78,7 @@ export type SyncProtocolResponse = SyncProtocolPayload & {
  */
 export type SyncDesiredPlushiesPayload = SyncProtocolPayload & {
 	/** Item names the client currently has attached. */
-	desiredNames: string[];
+	desiredNames?: string[];
 };
 
 /**
@@ -87,9 +87,9 @@ export type SyncDesiredPlushiesPayload = SyncProtocolPayload & {
  */
 export type SyncAppliedPlushiesPayload = SyncProtocolResponse & {
 	/** Names of plushies whose effects were successfully applied. */
-	appliedNames: string[];
+	appliedNames?: string[];
 	/** Names of plushies that were rejected (unknown name, not attached, etc.). */
-	rejectedNames: string[];
+	rejectedNames?: string[];
 };
 
 // ---------------------------------------------------------------------------

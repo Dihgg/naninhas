@@ -77,7 +77,7 @@ export abstract class Plushie implements Observer {
 		triggerEvent(EventsEnum.Unequipped, {
 			name: this.name,
 			...this.data
-		});
+		} as EventData);
 	}
 
 	/**

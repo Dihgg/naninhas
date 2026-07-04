@@ -161,6 +161,81 @@ describe("NaninhasCommandHandler", () => {
 	});
 
 	describe("revision handling", () => {
+		it("accepts payloads with missing desiredNames and reconciles as empty set", () => {
+			jest.resetModules();
+
+			const sendServerCommandMock = jest.fn();
+			jest.doMock("@asledgehammer/pipewrench", () => ({
+				sendServerCommand: sendServerCommandMock,
+				Perks: {}
+			}));
+
+			const mockPlayerApi = {
+				player: {},
+				getAttachedItemNames: jest.fn().mockReturnValue(new Set<string>()),
+				hasTrait: jest.fn().mockReturnValue(false),
+				addTrait: jest.fn(),
+				removeTrait: jest.fn(),
+				applyXpMultiplierDelta: jest.fn()
+			};
+
+			jest.doMock("@shared/components/PlayerApi", () => ({
+				PlayerApi: jest.fn().mockImplementation(() => mockPlayerApi)
+			}));
+
+			const authoritative = {
+				activePlushieNames: ["Doll"],
+				addedTraits: ["Organized"],
+				suppressedTraits: [],
+				xpBoosts: {}
+			};
+
+			const serverData = {
+				protocol: { lastClientRevision: 0, lastSchemaVersion: PROTOCOL_SCHEMA_VERSION },
+				authoritative
+			};
+
+			jest.doMock("@shared/components/ModData", () => ({
+				ModData: jest.fn().mockImplementation(() => ({ data: serverData }))
+			}));
+
+			const { PlushieReconciler } = jest.requireMock("@shared/components/PlushieReconciler");
+			PlushieReconciler.reconcile = jest.fn().mockReturnValue({
+				traitsToAdd: [],
+				traitsToRemove: ["Organized"],
+				traitsToSuppress: [],
+				traitsToRestore: [],
+				xpBoostDeltas: {},
+				newState: emptyAuthoritative()
+			});
+
+			const { NaninhasCommandHandler } = require("@server/components/NaninhasCommandHandler");
+			const handler = new NaninhasCommandHandler();
+
+			handler.handle(
+				NETWORK_MODULE,
+				NetworkCommands.SYNC_DESIRED_PLUSHIES,
+				{
+					getUsername: jest.fn().mockReturnValue("MissingDesiredNamesPlayer"),
+					getXp: jest.fn().mockReturnValue({ getMultiplier: jest.fn(), addXpMultiplier: jest.fn() })
+				} as any,
+				{ schemaVersion: PROTOCOL_SCHEMA_VERSION, revision: 1 } as any
+			);
+
+			expect(PlushieReconciler.reconcile).toHaveBeenCalledWith(authoritative, []);
+			expect(sendServerCommandMock).toHaveBeenCalledWith(
+				expect.anything(),
+				"Naninhas",
+				"SyncAppliedPlushies",
+				expect.objectContaining({
+					status: "ACCEPTED",
+					revision: 1,
+					appliedNames: [],
+					rejectedNames: []
+				})
+			);
+		});
+
 		it("sends explicit rejection reply for invalid payloads with revision sentinel 0", () => {
 			jest.resetModules();
 
@@ -533,15 +608,14 @@ describe("NaninhasCommandHandler", () => {
 	});
 
 	describe("protected hook behavior", () => {
-		it("getResponseCommand maps known command and falls back for unknown command", () => {
+		it("canHandle accepts configured module/command and rejects others", () => {
 			jest.resetModules();
 			const { NaninhasCommandHandler } = require("@server/components/NaninhasCommandHandler");
 			const handler = new NaninhasCommandHandler();
 
-			expect((handler as any).getResponseCommand(NetworkCommands.SYNC_DESIRED_PLUSHIES)).toBe(
-				NetworkCommands.SYNC_APPLIED_PLUSHIES
-			);
-			expect((handler as any).getResponseCommand("UnmappedCommand")).toBe("UnmappedCommand");
+			expect(handler.canHandle(NETWORK_MODULE, NetworkCommands.SYNC_DESIRED_PLUSHIES)).toBe(true);
+			expect(handler.canHandle("OtherModule", NetworkCommands.SYNC_DESIRED_PLUSHIES)).toBe(false);
+			expect(handler.canHandle(NETWORK_MODULE, "UnmappedCommand")).toBe(false);
 		});
 
 		it("isValidRequestPayload rejects malformed payloads and accepts valid payload", () => {

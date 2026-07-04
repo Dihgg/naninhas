@@ -35,8 +35,8 @@ export class NaninhasCommandHandler extends CommandHandler<
 		const payload = value as Partial<SyncDesiredPlushiesPayload>;
 		if (typeof payload.schemaVersion !== "number") return false;
 		if (typeof payload.revision !== "number") return false;
-		if (!Array.isArray(payload.desiredNames)) return false;
-		for (const name of payload.desiredNames) {
+		if (payload.desiredNames !== undefined && !Array.isArray(payload.desiredNames)) return false;
+		for (const name of payload.desiredNames ?? []) {
 			if (typeof name !== "string") return false;
 		}
 		return true;
@@ -79,9 +79,11 @@ export class NaninhasCommandHandler extends CommandHandler<
 	protected buildAcceptedResponse(
 		context: CommandRequestContext<ServerAuthoritativeState, SyncDesiredPlushiesPayload>
 	): SyncAppliedPlushiesPayload {
+		print(`[Naninhas][Server] Handling accepted request from player ${context.player.getUsername()}`);
 		const { player, payload, state } = context;
 		const playerApi = new PlayerApi(player);
 		const { authoritative } = state;
+		const { desiredNames = [] } = payload as SyncDesiredPlushiesPayload;
 
 		// -----------------------------------------------------------------------
 		// 2. Verify attachment and validate plushie names
@@ -90,7 +92,6 @@ export class NaninhasCommandHandler extends CommandHandler<
 
 		const validNames: string[] = [];
 		const rejectedNames: string[] = [];
-		const desiredNames = payload?.desiredNames ?? [];
 
 		for (const name of desiredNames) {
 			if (!isKnownPlushie(name) || !attachedSet.has(name)) {

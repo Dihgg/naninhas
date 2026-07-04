@@ -32,7 +32,7 @@ export type CommandRequestContext<
 	/** The player who sent the request. */
 	player: IsoPlayer;
 	/** The command name sent by the client. */
-	requestCommand: string;
+	command: string;
 	/** The authoritative state persisted on the server. */
 	state: CommandPersistedState<TAuthoritative>;
 	/** The deserialized payload sent by the client via `sendClientCommand`. */
@@ -42,16 +42,6 @@ export type CommandRequestContext<
 	/** The raw arguments sent by the client via `sendClientCommand`. */
 	args?: unknown;
 }
-
-/**
- * Result returned from protocol validation.
- */
-type CommandValidationResult = {
-	/** Whether the command is valid and can be processed. */
-	ok: boolean;
-	/** Optional reason for rejection if the command is invalid. */
-	reason?: CommandRejectReason;
-};
 
 /**
  * Input object used to validate and advance protocol state.
@@ -65,6 +55,17 @@ type ProtocolValidationContext = {
 	protocol: ServerProtocolState;
 	/** Player username used for structured logging. */
 	username: string;
+};
+
+/**
+ * Result returned from protocol validation.
+ */
+type ProtocolValidationResult = {
+	/** Whether the command is valid and can be processed. */
+	ok: boolean;
+	/** Optional reason for rejection if the command is invalid. */
+	reason?: CommandRejectReason;
+	protocol: ServerProtocolState;
 };
 
 /**
@@ -108,8 +109,11 @@ export abstract class CommandHandler<
 
 	/**
 	 * Checks whether this handler should process a specific incoming command.
+	 * @param module Incoming request module name.
+	 * @param command Incoming request command name.
+	 * @returns `true` when this handler can process the request; otherwise `false`.
 	 */
-	public canHandle(module: string, command: string): boolean {
+	private canHandle(module: string, command: string): boolean {
 		return module === this.moduleName && this.handledCommands.includes(command as NetworkRequestCommands);
 	}
 
@@ -121,12 +125,10 @@ export abstract class CommandHandler<
 	 */
 	public handle(module: string, command: string, player: IsoPlayer, args: unknown): boolean {
 
-		if (!this.canHandle(module, command)) {
-			return false;
-		}
+		if (!this.canHandle(module, command)) return false;
 
 		const username = player.getUsername();
-		const state = this.readState(player);
+		const { protocol: stateProtocol, authoritative } = this.readState(player);
 
 		if (!this.isValidRequestPayload(args)) {
 			print(
@@ -134,7 +136,7 @@ export abstract class CommandHandler<
 			);
 			const rejected = this.buildInvalidPayloadResponse({
 				player,
-				requestCommand: command,
+				command,
 				args,
 				reason: "INVALID_PAYLOAD",
 				state
@@ -149,19 +151,23 @@ export abstract class CommandHandler<
 			`[${this.moduleName}][MP][Server] received ${command} player=${username} revision=${payload.revision} schema=${payload.schemaVersion}`
 		);
 
-		const validation = this.validateAndAdvanceProtocol({
+		const { ok, reason, protocol } = this.validateProtocol({
 			command,
 			payload,
-			protocol: state.protocol,
+			protocol: stateProtocol,
 			username
 		});
-		if (!validation.ok) {
+
+		if (!ok) {
 			const rejected = this.buildRejectedResponse({
 				player,
-				requestCommand: command,
+				command,
 				payload,
-				reason: validation.reason,
-				state
+				reason,
+				state: {
+					authoritative,
+					protocol
+				}
 			});
 			this.sendResponse(player, command, rejected);
 			return true;
@@ -169,11 +175,13 @@ export abstract class CommandHandler<
 
 		const accepted = this.buildAcceptedResponse({
 			player,
-			requestCommand: command,
+			command,
 			payload,
-			state
+			state: {
+				authoritative,
+				protocol
+			}
 		});
-		this.writeState(player, state);
 		this.sendResponse(player, command, accepted);
 		return true;
 	}
@@ -181,7 +189,7 @@ export abstract class CommandHandler<
 	/**
 	 * Reads persisted state from ModData, seeding defaults and normalizing shape.
 	 */
-	protected readState(player: IsoPlayer): CommandPersistedState<TAuthoritative> {
+	private readState(player: IsoPlayer): CommandPersistedState<TAuthoritative> {
 		return new ModData<CommandPersistedState<TAuthoritative>>({
 			object: player,
 			modKey: this.modDataKey,
@@ -197,19 +205,6 @@ export abstract class CommandHandler<
 				authoritative: this.ensureAuthoritativeState(data.authoritative)
 			})
 		}).data;
-	}
-
-	/** Persists the latest protocol and authoritative state back into ModData. */
-	protected writeState(player: IsoPlayer, state: CommandPersistedState<TAuthoritative>): void {
-		new ModData<CommandPersistedState<TAuthoritative>>({
-			object: player,
-			modKey: this.modDataKey,
-			defaultData: state,
-			ensure: (data: Partial<CommandPersistedState<TAuthoritative>>) => ({
-				protocol: this.ensureProtocolState(data.protocol),
-				authoritative: this.ensureAuthoritativeState(data.authoritative)
-			})
-		}).data = state;
 	}
 
 	/**
@@ -320,38 +315,37 @@ export abstract class CommandHandler<
 	 * @param props Named protocol validation inputs.
 	 * @returns Validation outcome including optional rejection reason.
 	 */
-	private validateAndAdvanceProtocol(props: ProtocolValidationContext): CommandValidationResult {
+	private validateProtocol(props: ProtocolValidationContext): ProtocolValidationResult {
 
 		const { command, payload, protocol, username } = props;
 
-		if (payload.schemaVersion !== this.schemaVersion) {
-			print(
-				`[${this.moduleName}][MP][Server] reject ${command} player=${username} reason=SCHEMA_MISMATCH payload=${payload.schemaVersion} expected=${this.schemaVersion}`
-			);
-			return { ok: false, reason: "SCHEMA_MISMATCH" };
-		}
+		const resultProtocol: ServerProtocolState = { ...protocol };
 
 		if (payload.revision === 1 && protocol.lastClientRevision > 0) {
-			print(
-				`[${this.moduleName}][MP][Server] reconnect detected player=${username} resetting protocol revision from ${protocol.lastClientRevision} to 0`
-			);
-			protocol.lastClientRevision = 0;
+			resultProtocol.lastClientRevision = 0;
 		}
 
-		if (payload.revision <= protocol.lastClientRevision) {
-			print(
-				`[${this.moduleName}][MP][Server] reject ${command} player=${username} reason=STALE_REVISION payload=${payload.revision} lastAccepted=${protocol.lastClientRevision}`
-			);
-			return { ok: false, reason: "STALE_REVISION" };
+		const reason: (CommandRejectReason | undefined) = (() => {
+			if (payload.schemaVersion !== this.schemaVersion) return "SCHEMA_MISMATCH";
+			if (payload.revision <= protocol.lastClientRevision) return "STALE_REVISION";
+			return undefined;
+		})();
+
+		if (reason) {
+			return {
+				ok: false,
+				reason,
+				protocol: resultProtocol
+			};
 		}
 
-		protocol.lastClientRevision = payload.revision;
-		protocol.lastSchemaVersion = this.schemaVersion;
+		resultProtocol.lastClientRevision = payload.revision;
+		resultProtocol.lastSchemaVersion = this.schemaVersion;
 
 		print(
 			`[${this.moduleName}][MP][Server] accepted ${command} player=${username} revision=${payload.revision}`
 		);
 
-		return { ok: true };
+		return { ok: true, protocol: resultProtocol };
 	}
 }

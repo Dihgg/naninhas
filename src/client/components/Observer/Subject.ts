@@ -16,6 +16,7 @@ export class Subject {
 
 	/** Unsubscribe the observer by its name */
 	unsubscribe(observerName: string) {
+		print(`[Naninhas] Unsubscribing observer: ${observerName}`);
 		const observer = this.find(observerName);
 		observer?.unsubscribe();
 		this.observers = this.observers.filter(({ name }) => name !== observerName);
