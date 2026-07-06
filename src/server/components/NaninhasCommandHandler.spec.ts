@@ -1,5 +1,5 @@
 import { mock } from "jest-mock-extended";
-import type { SyncDesiredPlushiesPayload, ServerAuthoritativeState } from "@types";
+import type { SyncDesiredPlushiesPayload, NaninhasAuthoritativeState } from "@types";
 import { PROTOCOL_SCHEMA_VERSION, PlushieNames } from "@constants";
 
 jest.mock("@asledgehammer/pipewrench");
@@ -9,7 +9,7 @@ jest.mock("@shared/utils/ItemType");
 jest.mock("@shared/components/PlayerApi");
 jest.mock("@shared/components/ModData");
 
-const emptyAuthoritative = (): ServerAuthoritativeState => ({
+const emptyAuthoritative = (): NaninhasAuthoritativeState => ({
 	activePlushieNames: [],
 	addedTraits: [],
 	suppressedTraits: [],

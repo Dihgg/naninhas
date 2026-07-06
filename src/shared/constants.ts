@@ -1,3 +1,5 @@
+import { NetworkCommand } from "@types";
+
 export enum PlushieNames {
     BORISBADGER = "BorisBadger",
     DOLL = "Doll",
@@ -65,3 +67,10 @@ export enum NetworkCommands {
      */
     SyncAppliedPlushies = "SyncAppliedPlushies",
 };
+
+export const Commands: Record<string, NetworkCommand> = {
+    SYNC_PLUSHIE: {
+        REQUEST: "SyncPlushie.Request",
+        RESPONSE: "SyncPlushie.Response"
+    }
+}

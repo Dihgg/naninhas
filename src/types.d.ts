@@ -88,7 +88,7 @@ export type ServerProtocolState = {
  * Authoritative snapshot of which plushie effects are currently active for a
  * player, as determined and persisted by the server.
  */
-export type ServerAuthoritativeState = {
+export type NaninhasAuthoritativeState = {
 	/** Plushie names whose effects are currently active. */
 	activePlushieNames: string[];
 	/** Traits added by active plushies. */
@@ -103,7 +103,15 @@ export type ServerAuthoritativeState = {
  * Full server-side modData structure stored under the `"Naninhas"` key in
  * `player.getModData()` on the server.
  */
-export type ServerModData = {
+export type ServerModData<TAuthoritative> = {
 	protocol: ServerProtocolState;
-	authoritative: ServerAuthoritativeState;
+	authoritative: TAuthoritative;
 };
+
+export type CommandPayload<T> = {
+	revision: number;
+	schemaVersion: number;
+	data: T;
+};
+
+export type NetworkCommand = { REQUEST: string; RESPONSE: string };

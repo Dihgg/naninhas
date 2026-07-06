@@ -1,16 +1,18 @@
 /* @noSelfInFile */
 import type { IsoPlayer, Perk } from "@asledgehammer/pipewrench";
 import { sendServerCommand, Perks } from "@asledgehammer/pipewrench";
-import { NETWORK_MODULE, NetworkCommands, PROTOCOL_SCHEMA_VERSION } from "@constants";
+import { Commands, NETWORK_MODULE, NetworkCommands, PROTOCOL_SCHEMA_VERSION } from "@constants";
 import type {
 	SyncAppliedPlushiesPayload,
 	SyncDesiredPlushiesPayload,
-	ServerModData
+	ServerModData,
+	NaninhasAuthoritativeState
 } from "@types";
 import { PlushieReconciler } from "@shared/components/PlushieReconciler";
 import { isKnownPlushie } from "@shared/catalog/PlushieCatalog";
 import { ModData } from "@shared/components/ModData";
 import { PlayerApi } from "@shared/components/PlayerApi";
+import { CommandHandler } from "./CommandHandler";
 
 /**
  * Server-side command handler for the Naninhas mod.
@@ -38,14 +40,14 @@ export class NaninhasCommandHandler {
 		// 1. Load or initialize server state
 		// -----------------------------------------------------------------------
 		const playerApi = new PlayerApi(player);
-		const serverModData = new ModData<ServerModData>({
+		const serverModData = new ModData<ServerModData<NaninhasAuthoritativeState>>({
 			object: playerApi.player,
 			modKey: "Naninhas",
 			defaultData: {
 				protocol: { lastClientRevision: 0, lastSchemaVersion: PROTOCOL_SCHEMA_VERSION },
 				authoritative: { activePlushieNames: [], addedTraits: [], suppressedTraits: [], xpBoosts: {} }
 			},
-			ensure: NaninhasCommandHandler.ensureServerModData
+			ensure: this.ensureServerModData
 		}).data;
 		const { protocol, authoritative } = serverModData;
 
@@ -177,7 +179,7 @@ export class NaninhasCommandHandler {
 	 * Returns a fully initialized `ServerModData` from the player's modData,
 	 * creating and seeding defaults if the structure is absent or incomplete.
 	 */
-	private static ensureServerModData(data: Partial<ServerModData>): ServerModData {
+	private ensureServerModData(data: Partial<ServerModData<NaninhasAuthoritativeState>>): ServerModData<NaninhasAuthoritativeState> {
 		const persistedVersion = data.protocol?.lastSchemaVersion ?? 0;
 		if (persistedVersion < PROTOCOL_SCHEMA_VERSION) {
 			print(`[Naninhas] Migrating server mod data from schema v${persistedVersion} to v${PROTOCOL_SCHEMA_VERSION}`);
@@ -198,5 +200,15 @@ export class NaninhasCommandHandler {
 				xpBoosts: data.authoritative?.xpBoosts ?? {}
 			}
 		};
+	}
+}
+
+export class NaninhasCommandHandlerA extends CommandHandler<NaninhasAuthoritativeState, SyncDesiredPlushiesPayload> {
+	constructor() {
+		super(
+			NETWORK_MODULE,
+			Commands.SYNC_PLUSHIE,
+			{ activePlushieNames: [], addedTraits: [], suppressedTraits: [], xpBoosts: {} }
+		);
 	}
 }
