@@ -1,4 +1,4 @@
-import { NETWORK_MODULE, NetworkCommands } from "@constants";
+import { Commands, NETWORK_MODULE } from "@constants";
 
 describe("server Naninhas event registration", () => {
 	beforeEach(() => {
@@ -6,8 +6,8 @@ describe("server Naninhas event registration", () => {
 	});
 
 	it("registers OnClientCommand and forwards matching sync commands to the handler", () => {
-		const onSyncDesiredPlushies = jest.fn();
-		const handlerCtor = jest.fn(() => ({ onSyncDesiredPlushies }));
+		const handlerFn = jest.fn();
+		const handlerCtor = jest.fn(() => ({ handler: handlerFn }));
 		const addListener = jest.fn();
 
 		jest.doMock("@server/components/NaninhasCommandHandler", () => ({
@@ -26,18 +26,23 @@ describe("server Naninhas event registration", () => {
 			(module: string, command: string, player: unknown, args: unknown) => void
 		];
 		const player = { getUsername: jest.fn(() => "server-player") };
-		const args = { revision: 7, desiredNames: ["Doll"], schemaVersion: 1 };
+		const args = { revision: 7, schemaVersion: 1, data: { desiredNames: ["Doll"] } };
 
-		listener(NETWORK_MODULE, NetworkCommands.SyncDesiredPlushies, player, args);
-		expect(onSyncDesiredPlushies).toHaveBeenCalledWith(player, args);
+		listener(NETWORK_MODULE, Commands.SYNC_PLUSHIE.REQUEST, player, args);
+		expect(handlerFn).toHaveBeenCalledWith({
+			module: NETWORK_MODULE,
+			command: Commands.SYNC_PLUSHIE.REQUEST,
+			player,
+			args
+		});
 	});
 
-	it("ignores unrelated client commands", () => {
-		const onSyncDesiredPlushies = jest.fn();
+	it("ignores commands from other modules", () => {
+		const handlerFn = jest.fn();
 		const addListener = jest.fn();
 
 		jest.doMock("@server/components/NaninhasCommandHandler", () => ({
-			NaninhasCommandHandler: jest.fn(() => ({ onSyncDesiredPlushies }))
+			NaninhasCommandHandler: jest.fn(() => ({ handler: handlerFn }))
 		}));
 		jest.doMock("@asledgehammer/pipewrench-events", () => ({
 			onClientCommand: { addListener }
@@ -49,9 +54,35 @@ describe("server Naninhas event registration", () => {
 			(module: string, command: string, player: unknown, args: unknown) => void
 		];
 
-		listener("OtherModule", NetworkCommands.SyncDesiredPlushies, {}, {});
+		listener("OtherModule", Commands.SYNC_PLUSHIE.REQUEST, {}, {});
+
+		expect(handlerFn).not.toHaveBeenCalled();
+	});
+
+	it("forwards same-module non-matching commands so handler can filter", () => {
+		const handlerFn = jest.fn();
+		const addListener = jest.fn();
+
+		jest.doMock("@server/components/NaninhasCommandHandler", () => ({
+			NaninhasCommandHandler: jest.fn(() => ({ handler: handlerFn }))
+		}));
+		jest.doMock("@asledgehammer/pipewrench-events", () => ({
+			onClientCommand: { addListener }
+		}));
+
+		require("./Naninhas");
+
+		const [listener] = addListener.mock.calls[0] as [
+			(module: string, command: string, player: unknown, args: unknown) => void
+		];
+
 		listener(NETWORK_MODULE, "OtherCommand", {}, {});
 
-		expect(onSyncDesiredPlushies).not.toHaveBeenCalled();
+		expect(handlerFn).toHaveBeenCalledWith({
+			module: NETWORK_MODULE,
+			command: "OtherCommand",
+			player: {},
+			args: {}
+		});
 	});
 });

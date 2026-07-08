@@ -1,16 +1,15 @@
 /* @noSelfInFile */
 import type { IsoPlayer, Perk } from "@asledgehammer/pipewrench";
-import { sendServerCommand, Perks } from "@asledgehammer/pipewrench";
-import { Commands, NETWORK_MODULE, NetworkCommands, PROTOCOL_SCHEMA_VERSION } from "@constants";
+import { Perks } from "@asledgehammer/pipewrench";
+import { Commands, NETWORK_MODULE, PROTOCOL_SCHEMA_VERSION } from "@constants";
 import type {
+	CommandPayload,
 	SyncAppliedPlushiesPayload,
 	SyncDesiredPlushiesPayload,
-	ServerModData,
 	NaninhasAuthoritativeState
 } from "@types";
 import { PlushieReconciler } from "@shared/components/PlushieReconciler";
 import { isKnownPlushie } from "@shared/catalog/PlushieCatalog";
-import { ModData } from "@shared/components/ModData";
 import { PlayerApi } from "@shared/components/PlayerApi";
 import { CommandHandler } from "./CommandHandler";
 
@@ -20,9 +19,20 @@ import { CommandHandler } from "./CommandHandler";
  * Receives client sync requests, validates them, applies reconciled effects to
  * the live player, and sends a confirmed reply back to the client.
  */
-export class NaninhasCommandHandler {
+export class NaninhasCommandHandler extends CommandHandler<NaninhasAuthoritativeState, SyncDesiredPlushiesPayload, SyncAppliedPlushiesPayload> {
 	/**
-	 * Processes a SyncDesiredPlushies request from a client.
+	 * Configures the Naninhas multiplayer command flow.
+	 */
+	constructor() {
+		super(
+			NETWORK_MODULE,
+			Commands.SYNC_PLUSHIE,
+			{ activePlushieNames: [], addedTraits: [], suppressedTraits: [], xpBoosts: {} }
+		);
+	}
+
+	/**
+	 * Processes a SyncPlushie request from a client.
 	 *
 	 * Responsibilities:
 	 * 1. Validate revision to ensure freshness
@@ -30,41 +40,19 @@ export class NaninhasCommandHandler {
 	 * 3. Call the reconciler to compute trait/XP deltas
 	 * 4. Apply those changes to the live player
 	 * 5. Persist the new server state
-	 * 6. Reply to the client with SyncAppliedPlushies
+	 * 6. Reply to the client with the applied and rejected plushie names
 	 *
 	 * @param player The player sending the sync request
 	 * @param payload The deserialized payload sent by the client via `sendClientCommand`
 	 */
-	onSyncDesiredPlushies(player: IsoPlayer, payload: SyncDesiredPlushiesPayload): void {
+	protected onCommand(player: IsoPlayer, payload: CommandPayload<SyncDesiredPlushiesPayload>): void {
 		// -----------------------------------------------------------------------
 		// 1. Load or initialize server state
 		// -----------------------------------------------------------------------
 		const playerApi = new PlayerApi(player);
-		const serverModData = new ModData<ServerModData<NaninhasAuthoritativeState>>({
-			object: playerApi.player,
-			modKey: "Naninhas",
-			defaultData: {
-				protocol: { lastClientRevision: 0, lastSchemaVersion: PROTOCOL_SCHEMA_VERSION },
-				authoritative: { activePlushieNames: [], addedTraits: [], suppressedTraits: [], xpBoosts: {} }
-			},
-			ensure: this.ensureServerModData
-		}).data;
-		const { protocol, authoritative } = serverModData;
-
-		// A reconnect creates a new client publisher that restarts revision at 1.
-		// Accept that reset so one old persisted server revision does not cause
-		// permanent stale-reject loops.
-		if (payload.revision === 1 && protocol.lastClientRevision > 0) {
-			protocol.lastClientRevision = 0;
-		}
-
-		// Check revision freshness to prevent stale / out-of-order requests
-		if (payload.revision <= protocol.lastClientRevision) {
-			print(`[Naninhas] SyncDesiredPlushies: stale revision from ${player.getUsername()} `);
-			print(`(last accepted: ${protocol.lastClientRevision}, got ${payload.revision})`);
-			this.sendRejectReply(player, payload);
-			return;
-		}
+		const serverModData = this.getModData(playerApi.player);
+		const { authoritative } = serverModData;
+		const { desiredNames } = payload.data;
 
 		// -----------------------------------------------------------------------
 		// 2. Verify attachment and validate plushie names
@@ -74,7 +62,7 @@ export class NaninhasCommandHandler {
 		const validNames: string[] = [];
 		const rejectedNames: string[] = [];
 
-		for (const name of payload.desiredNames) {
+		for (const name of desiredNames) {
 			if (!isKnownPlushie(name) || !attachedSet.has(name)) {
 				rejectedNames.push(name);
 			} else {
@@ -121,7 +109,6 @@ export class NaninhasCommandHandler {
 			playerApi.addTrait(trait);
 		}
 
-		const xp = player.getXp();
 		for (const [key, delta] of Object.entries(xpBoostDeltas)) {
 			const [, perkName] = key.split(":");
 			const perk = Perks[perkName as keyof typeof Perks] as Perk;
@@ -131,8 +118,6 @@ export class NaninhasCommandHandler {
 		// -----------------------------------------------------------------------
 		// 4. Persist updated server state
 		// -----------------------------------------------------------------------
-		protocol.lastClientRevision = payload.revision;
-		protocol.lastSchemaVersion = PROTOCOL_SCHEMA_VERSION;
 		// suppressedTraits must only contain traits actually removed from the player,
 		// not the full desired-suppression set from the reconciler.
 		// addedTraits must only contain traits that were actually added by the mod,
@@ -153,34 +138,36 @@ export class NaninhasCommandHandler {
 		// 5. Reply to the client
 		// -----------------------------------------------------------------------
 		const reply: SyncAppliedPlushiesPayload = {
-			schemaVersion: payload.schemaVersion,
-			revision: payload.revision,
 			appliedNames: validNames,
 			rejectedNames
 		};
-		sendServerCommand(player, NETWORK_MODULE, NetworkCommands.SyncAppliedPlushies, reply);
+		this.sendResponse(player, payload, reply);
 	}
 
 	/**
 	 * Sends a rejection reply echoing the payload's version and revision, with
 	 * all desired names moved to `rejectedNames`.
+	 *
+	 * @param player Player who sent the stale request.
+	 * @param payload Stale request envelope being rejected.
 	 */
-	private sendRejectReply(player: IsoPlayer, payload: SyncDesiredPlushiesPayload): void {
+	protected onStaleCommand(player: IsoPlayer, payload: CommandPayload<SyncDesiredPlushiesPayload>): void {
 		const reply: SyncAppliedPlushiesPayload = {
-			schemaVersion: payload.schemaVersion,
-			revision: payload.revision,
 			appliedNames: [],
-			rejectedNames: payload.desiredNames
+			rejectedNames: payload.data.desiredNames
 		};
-		sendServerCommand(player, NETWORK_MODULE, NetworkCommands.SyncAppliedPlushies, reply);
+		this.sendResponse(player, payload, reply);
 	}
 
 	/**
-	 * Returns a fully initialized `ServerModData` from the player's modData,
-	 * creating and seeding defaults if the structure is absent or incomplete.
+	 * Returns a fully initialized authoritative state from the persisted
+	 * authoritative payload.
+	 *
+	 * @param persistedVersion Schema version stored alongside the authoritative data.
+	 * @param authoritativeData Partially populated persisted authoritative state.
+	 * @returns Current authoritative state shape for runtime use.
 	 */
-	private ensureServerModData(data: Partial<ServerModData<NaninhasAuthoritativeState>>): ServerModData<NaninhasAuthoritativeState> {
-		const persistedVersion = data.protocol?.lastSchemaVersion ?? 0;
+	protected migrateAuthoritativeData(persistedVersion: number, authoritativeData: unknown): NaninhasAuthoritativeState {
 		if (persistedVersion < PROTOCOL_SCHEMA_VERSION) {
 			print(`[Naninhas] Migrating server mod data from schema v${persistedVersion} to v${PROTOCOL_SCHEMA_VERSION}`);
 			//TODO: Add migration logic here when a breaking schema change is introduced:
@@ -188,27 +175,13 @@ export class NaninhasCommandHandler {
 			// if (persistedVersion < 3) { /* reshape fields for schema 3 */ }
 		}
 
-		return {
-			protocol: {
-				lastClientRevision: data.protocol?.lastClientRevision ?? 0,
-				lastSchemaVersion: data.protocol?.lastSchemaVersion ?? PROTOCOL_SCHEMA_VERSION
-			},
-			authoritative: {
-				activePlushieNames: data.authoritative?.activePlushieNames ?? [],
-				addedTraits: data.authoritative?.addedTraits ?? [],
-				suppressedTraits: data.authoritative?.suppressedTraits ?? [],
-				xpBoosts: data.authoritative?.xpBoosts ?? {}
-			}
-		};
-	}
-}
+		const authoritative = authoritativeData as Partial<NaninhasAuthoritativeState> | undefined;
 
-export class NaninhasCommandHandlerA extends CommandHandler<NaninhasAuthoritativeState, SyncDesiredPlushiesPayload> {
-	constructor() {
-		super(
-			NETWORK_MODULE,
-			Commands.SYNC_PLUSHIE,
-			{ activePlushieNames: [], addedTraits: [], suppressedTraits: [], xpBoosts: {} }
-		);
+		return {
+			activePlushieNames: authoritative?.activePlushieNames ?? [],
+			addedTraits: authoritative?.addedTraits ?? [],
+			suppressedTraits: authoritative?.suppressedTraits ?? [],
+			xpBoosts: authoritative?.xpBoosts ?? {}
+		};
 	}
 }

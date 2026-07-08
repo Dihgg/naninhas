@@ -52,25 +52,13 @@ export const PROTOCOL_SCHEMA_VERSION = 1;
 /**
  * Network command names shared between client and server.
  *
- * Client -> Server: `SyncDesiredPlushies`
- * Server -> Client: `SyncAppliedPlushies`
+ * Each entry represents one logical multiplayer interaction and exposes a
+ * request/response pair so client and server can agree on transport names
+ * while the payload schema lives in `CommandPayload<T>`.
  */
-export enum NetworkCommands {
-    /**
-     * Sent by the client to request a specific set of plushie effects be
-     * applied authoritatively. The server validates, reconciles, and applies.
-     */
-    SyncDesiredPlushies = "SyncDesiredPlushies",
-    /**
-     * Sent by the server back to the requesting client confirming which
-     * plushie effects were applied or rejected.
-     */
-    SyncAppliedPlushies = "SyncAppliedPlushies",
-};
-
 export const Commands: Record<string, NetworkCommand> = {
     SYNC_PLUSHIE: {
         REQUEST: "SyncPlushie.Request",
         RESPONSE: "SyncPlushie.Response"
     }
-}
+};
