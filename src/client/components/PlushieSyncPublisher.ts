@@ -2,8 +2,8 @@
 import type { IsoPlayer } from "@asledgehammer/pipewrench";
 import { sendClientCommand } from "@asledgehammer/pipewrench";
 import * as Events from "@asledgehammer/pipewrench-events";
-import { NETWORK_MODULE, NetworkCommands, PROTOCOL_SCHEMA_VERSION } from "@constants";
-import type { SyncAppliedPlushiesPayload, SyncDesiredPlushiesPayload } from "@types";
+import { Commands, NETWORK_MODULE, PROTOCOL_SCHEMA_VERSION } from "@constants";
+import type { CommandPayload, SyncAppliedPlushiesPayload, SyncDesiredPlushiesPayload } from "@types";
 import { isKnownPlushie } from "@shared/catalog/PlushieCatalog";
 import { PlayerApi } from "@shared/components/PlayerApi";
 
@@ -13,8 +13,8 @@ import { PlayerApi } from "@shared/components/PlayerApi";
  *
  * On each tick it compares the current attached plushie set against the
  * previously known set. When a change is detected it sends a
- * `SyncDesiredPlushies` command to the server and waits for the
- * `SyncAppliedPlushies` reply before updating the known set.
+ * `SyncPlushie.Request` command to the server and waits for the
+ * `SyncPlushie.Response` reply before updating the known set.
  *
  * A monotonically increasing revision counter is used so the server can
  * safely drop stale / out-of-order requests.
@@ -28,6 +28,9 @@ export class PlushieSyncPublisher {
 	/** Monotonically increasing request counter. */
 	private revision = 0;
 
+	/**
+	 * @param player Local player whose attached plushies should be synchronized.
+	 */
 	constructor(player: IsoPlayer) {
 		this.playerApi = new PlayerApi(player);
 		this.registerReplyListener();
@@ -64,48 +67,52 @@ export class PlushieSyncPublisher {
 	}
 
 	/**
-	 * Sends a `SyncDesiredPlushies` command to the server with the current
+	 * Sends a `SyncPlushie.Request` command to the server with the current
 	 * plushie set. The revision is incremented before sending so the server
 	 * can reject stale replays.
 	 *
 	 * `lastKnownNames` is updated eagerly here so that a subsequent attachment
 	 * change within the same reply window is still detected on the next tick,
 	 * even if the server reply for this send has not yet arrived.
+	 *
+	 * @param names Current known-good set of attached plushies.
 	 */
 	private send(names: Set<string>): void {
 		this.revision++;
 		this.lastKnownNames = new Set(names);
 
-		const payload: SyncDesiredPlushiesPayload = {
+		const payload: CommandPayload<SyncDesiredPlushiesPayload> = {
 			schemaVersion: PROTOCOL_SCHEMA_VERSION,
 			revision: this.revision,
-			desiredNames: [...names]
+			data: {
+				desiredNames: [...names]
+			}
 		};
 
-		sendClientCommand(this.playerApi.player, NETWORK_MODULE, NetworkCommands.SyncDesiredPlushies, payload);
+		sendClientCommand(this.playerApi.player, NETWORK_MODULE, Commands.SYNC_PLUSHIE.REQUEST, payload);
 	}
 
 	/**
-	 * Registers the `OnServerCommand` listener for `SyncAppliedPlushies` replies.
+	 * Registers the `OnServerCommand` listener for `SyncPlushie.Response` replies.
 	 * Updates `lastKnownNames` on a successful response so the next tick does
 	 * not re-send needlessly.
 	 */
 	private registerReplyListener(): void {
 		Events.onServerCommand.addListener((module, command, args) => {
-			if (module !== NETWORK_MODULE || command !== NetworkCommands.SyncAppliedPlushies) {
+			if (module !== NETWORK_MODULE || command !== Commands.SYNC_PLUSHIE.RESPONSE) {
 				return;
 			}
 
-			const payload = args as unknown as SyncAppliedPlushiesPayload;
+			const payload = args as unknown as CommandPayload<SyncAppliedPlushiesPayload>;
 
-			if (payload.rejectedNames.length > 0) {
-				print(`[Naninhas] SyncAppliedPlushies: rejected names: ${payload.rejectedNames.join(", ")}`);
+			if (payload.data.rejectedNames.length > 0) {
+				print(`[Naninhas] ${Commands.SYNC_PLUSHIE.RESPONSE}: rejected names: ${payload.data.rejectedNames.join(", ")}`);
 			}
 
 			// Update our reference. If a corrective send already updated
 			// lastKnownNames ahead of this reply, the reply may contain a
 			// stale set — leave it as-is so the next tick re-evaluates correctly.
-			const replyNames = new Set([...payload.appliedNames, ...payload.rejectedNames]);
+			const replyNames = new Set([...payload.data.appliedNames, ...payload.data.rejectedNames]);
 			if (!this.hasChanged(replyNames)) {
 				// Reply matches our current expectation — nothing to do
 				return;
@@ -114,7 +121,12 @@ export class PlushieSyncPublisher {
 		});
 	}
 
-	/** Returns true if `names` differs from `lastKnownNames`. */
+	/**
+	 * Returns whether `names` differs from the last acknowledged state.
+	 *
+	 * @param names Current local plushie set.
+	 * @returns `true` when a sync request should be sent.
+	 */
 	private hasChanged(names: Set<string>): boolean {
 		if (names.size !== this.lastKnownNames.size) {
 			return true;

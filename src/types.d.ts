@@ -36,33 +36,19 @@ export type EventData = PlayerModData & {
 // ---------------------------------------------------------------------------
 
 /**
- * Payload sent from the client to the server to request a set of plushie
+ * Request data sent from the client to the server to request a set of plushie
  * effects be applied authoritatively.
- *
- * Handlers must reject payloads whose `schemaVersion` they do not recognise.
  */
 export type SyncDesiredPlushiesPayload = {
-	/** Protocol version — must equal `PROTOCOL_SCHEMA_VERSION`. */
-	schemaVersion: number;
-	/**
-	 * Monotonically increasing counter scoped to the client's current session.
-	 * The server drops payloads whose revision is not strictly greater than
-	 * the last accepted revision to prevent stale / out-of-order processing.
-	 */
-	revision: number;
 	/** Item names the client currently has attached. */
 	desiredNames: string[];
 };
 
 /**
- * Payload sent from the server back to the requesting client confirming
+ * Response data sent from the server back to the requesting client confirming
  * which plushie effects were applied and which were rejected.
  */
 export type SyncAppliedPlushiesPayload = {
-	/** Echo of the `schemaVersion` from the originating request. */
-	schemaVersion: number;
-	/** Echo of the `revision` from the originating request. */
-	revision: number;
 	/** Names of plushies whose effects were successfully applied. */
 	appliedNames: string[];
 	/** Names of plushies that were rejected (unknown name, not attached, etc.). */
@@ -88,7 +74,7 @@ export type ServerProtocolState = {
  * Authoritative snapshot of which plushie effects are currently active for a
  * player, as determined and persisted by the server.
  */
-export type ServerAuthoritativeState = {
+export type NaninhasAuthoritativeState = {
 	/** Plushie names whose effects are currently active. */
 	activePlushieNames: string[];
 	/** Traits added by active plushies. */
@@ -103,7 +89,29 @@ export type ServerAuthoritativeState = {
  * Full server-side modData structure stored under the `"Naninhas"` key in
  * `player.getModData()` on the server.
  */
-export type ServerModData = {
+export type ServerModData<TAuthoritative> = {
 	protocol: ServerProtocolState;
-	authoritative: ServerAuthoritativeState;
+	authoritative: TAuthoritative;
 };
+
+/**
+ * Standard network envelope shared by request and response commands.
+ *
+ * In this branch, the command name describes the transport action while the
+ * domain payload is carried inside `data`.
+ *
+ * @typeParam T Inner payload for the command.
+ */
+export type CommandPayload<T> = {
+	/** Monotonically increasing request counter scoped to the current session. */
+	revision: number;
+	/** Protocol schema version for the command payload. */
+	schemaVersion: number;
+	/** Domain-specific request or response data. */
+	data: T;
+};
+
+/**
+ * Pair of transport command names used for a multiplayer request/response flow.
+ */
+export type NetworkCommand = { REQUEST: string; RESPONSE: string };

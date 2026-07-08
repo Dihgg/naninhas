@@ -1,6 +1,5 @@
-import { mock } from "jest-mock-extended";
-import type { SyncDesiredPlushiesPayload, ServerAuthoritativeState } from "@types";
-import { PROTOCOL_SCHEMA_VERSION, PlushieNames } from "@constants";
+import type { CommandPayload, SyncDesiredPlushiesPayload, NaninhasAuthoritativeState } from "@types";
+import { Commands, PROTOCOL_SCHEMA_VERSION } from "@constants";
 
 jest.mock("@asledgehammer/pipewrench");
 jest.mock("@shared/components/PlushieReconciler");
@@ -9,11 +8,22 @@ jest.mock("@shared/utils/ItemType");
 jest.mock("@shared/components/PlayerApi");
 jest.mock("@shared/components/ModData");
 
-const emptyAuthoritative = (): ServerAuthoritativeState => ({
+const emptyAuthoritative = (): NaninhasAuthoritativeState => ({
 	activePlushieNames: [],
 	addedTraits: [],
 	suppressedTraits: [],
 	xpBoosts: {}
+});
+
+const makePayload = (revision: number, desiredNames: string[]): CommandPayload<SyncDesiredPlushiesPayload> => ({
+	schemaVersion: PROTOCOL_SCHEMA_VERSION,
+	revision,
+	data: { desiredNames }
+});
+
+const makePlayer = (username: string) => ({
+	getUsername: jest.fn().mockReturnValue(username),
+	getXp: jest.fn().mockReturnValue({ getMultiplier: jest.fn(), addXpMultiplier: jest.fn() })
 });
 
 describe("NaninhasCommandHandler", () => {
@@ -21,7 +31,7 @@ describe("NaninhasCommandHandler", () => {
 		const { NaninhasCommandHandler } = require("@server/components/NaninhasCommandHandler");
 		const handler = new NaninhasCommandHandler();
 		expect(handler).toBeDefined();
-		expect(typeof handler.onSyncDesiredPlushies).toBe("function");
+		expect(typeof handler.handler).toBe("function");
 	});
 
 	describe("trait suppression", () => {
@@ -29,12 +39,10 @@ describe("NaninhasCommandHandler", () => {
 			jest.resetModules();
 
 			const removeTraitFn = jest.fn();
-			const hasTraitFn = jest.fn().mockReturnValue(false); // player does NOT have ShortSighted
-
 			const mockPlayerApi = {
 				player: {},
 				getAttachedItemNames: jest.fn().mockReturnValue(new Set(["Doll"])),
-				hasTrait: hasTraitFn,
+				hasTrait: jest.fn().mockReturnValue(false),
 				addTrait: jest.fn(),
 				removeTrait: removeTraitFn,
 				applyXpMultiplierDelta: jest.fn()
@@ -48,12 +56,7 @@ describe("NaninhasCommandHandler", () => {
 				ModData: jest.fn().mockImplementation(() => ({
 					data: {
 						protocol: { lastClientRevision: 0, lastSchemaVersion: PROTOCOL_SCHEMA_VERSION },
-						authoritative: {
-							activePlushieNames: [],
-							addedTraits: [],
-							suppressedTraits: [],
-							xpBoosts: {}
-						}
+						authoritative: emptyAuthoritative()
 					}
 				}))
 			}));
@@ -75,19 +78,13 @@ describe("NaninhasCommandHandler", () => {
 
 			const { NaninhasCommandHandler } = require("@server/components/NaninhasCommandHandler");
 			const handler = new NaninhasCommandHandler();
+			handler.handler({
+				module: "Naninhas",
+				command: Commands.SYNC_PLUSHIE.REQUEST,
+				player: makePlayer("TestPlayer") as any,
+				args: makePayload(1, ["Doll"])
+			});
 
-			const payload: SyncDesiredPlushiesPayload = {
-				schemaVersion: PROTOCOL_SCHEMA_VERSION,
-				revision: 1,
-				desiredNames: ["Doll"]
-			};
-
-			handler.onSyncDesiredPlushies({
-				getUsername: jest.fn().mockReturnValue("TestPlayer"),
-				getXp: jest.fn().mockReturnValue({ getMultiplier: jest.fn(), addXpMultiplier: jest.fn() })
-			} as any, payload);
-
-			// Player never had ShortSighted — removeTrait should not be called for it
 			expect(removeTraitFn).not.toHaveBeenCalledWith("ShortSighted");
 		});
 
@@ -96,12 +93,10 @@ describe("NaninhasCommandHandler", () => {
 
 			const addTraitFn = jest.fn();
 			const removeTraitFn = jest.fn();
-			const hasTraitFn = jest.fn((traitId: string) => traitId === "Organized");
-
 			const mockPlayerApi = {
 				player: {},
 				getAttachedItemNames: jest.fn().mockReturnValue(new Set(["SpiffoCherry"])),
-				hasTrait: hasTraitFn,
+				hasTrait: jest.fn((traitId: string) => traitId === "Organized"),
 				addTrait: addTraitFn,
 				removeTrait: removeTraitFn,
 				applyXpMultiplierDelta: jest.fn()
@@ -113,12 +108,7 @@ describe("NaninhasCommandHandler", () => {
 
 			const serverData = {
 				protocol: { lastClientRevision: 0, lastSchemaVersion: PROTOCOL_SCHEMA_VERSION },
-				authoritative: {
-					activePlushieNames: [],
-					addedTraits: [],
-					suppressedTraits: [],
-					xpBoosts: {}
-				}
+				authoritative: emptyAuthoritative()
 			};
 
 			jest.doMock("@shared/components/ModData", () => ({
@@ -142,17 +132,12 @@ describe("NaninhasCommandHandler", () => {
 
 			const { NaninhasCommandHandler } = require("@server/components/NaninhasCommandHandler");
 			const handler = new NaninhasCommandHandler();
-
-			const payload: SyncDesiredPlushiesPayload = {
-				schemaVersion: PROTOCOL_SCHEMA_VERSION,
-				revision: 1,
-				desiredNames: ["SpiffoCherry"]
-			};
-
-			handler.onSyncDesiredPlushies({
-				getUsername: jest.fn().mockReturnValue("TestPlayer"),
-				getXp: jest.fn().mockReturnValue({ getMultiplier: jest.fn(), addXpMultiplier: jest.fn() })
-			} as any, payload);
+			handler.handler({
+				module: "Naninhas",
+				command: Commands.SYNC_PLUSHIE.REQUEST,
+				player: makePlayer("TestPlayer") as any,
+				args: makePayload(1, ["SpiffoCherry"])
+			});
 
 			expect(addTraitFn).not.toHaveBeenCalledWith("Organized");
 			expect(removeTraitFn).not.toHaveBeenCalledWith("Organized");
@@ -184,7 +169,6 @@ describe("NaninhasCommandHandler", () => {
 			}));
 
 			const initialAuthoritative = emptyAuthoritative();
-
 			const serverData = {
 				protocol: { lastClientRevision: 10, lastSchemaVersion: PROTOCOL_SCHEMA_VERSION },
 				authoritative: initialAuthoritative
@@ -214,28 +198,26 @@ describe("NaninhasCommandHandler", () => {
 
 			const { NaninhasCommandHandler } = require("@server/components/NaninhasCommandHandler");
 			const handler = new NaninhasCommandHandler();
-
-			const payload: SyncDesiredPlushiesPayload = {
-				schemaVersion: PROTOCOL_SCHEMA_VERSION,
-				revision: 1,
-				desiredNames: ["Doll"]
-			};
-
-			handler.onSyncDesiredPlushies({
-				getUsername: jest.fn().mockReturnValue("ReconnectPlayer"),
-				getXp: jest.fn().mockReturnValue({ getMultiplier: jest.fn(), addXpMultiplier: jest.fn() })
-			} as any, payload);
+			handler.handler({
+				module: "Naninhas",
+				command: Commands.SYNC_PLUSHIE.REQUEST,
+				player: makePlayer("ReconnectPlayer") as any,
+				args: makePayload(1, ["Doll"])
+			});
 
 			expect(PlushieReconciler.reconcile).toHaveBeenCalledWith(initialAuthoritative, ["Doll"]);
 			expect(serverData.protocol.lastClientRevision).toBe(1);
 			expect(sendServerCommandMock).toHaveBeenCalledWith(
 				expect.anything(),
 				"Naninhas",
-				"SyncAppliedPlushies",
+				Commands.SYNC_PLUSHIE.RESPONSE,
 				expect.objectContaining({
 					revision: 1,
-					appliedNames: ["Doll"],
-					rejectedNames: []
+					schemaVersion: PROTOCOL_SCHEMA_VERSION,
+					data: {
+						appliedNames: ["Doll"],
+						rejectedNames: []
+					}
 				})
 			);
 		});
@@ -276,31 +258,26 @@ describe("NaninhasCommandHandler", () => {
 
 			const { NaninhasCommandHandler } = require("@server/components/NaninhasCommandHandler");
 			const handler = new NaninhasCommandHandler();
-
-			const payload: SyncDesiredPlushiesPayload = {
-				schemaVersion: PROTOCOL_SCHEMA_VERSION,
-				revision: 5,
-				desiredNames: ["Doll"]
-			};
-
-			handler.onSyncDesiredPlushies(
-				{
-					getUsername: jest.fn().mockReturnValue("StaleRevisionPlayer"),
-					getXp: jest.fn().mockReturnValue({ getMultiplier: jest.fn(), addXpMultiplier: jest.fn() })
-				} as any,
-				payload
-			);
+			const payload = makePayload(5, ["Doll"]);
+			handler.handler({
+				module: "Naninhas",
+				command: Commands.SYNC_PLUSHIE.REQUEST,
+				player: makePlayer("StaleRevisionPlayer") as any,
+				args: payload
+			});
 
 			expect(PlushieReconciler.reconcile).not.toHaveBeenCalled();
 			expect(sendServerCommandMock).toHaveBeenCalledWith(
 				expect.anything(),
 				"Naninhas",
-				"SyncAppliedPlushies",
+				Commands.SYNC_PLUSHIE.RESPONSE,
 				expect.objectContaining({
 					schemaVersion: payload.schemaVersion,
 					revision: payload.revision,
-					appliedNames: [],
-					rejectedNames: payload.desiredNames
+					data: {
+						appliedNames: [],
+						rejectedNames: payload.data.desiredNames
+					}
 				})
 			);
 		});
@@ -374,20 +351,12 @@ describe("NaninhasCommandHandler", () => {
 
 			const { NaninhasCommandHandler } = require("@server/components/NaninhasCommandHandler");
 			const handler = new NaninhasCommandHandler();
-
-			const payload: SyncDesiredPlushiesPayload = {
-				schemaVersion: PROTOCOL_SCHEMA_VERSION,
-				revision: 2,
-				desiredNames: ["Doll"]
-			};
-
-			handler.onSyncDesiredPlushies(
-				{
-					getUsername: jest.fn().mockReturnValue("XPPlayer"),
-					getXp: jest.fn().mockReturnValue({ getMultiplier: jest.fn(), addXpMultiplier: jest.fn() })
-				} as any,
-				payload
-			);
+			handler.handler({
+				module: "Naninhas",
+				command: Commands.SYNC_PLUSHIE.REQUEST,
+				player: makePlayer("XPPlayer") as any,
+				args: makePayload(2, ["Doll"])
+			});
 
 			expect(applyXpMultiplierDeltaFn).toHaveBeenCalledTimes(1);
 			expect(applyXpMultiplierDeltaFn).toHaveBeenCalledWith(fitnessPerk, 0.2);
@@ -406,47 +375,36 @@ describe("NaninhasCommandHandler", () => {
 		});
 	});
 
-	describe("ensureServerModData", () => {
-		it("fills defaults for missing protocol and authoritative fields", () => {
+	describe("migrateAuthoritativeData", () => {
+		it("fills defaults for missing authoritative fields", () => {
 			jest.resetModules();
 			const { NaninhasCommandHandler } = require("@server/components/NaninhasCommandHandler");
+			const handler = new NaninhasCommandHandler();
 
-			const ensured = (NaninhasCommandHandler as any).ensureServerModData({});
+			const ensured = (handler as any).migrateAuthoritativeData(0, {});
 
 			expect(ensured).toEqual({
-				protocol: {
-					lastClientRevision: 0,
-					lastSchemaVersion: PROTOCOL_SCHEMA_VERSION
-				},
-				authoritative: {
-					activePlushieNames: [],
-					addedTraits: [],
-					suppressedTraits: [],
-					xpBoosts: {}
-				}
+				activePlushieNames: [],
+				addedTraits: [],
+				suppressedTraits: [],
+				xpBoosts: {}
 			});
 		});
 
 		it("preserves provided nested values", () => {
 			jest.resetModules();
 			const { NaninhasCommandHandler } = require("@server/components/NaninhasCommandHandler");
+			const handler = new NaninhasCommandHandler();
 
-			const ensured = (NaninhasCommandHandler as any).ensureServerModData({
-				protocol: {
-					lastClientRevision: 12,
-					lastSchemaVersion: PROTOCOL_SCHEMA_VERSION
-				},
-				authoritative: {
-					activePlushieNames: ["Doll"],
-					addedTraits: ["Organized"],
-					suppressedTraits: ["ShortSighted"],
-					xpBoosts: { "xp:Fitness": 0.2 }
-				}
+			const ensured = (handler as any).migrateAuthoritativeData(PROTOCOL_SCHEMA_VERSION, {
+				activePlushieNames: ["Doll"],
+				addedTraits: ["Organized"],
+				suppressedTraits: ["ShortSighted"],
+				xpBoosts: { "xp:Fitness": 0.2 }
 			});
 
-			expect(ensured.protocol.lastClientRevision).toBe(12);
-			expect(ensured.authoritative.activePlushieNames).toEqual(["Doll"]);
-			expect(ensured.authoritative.xpBoosts).toEqual({ "xp:Fitness": 0.2 });
+			expect(ensured.activePlushieNames).toEqual(["Doll"]);
+			expect(ensured.xpBoosts).toEqual({ "xp:Fitness": 0.2 });
 		});
 	});
 });
