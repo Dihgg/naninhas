@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.12.0](https://github.com/dihgg/naninhas/compare/v1.11.2...v1.12.0) (2026-07-08)
+
+
+### Features
+
+* **multiplayer:** making multiplayer functions more generic ([5da3c59](https://github.com/dihgg/naninhas/commit/5da3c59ccc46613ce83d2e49a29465573b9eb39a))
+* **multiplayer:** trying to make multiplayer functions more generic ([ea15b81](https://github.com/dihgg/naninhas/commit/ea15b81f30377d981dab4a3d926bfeebbfcbacd4))
+
 ### [1.11.2](https://github.com/dihgg/naninhas/compare/v1.11.1...v1.11.2) (2026-06-11)
 
 
