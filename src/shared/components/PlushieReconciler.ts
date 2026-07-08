@@ -1,4 +1,4 @@
-import type { ServerAuthoritativeState } from "@types";
+import type { NaninhasAuthoritativeState } from "@types";
 import { getPlushieDefinition } from "@shared/catalog/PlushieCatalog";
 
 /**
@@ -23,7 +23,7 @@ export type ReconcilePlan = {
 	 */
 	xpBoostDeltas: Record<string, number>;
 	/** The authoritative state that results from applying this plan. */
-	newState: ServerAuthoritativeState;
+	newState: NaninhasAuthoritativeState;
 };
 
 /**
@@ -44,7 +44,7 @@ export class PlushieReconciler {
 	 * @param newActivePlushieNames - The verified list of plushies to make active.
 	 * @returns A plan describing what to change and the resulting new state.
 	 */
-	static reconcile(currentState: ServerAuthoritativeState, newActivePlushieNames: string[]): ReconcilePlan {
+	static reconcile(currentState: NaninhasAuthoritativeState, newActivePlushieNames: string[]): ReconcilePlan {
 		// -----------------------------------------------------------------------
 		// 1. Build desired aggregate from the new active set
 		// -----------------------------------------------------------------------
@@ -99,7 +99,7 @@ export class PlushieReconciler {
 		// -----------------------------------------------------------------------
 		// 3. Build the new authoritative state
 		// -----------------------------------------------------------------------
-		const newState: ServerAuthoritativeState = {
+		const newState: NaninhasAuthoritativeState = {
 			activePlushieNames: [...newActivePlushieNames],
 			addedTraits: [...desiredAddedTraits],
 			suppressedTraits: [...desiredSuppressedTraits],

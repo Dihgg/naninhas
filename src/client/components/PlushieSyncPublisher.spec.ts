@@ -2,8 +2,8 @@ import { mock } from "jest-mock-extended";
 import type { IsoPlayer } from "@asledgehammer/pipewrench";
 import { sendClientCommand } from "@asledgehammer/pipewrench";
 import * as Events from "@asledgehammer/pipewrench-events";
-import { PROTOCOL_SCHEMA_VERSION } from "@constants";
-import type { SyncAppliedPlushiesPayload } from "@types";
+import { Commands, PROTOCOL_SCHEMA_VERSION } from "@constants";
+import type { CommandPayload, SyncAppliedPlushiesPayload } from "@types";
 import { PlushieSyncPublisher } from "@client/components/PlushieSyncPublisher";
 
 jest.mock("@asledgehammer/pipewrench");
@@ -26,15 +26,24 @@ describe("PlushieSyncPublisher", () => {
 		return new PlushieSyncPublisher(mockPlayer());
 	}
 
-	function fireReply(payload: Partial<SyncAppliedPlushiesPayload>): void {
-		const full: SyncAppliedPlushiesPayload = {
+	function fireReply(
+		data: Partial<SyncAppliedPlushiesPayload>,
+		envelope: Partial<Omit<CommandPayload<SyncAppliedPlushiesPayload>, "data">> = {}
+	): void {
+		const full: CommandPayload<SyncAppliedPlushiesPayload> = {
 			schemaVersion: PROTOCOL_SCHEMA_VERSION,
 			revision: 1,
-			appliedNames: [],
-			rejectedNames: [],
-			...payload
+			data: {
+				appliedNames: [],
+				rejectedNames: []
+			},
+			...envelope
 		};
-		replyListener?.("Naninhas", "SyncAppliedPlushies", full);
+		full.data = {
+			appliedNames: data.appliedNames ?? [],
+			rejectedNames: data.rejectedNames ?? []
+		};
+		replyListener?.("Naninhas", Commands.SYNC_PLUSHIE.RESPONSE, full);
 	}
 
 	beforeEach(() => {
@@ -89,7 +98,7 @@ describe("PlushieSyncPublisher", () => {
 
 			expect(sendClientCommandMock).toHaveBeenCalledTimes(1);
 			const [, , , payload] = sendClientCommandMock.mock.calls[0];
-			expect((payload as any).desiredNames).toContain("Doll");
+			expect((payload as any).data.desiredNames).toContain("Doll");
 			expect((payload as any).revision).toBe(1);
 			expect((payload as any).schemaVersion).toBe(PROTOCOL_SCHEMA_VERSION);
 		});
@@ -154,7 +163,7 @@ describe("PlushieSyncPublisher", () => {
 
 			expect(sendClientCommandMock).toHaveBeenCalledTimes(1);
 			const [, , , payload] = sendClientCommandMock.mock.calls[0];
-			expect((payload as any).desiredNames).toHaveLength(0);
+			expect((payload as any).data.desiredNames).toHaveLength(0);
 			expect((payload as any).revision).toBe(2);
 		});
 
@@ -180,8 +189,8 @@ describe("PlushieSyncPublisher", () => {
 			pub.tick();
 
 			const [, , , payload] = sendClientCommandMock.mock.calls[0];
-			expect((payload as any).desiredNames).toContain("Doll");
-			expect((payload as any).desiredNames).not.toContain("SomeRandomItem");
+			expect((payload as any).data.desiredNames).toContain("Doll");
+			expect((payload as any).data.desiredNames).not.toContain("SomeRandomItem");
 		});
 	});
 
@@ -193,11 +202,13 @@ describe("PlushieSyncPublisher", () => {
 			pub.tick();
 			sendClientCommandMock.mockClear();
 
-			replyListener?.("OtherMod", "SyncAppliedPlushies", {
+			replyListener?.("OtherMod", Commands.SYNC_PLUSHIE.RESPONSE, {
 				schemaVersion: PROTOCOL_SCHEMA_VERSION,
 				revision: 1,
-				appliedNames: ["Doll"],
-				rejectedNames: []
+				data: {
+					appliedNames: ["Doll"],
+					rejectedNames: []
+				}
 			});
 
 			// State unchanged — no resend expected
@@ -212,7 +223,7 @@ describe("PlushieSyncPublisher", () => {
 			pub.tick();
 			sendClientCommandMock.mockClear();
 
-			fireReply({ schemaVersion: 99, appliedNames: ["Doll"] });
+			fireReply({ appliedNames: ["Doll"] }, { schemaVersion: 99 });
 
 			// State unchanged — no resend expected
 			pub.tick();
@@ -230,7 +241,7 @@ describe("PlushieSyncPublisher", () => {
 			fireReply({ appliedNames: [], rejectedNames: ["Doll"] });
 
 			expect(printSpy).toHaveBeenCalledWith(
-				"[Naninhas] SyncAppliedPlushies: rejected names: Doll"
+				"[Naninhas] SyncPlushie.Response: rejected names: Doll"
 			);
 
 			printSpy.mockRestore();

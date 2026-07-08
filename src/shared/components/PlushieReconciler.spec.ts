@@ -1,8 +1,8 @@
 import { PlushieReconciler } from "@shared/components/PlushieReconciler";
-import type { ServerAuthoritativeState } from "@types";
+import type { NaninhasAuthoritativeState } from "@types";
 import { PlushieNames } from "@constants";
 
-const emptyState = (): ServerAuthoritativeState => ({
+const emptyState = (): NaninhasAuthoritativeState => ({
 	activePlushieNames: [],
 	addedTraits: [],
 	suppressedTraits: [],
@@ -34,7 +34,7 @@ describe("PlushieReconciler", () => {
 
 	describe("switch plushies", () => {
 		it("removes old plushie traits and adds new ones", () => {
-			const current: ServerAuthoritativeState = {
+			const current: NaninhasAuthoritativeState = {
 				activePlushieNames: [PlushieNames.DOLL],
 				addedTraits: ["EagleEyed"],
 				suppressedTraits: ["ShortSighted"],
@@ -50,7 +50,7 @@ describe("PlushieReconciler", () => {
 
 	describe("detach all plushies", () => {
 		it("removes all effects when empty set is provided", () => {
-			const current: ServerAuthoritativeState = {
+			const current: NaninhasAuthoritativeState = {
 				activePlushieNames: [PlushieNames.DOLL],
 				addedTraits: ["EagleEyed"],
 				suppressedTraits: ["ShortSighted"],
@@ -67,7 +67,7 @@ describe("PlushieReconciler", () => {
 
 	describe("idempotence", () => {
 		it("produces empty diffs when state already matches desired plushies", () => {
-			const current: ServerAuthoritativeState = {
+			const current: NaninhasAuthoritativeState = {
 				activePlushieNames: [PlushieNames.DOLL],
 				addedTraits: ["EagleEyed"],
 				suppressedTraits: ["ShortSighted"],
@@ -82,7 +82,7 @@ describe("PlushieReconciler", () => {
 		});
 
 		it("produces empty xp deltas when same xp plushie is already applied", () => {
-			const current: ServerAuthoritativeState = {
+			const current: NaninhasAuthoritativeState = {
 				activePlushieNames: [PlushieNames.JACQUESBEAVER],
 				addedTraits: [],
 				suppressedTraits: [],
@@ -122,7 +122,7 @@ describe("PlushieReconciler", () => {
 
 	describe("xp boost removal", () => {
 		it("emits negative delta when xp plushie is removed", () => {
-			const current: ServerAuthoritativeState = {
+			const current: NaninhasAuthoritativeState = {
 				activePlushieNames: [PlushieNames.JACQUESBEAVER],
 				addedTraits: [],
 				suppressedTraits: [],
