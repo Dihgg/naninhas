@@ -6,21 +6,21 @@
   <img src="./steam/preview.png">
 </p>
 
-This mod introduces the concept of "naninhas" to AuthenticZ attachable plushies!
+> **Naninha** is a Portuguese term for a child's comfort plushie or emotional support toy, the kind of soft companion many children keep close for reassurance.
 
-Each plushie will give a different bonus when attached to the backpack!
+This mod adds "naninhas" style bonuses to Authentic Z attachable plushies. Each plushie grants a different bonus while attached to a backpack.
 
 ## Requirements
 
-This mod requires one of the **[Authentic Z](https://steamcommunity.com/sharedfiles/filedetails/?id=2335368829)** mods that allows attachable items, either:
+This mod requires one of the **[Authentic Z](https://steamcommunity.com/sharedfiles/filedetails/?id=2335368829)** mods that allow attachable items:
 - Authentic Z (full mod)
 - AuthenticZBackpacks+ (only the backpacks)
 
 ## Links
 
 - [Steam Workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=3624617298)
+- [Nexusmods](https://www.nexusmods.com/projectzomboid/mods/338)
 - [GitHub Repository](https://github.com/dihgg/naninhas)
-
 
 ## 🦸‍♀️ Support!
 <hr/>
@@ -37,33 +37,43 @@ This mod requires one of the **[Authentic Z](https://steamcommunity.com/sharedfi
 
 ## ✊ Buffs
 
-Each plushie grants a unique bonus when attached to your backpack. Only one plushie can be equipped at a time, and buffs are active while equipped.
+Each plushie grants a unique bonus while attached to your backpack.
 
 | 🧸 **Plushie**              | ✨ **Effect /Buff**                                                                                                                           |
 | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| **🦡 Boris The Badger**     | Grants `Cats Eye's` trait (Better night vision)                                                                                               |
-| **🧸 Doll**                 | Grants `Eagle Eyed` trait (better field of vision)                                                                                            |
-| **🦩 Flamingo**             | Grants `Graceful` trait (Makes less noise when moving)                                                                                        |
-| **🐇 Fluffyfoot The Bunny** | Grants `LightEater` trait (reduces the amount the player needs to eat)                                                                        |
-| **🦊 Freddy The Fox**       | Grants `Inconspicous` trait (reduces the chance of being spotted by zombies)                                                                  |
-| **🐿️ Furbert The Squirrel** | Grants `Outdoorsy` trait (This trait reduces the chance of catching a cold and lowers the chance of scratches from trees. Improves foraging.) |
-| **👶 Green Sci-Fi Goblin**  | Grants `Fast Learner` trait (Increases XP gain)                                                                                               |
-| **🐾 Moley The Mole**       | Slight boost to Foraging efficiency XP gain                                                                                                   |
-| **🐶 Otis the Pug**         | Grants `Fast Reader` trait (Takes less time to read books)                                                                                    |
-| **🦔 Pancake The Hedgehog** | Slight boost to sprinting and Agility XP gain                                                                                                 |
-| **🐾 Jacques The Beaver**   | Slight boost to Carpentry XP gain                                                                                                             |
-| **🦝 Spiffo**               | Grants bonus to endurance while equipped                                                                                                      |
-| **🐾 Spiffo Blueberry**     | Grants `LowThirst` trait (You need to drink less water)                                                                                       |
-| **🍒 Spiffo Cherry**        | Grants `Organized` trait                                                                                                                      |
-| **🦝 Spiffo PAWS (Gray)**   | Slight boost to Nimble, Blades & Blunt XP gains                                                                                               |
-| **❤️ Spiffo Heart**         | Slight boost to First Aid XP gain                                                                                                             |
-| **🌈 Spiffo Rainbow**       | Small bonus to reduce Boredom, Fatigue and recover Fatigue                                                                                    |
-| **🎅 Spiffo Santa**         | Reduces Boredom slowly                                                                                                                        |
-| **🍀 Spiffo Shamrock**      | Slight boost to Aiming and Reloding XP gain                                                                                                   |
-| **🐾 Substitution Doll**    | Grants `Brave` trait                                                                                                                          |
-| **🐻 Toy Bear**             | Reduces Panic and Stress                                                                                                                      |
-| **🐻 Toy Bear (Small)**     | Same as ToyBear but slightly lower effect                                                                                                     |
+| **🦡 Boris The Badger**     | Grants the `Cat's Eyes` / `NightVision` effect for better night vision                                                                        |
+| **🧸 Doll**                 | Grants `Eagle Eyed` and suppresses `Short Sighted`                                                                                            |
+| **🦩 Flamingo**             | Grants `Graceful` and suppresses `Clumsy`                                                                                                     |
+| **🐇 Fluffyfoot The Bunny** | Grants `Light Eater` and suppresses `Hearty Appetite`                                                                                         |
+| **🦊 Freddy The Fox**       | Grants `Inconspicuous` and suppresses `Conspicuous`                                                                                           |
+| **🐿️ Furbert The Squirrel** | Grants `Outdoorsman`                                                                                                                          |
+| **👶 Green Sci-Fi Goblin**  | Grants `Fast Learner` and suppresses `Slow Learner`                                                                                           |
+| **🐾 Moley The Mole**       | Adds +2 `Plant Scavenging` XP multiplier while equipped                                                                                       |
+| **🐶 Otis the Pug**         | Grants `Fast Reader` and suppresses `Slow Reader`                                                                                             |
+| **🦔 Pancake The Hedgehog** | Adds +1 `Sprinting` and +1 `Agility` XP multipliers while equipped                                                                           |
+| **🐾 Jacques The Beaver**   | Adds +1 `Woodwork` XP multiplier while equipped                                                                                               |
+| **🦝 Spiffo**               | Periodically restores endurance while equipped                                                                                                |
+| **🐾 Spiffo Blueberry**     | Grants `Low Thirst` and suppresses `High Thirst`                                                                                              |
+| **🍒 Spiffo Cherry**        | Grants `Organized` and suppresses `Disorganized`                                                                                              |
+| **🦝 Spiffo PAWS (Gray)**   | Adds +1 `Nimble`, `Long Blade`, `Small Blade`, `Blunt`, and `Small Blunt` XP multipliers while equipped                                     |
+| **❤️ Spiffo Heart**         | Adds +2 `Doctor` / First Aid XP multiplier while equipped                                                                                     |
+| **🌈 Spiffo Rainbow**       | Periodically reduces boredom, restores endurance, and reduces fatigue                                                                         |
+| **🎅 Spiffo Santa**         | Periodically reduces boredom                                                                                                                  |
+| **🍀 Spiffo Shamrock**      | Adds +5 `Aiming` and +5 `Reloading` XP multipliers while equipped                                                                             |
+| **🐾 Substitution Doll**    | Grants `Brave` and suppresses `Desensitized`, `Cowardly`, `Agoraphobic`, and `Claustrophobic`                                                |
+| **🐻 Toy Bear**             | Periodically reduces panic                                                                                                                    |
+| **🐻 Toy Bear (Small)**     | Periodically reduces panic, with a smaller effect than Toy Bear                                                                               |
 
+---
+
+## 🌎 Translations
+Available languages for **Naninhas**
+### 🇧🇷 Brazilian Portuguese
+- [Steam workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=3737445801)
+- [Nexusmods](https://www.nexusmods.com/projectzomboid/mods/340)
+---
+
+# Development
 ## 🌎 Translations
 
 Translations are maintained in JSON under [src/translations-json](src/translations-json).
@@ -71,23 +81,20 @@ Translations are maintained in JSON under [src/translations-json](src/translatio
 During `npm run postbuild`:
 - Build 42 output is generated as `.json` files in `42/media/lua/shared/Translate/<LANG>/<NAMESPACE>.json`
 
----
-
-# Development
 ## 👩‍💻 API
-Other mods can interact with **Naninhas** by using the `Events`.
+Other mods can interact with **Naninhas** through its custom `Events` hooks.
 
 ### Equipped / Unequipped / Update
-Each Plushie will trigger custom events that can be listened.
+Each plushie triggers custom events that other mods can listen to.
 ```lua
-  Events.NaninhasEquipped.Add(function(data) { });
+  Events.NaninhasEquipped.Add(function(data) end)
 
-  Events.NaninhasUnequipped.Add(function(data) { });
+  Events.NaninhasUnequipped.Add(function(data) end)
 
-  Events.NaninhasUpdate.Add(function(data) { });
+  Events.NaninhasUpdate.Add(function(data) end)
 ```
 
-On Typescript, this is how it would looks like:
+In TypeScript, this looks like:
 
 ```typescript
 
@@ -95,28 +102,29 @@ import * as Events from "@asledgehammer/pipewrench-events";
 import { EventsEnum } from "@constants";
 import type { EventData } from "@types";
 
-new Events.EventEmitter<(data: EventData) => void>(EventsEnum.Update)
-  .addListener((data) => {
-	  print(`Updating Plushie ${data.name} with traits:`, tostring(data.addedTraits), "and XP boosts:", tostring(data.xpBoosts));
-  }
-);
+new Events.EventEmitter<( data: EventData ) => void>(EventsEnum.Equipped).addListener((data) =>{});
+
+new Events.EventEmitter<( data: EventData ) => void>(EventsEnum.Unequipped).addListener((data) =>{});
+
+new Events.EventEmitter<( data: EventData ) => void>(EventsEnum.Update).addListener((data) =>{});
 ```
 
-The `data` structure is the following
+The `data` payload has the following structure:
 
 | Property | Type | Description |
 |----------|-------|------------|
-| data.name | `string` | The plushie name |
-| addedTraits | `Array<string>` | Array of Traits the plushie grants |
-| suppressedTraits | `Array<string>` | Array of Traits the plushie will suppress. |
-| xpBoosts | `Table<string,number>` | A Set of Perks and boosts (e.g { perk = Perks.Aiming , value = 5 }) |
+| name | `string` | The plushie name |
+| addedTraits | `Array<string>` | Traits granted by the plushie |
+| suppressedTraits | `Array<string>` | Traits suppressed by the plushie |
+| xpBoosts | `Table<string,number>` | XP boosts keyed by perk name |
 
 
 ---
 
+
 ## Architecture
 
-Naninhas uses a **unified server-authoritative model** for all game modes (single player / multiplayer).
+Naninhas uses a **unified server-authoritative model** for both game modes (single player / multiplayer).
 
 **Key principles:**
 - Client detects attachment changes and publishes desired plushie set
@@ -124,7 +132,7 @@ Naninhas uses a **unified server-authoritative model** for all game modes (singl
 - Observer pattern handles event emission for external mods
 - Trait and XP application is **ALWAYS** server-side, never client-side
 
-### Logic Flow (All game Modes)
+### Logic Flow
 
 ```mermaid
 flowchart TD
@@ -140,22 +148,24 @@ flowchart TD
     H --> I["Attachment set changed since last sync?"]
     I -->|No| J["Wait for next cycle"]
     I -->|Yes| K["Send <code>SyncDesiredPlushies</code> to Server"]
-    K --> L["<strong>Server:</strong> Validate schema and revision"]
-    L --> M["<strong>Server:</strong> Verify attachments server-side"]
-    M --> N["<strong>Server:</strong> Reconcile traits/XP"]
-    N --> O["<strong>Server:</strong> Apply to player and persist <code>modData</code>"]
-    O --> P["<strong>Server:</strong> Reply <code>SyncAppliedPlushies</code>"]
-    P --> Q["<strong>Client:</strong> Update <code>lastKnownNames</code>"]
+    K --> L["Validate schema and revision"]
+    subgraph Server
+    L --> M["Verify attachments server-side"]
+    M --> N["Reconcile traits/XP"]
+    N --> O["Apply to player and persist <code>modData</code>"]
+    O --> P["Reply <code>SyncAppliedPlushies</code>"]
+    end
+    P --> Q["Update <code>lastKnownNames</code>"]
     Q --> J
 ```
 
 ### Single Player
 
-In single player, plushie buffs are still applied *server-authoritatively*, as the single player is also a server that runs in the local game process.
+In single player, plushie buffs are still applied *server-authoritatively*, because the local game process also runs the server logic.
 
 ### Multiplayer
 
-Multiplayer introduces latency, so the flow must tolerate stale or out of order requests. Naninhas handles this with a monotonic `revision` number that is tracked by both client and server.
+Multiplayer introduces latency, so the flow must tolerate stale and out-of-order requests. Naninhas handles this with a monotonic `revision` number tracked by both client and server.
 
 Project Zomboid typically prevents clients with different installed mod versions from joining the same server. Even so, Naninhas still treats `schemaVersion` as a transport guard so incompatible request or response payloads are rejected safely instead of being processed accidentally.
 
@@ -163,7 +173,7 @@ Project Zomboid typically prevents clients with different installed mod versions
 
 Module: `Naninhas`
 
-Client -> Server command: `SyncDesiredPlushies`
+Client to server command: `SyncDesiredPlushies`
 
 | Field | Type | Description |
 |---|---|---|
@@ -171,7 +181,7 @@ Client -> Server command: `SyncDesiredPlushies`
 | revision | `number` | Monotonic client sync counter |
 | desiredNames | `string[]` | Desired active plushie names from current attachments |
 
-Server -> Client command: `SyncAppliedPlushies`
+Server to client command: `SyncAppliedPlushies`
 
 | Field | Type | Description |
 |---|---|---|
@@ -214,14 +224,6 @@ flowchart TD
   K -->|No| L["Ignore response safely"]
   K -->|Yes| M["Update lastKnownNames"]
 ```
-
-### Migration Strategy
-
-The server-side migration hook is for persisted `modData`, not for translating old network payloads.
-
-- If an older save is loaded after the authoritative state shape changes, the server can reshape that stored data during load.
-- If a network message arrives with an unsupported `schemaVersion`, it is not migrated in place; it is rejected at the transport boundary.
-
 
 ## 👩‍💻 Repository Badges
 ### Code Coverage
