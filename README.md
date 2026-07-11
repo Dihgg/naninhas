@@ -155,7 +155,9 @@ In single player, plushie buffs are still applied *server-authoritatively*, as t
 
 ### Multiplayer
 
-Multiplayer introduces latency, so the flow should be able to handle stale or out of order requests, this is done by usage of a `revision` number that is synced between server / client
+Multiplayer introduces latency, so the flow must tolerate stale or out of order requests. Naninhas handles this with a monotonic `revision` number that is tracked by both client and server.
+
+Project Zomboid typically prevents clients with different installed mod versions from joining the same server. Even so, Naninhas still treats `schemaVersion` as a transport guard so incompatible request or response payloads are rejected safely instead of being processed accidentally.
 
 ### Network Contract
 
@@ -179,10 +181,46 @@ Server -> Client command: `SyncAppliedPlushies`
 | rejectedNames | `string[]` | Names rejected by validation |
 
 Validation behavior:
-- Unsupported `schemaVersion` is rejected safely.
+- Unsupported request `schemaVersion` is rejected by the server before domain logic runs.
+- Unsupported response `schemaVersion` is ignored by the client.
 - Stale `revision` is rejected to avoid out-of-order application.
 - Unknown plushie names are rejected.
 - Server verifies plushies are actually attached before applying.
+
+### Transport vs Persisted Data
+
+There are two separate compatibility concerns in this architecture:
+
+1. **Transport schema**: the shape of request/response payloads sent over `sendClientCommand` / `sendServerCommand`.
+2. **Persisted data schema**: the shape of authoritative state stored in player `modData` across saves and mod updates.
+
+These are intentionally handled differently:
+
+- Transport schema mismatches are rejected or ignored immediately at the network boundary.
+- Persisted `modData` is normalized and migrated on load through the server handler migration path.
+
+```mermaid
+flowchart TD
+  A["Client builds SyncPlushie.Request\nschemaVersion + revision + desiredNames"] --> B{"Server schemaVersion\nsupported?"}
+  B -->|No| C["Reject request safely\nreply with rejectedNames"]
+  B -->|Yes| D{"Revision fresh?"}
+  D -->|No| E["Reject as stale\nreply with rejectedNames"]
+  D -->|Yes| F["Load persisted player modData"]
+  F --> G["Normalize / migrate\nauthoritative state"]
+  G --> H["Validate attachments\nreconcile traits and XP"]
+  H --> I["Persist authoritative state"]
+  I --> J["Send SyncPlushie.Response"]
+  J --> K{"Client schemaVersion\nsupported?"}
+  K -->|No| L["Ignore response safely"]
+  K -->|Yes| M["Update lastKnownNames"]
+```
+
+### Migration Strategy
+
+The server-side migration hook is for persisted `modData`, not for translating old network payloads.
+
+- If an older save is loaded after the authoritative state shape changes, the server can reshape that stored data during load.
+- If a network message arrives with an unsupported `schemaVersion`, it is not migrated in place; it is rejected at the transport boundary.
 
 
 ## 👩‍💻 Repository Badges
