@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.13.0](https://github.com/dihgg/naninhas/compare/v1.12.0...v1.13.0) (2026-07-20)
+
+
+### Features
+
+* **multiplayer:** add unsupported schema handler ([5da9594](https://github.com/dihgg/naninhas/commit/5da9594dcf679500277f386af3642f8c568a5ba0))
+
 ## [1.12.0](https://github.com/dihgg/naninhas/compare/v1.11.2...v1.12.0) (2026-07-08)
 
 
