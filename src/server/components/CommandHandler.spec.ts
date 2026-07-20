@@ -47,6 +47,7 @@ const makePayload = (
 class TestCommandHandler extends CommandHandler<TestAuthoritativeState, TestRequestPayload, TestResponsePayload> {
 	public readonly onCommandMock = jest.fn();
 	public readonly onStaleCommandMock = jest.fn();
+	public readonly onUnsupportedSchemaMock = jest.fn();
 
 	constructor() {
 		super(TEST_MODULE, TEST_COMMAND, defaultAuthoritativeState());
@@ -74,6 +75,10 @@ class TestCommandHandler extends CommandHandler<TestAuthoritativeState, TestRequ
 
 	protected override onStaleCommand(player: IsoPlayer, payload: CommandPayload<TestRequestPayload>): void {
 		this.onStaleCommandMock(player, payload);
+	}
+
+	protected override onUnsupportedSchema(player: IsoPlayer, payload: CommandPayload<TestRequestPayload>): void {
+		this.onUnsupportedSchemaMock(player, payload);
 	}
 
 	protected override migrateAuthoritativeData(
@@ -170,6 +175,34 @@ describe("CommandHandler", () => {
 		expect(serverData.protocol.lastClientRevision).toBe(1);
 		expect(serverData.protocol.lastSchemaVersion).toBe(PROTOCOL_SCHEMA_VERSION);
 		expect(handler.onStaleCommandMock).not.toHaveBeenCalled();
+		expect(handler.onUnsupportedSchemaMock).not.toHaveBeenCalled();
+	});
+
+	it("rejects unsupported schema versions before loading modData", () => {
+		const printSpy = jest.spyOn(globalThis as typeof globalThis & { print: typeof print }, "print").mockImplementation(() => undefined);
+		const handler = new TestCommandHandler();
+		const player = makePlayer("SchemaMismatchPlayer");
+		const payload = {
+			...makePayload(4),
+			schemaVersion: PROTOCOL_SCHEMA_VERSION + 1
+		};
+
+		handler.handler({
+			module: TEST_MODULE,
+			command: TEST_COMMAND.REQUEST,
+			player,
+			args: payload
+		});
+
+		expect(ModData).not.toHaveBeenCalled();
+		expect(handler.onCommandMock).not.toHaveBeenCalled();
+		expect(handler.onStaleCommandMock).not.toHaveBeenCalled();
+		expect(handler.onUnsupportedSchemaMock).toHaveBeenCalledWith(player, payload);
+		expect(printSpy).toHaveBeenCalledWith(
+			`[${TEST_MODULE}][Server][${TEST_COMMAND.REQUEST}] Rejecting unsupported schema version ${payload.schemaVersion} from player SchemaMismatchPlayer`
+		);
+
+		printSpy.mockRestore();
 	});
 
 	it("rejects stale revisions and calls the stale hook", () => {
@@ -196,6 +229,7 @@ describe("CommandHandler", () => {
 
 		expect(handler.onCommandMock).not.toHaveBeenCalled();
 		expect(handler.onStaleCommandMock).toHaveBeenCalledWith(player, payload);
+		expect(handler.onUnsupportedSchemaMock).not.toHaveBeenCalled();
 		expect(serverData.protocol.lastSchemaVersion).toBe(7);
 		expect(printSpy).toHaveBeenCalledWith(
 			`[${TEST_MODULE}][Server][${TEST_COMMAND.REQUEST}] Ignoring stale or out-of-order request from player StalePlayer`

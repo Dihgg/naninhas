@@ -160,6 +160,20 @@ export class NaninhasCommandHandler extends CommandHandler<NaninhasAuthoritative
 	}
 
 	/**
+	 * Sends a rejection reply for requests using an unsupported payload schema.
+	 *
+	 * @param player Player who sent the incompatible request.
+	 * @param payload Rejected request envelope being rejected.
+	 */
+	protected onUnsupportedSchema(player: IsoPlayer, payload: CommandPayload<SyncDesiredPlushiesPayload>): void {
+		const reply: SyncAppliedPlushiesPayload = {
+			appliedNames: [],
+			rejectedNames: payload.data.desiredNames
+		};
+		this.sendResponse(player, payload, reply);
+	}
+
+	/**
 	 * Returns a fully initialized authoritative state from the persisted
 	 * authoritative payload.
 	 *

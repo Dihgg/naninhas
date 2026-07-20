@@ -105,6 +105,10 @@ export class PlushieSyncPublisher {
 
 			const payload = args as unknown as CommandPayload<SyncAppliedPlushiesPayload>;
 
+			if (payload.schemaVersion !== PROTOCOL_SCHEMA_VERSION) {
+				return;
+			}
+
 			if (payload.data.rejectedNames.length > 0) {
 				print(`[Naninhas] ${Commands.SYNC_PLUSHIE.RESPONSE}: rejected names: ${payload.data.rejectedNames.join(", ")}`);
 			}

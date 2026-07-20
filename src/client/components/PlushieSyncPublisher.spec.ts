@@ -223,9 +223,10 @@ describe("PlushieSyncPublisher", () => {
 			pub.tick();
 			sendClientCommandMock.mockClear();
 
-			fireReply({ appliedNames: ["Doll"] }, { schemaVersion: 99 });
+			fireReply({ appliedNames: [], rejectedNames: [] }, { schemaVersion: 99 });
 
-			// State unchanged — no resend expected
+			// If the mismatched reply were processed, it would clear lastKnownNames
+			// and force a corrective resend on the next tick.
 			pub.tick();
 			expect(sendClientCommandMock).not.toHaveBeenCalled();
 		});
