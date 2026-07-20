@@ -146,6 +146,59 @@ describe("NaninhasCommandHandler", () => {
 	});
 
 	describe("revision handling", () => {
+		it("rejects unsupported schema versions without reconciling or mutating persisted state", () => {
+			jest.resetModules();
+
+			const sendServerCommandMock = jest.fn();
+			jest.doMock("@asledgehammer/pipewrench", () => ({
+				sendServerCommand: sendServerCommandMock,
+				Perks: {}
+			}));
+
+			const serverData = {
+				protocol: { lastClientRevision: 2, lastSchemaVersion: PROTOCOL_SCHEMA_VERSION },
+				authoritative: emptyAuthoritative()
+			};
+
+			jest.doMock("@shared/components/ModData", () => ({
+				ModData: jest.fn().mockImplementation(() => ({ data: serverData }))
+			}));
+
+			const { PlushieReconciler } = jest.requireMock("@shared/components/PlushieReconciler");
+			PlushieReconciler.reconcile = jest.fn();
+
+			const { NaninhasCommandHandler } = require("@server/components/NaninhasCommandHandler");
+			const handler = new NaninhasCommandHandler();
+			const payload = {
+				...makePayload(6, ["Doll"]),
+				schemaVersion: PROTOCOL_SCHEMA_VERSION + 1
+			};
+
+			handler.handler({
+				module: "Naninhas",
+				command: Commands.SYNC_PLUSHIE.REQUEST,
+				player: makePlayer("SchemaMismatchPlayer") as any,
+				args: payload
+			});
+
+			expect(PlushieReconciler.reconcile).not.toHaveBeenCalled();
+			expect(serverData.protocol.lastClientRevision).toBe(2);
+			expect(serverData.protocol.lastSchemaVersion).toBe(PROTOCOL_SCHEMA_VERSION);
+			expect(sendServerCommandMock).toHaveBeenCalledWith(
+				expect.anything(),
+				"Naninhas",
+				Commands.SYNC_PLUSHIE.RESPONSE,
+				expect.objectContaining({
+					schemaVersion: payload.schemaVersion,
+					revision: payload.revision,
+					data: {
+						appliedNames: [],
+						rejectedNames: payload.data.desiredNames
+					}
+				})
+			);
+		});
+
 		it("accepts revision 1 after reconnect when server has persisted higher revision", () => {
 			jest.resetModules();
 

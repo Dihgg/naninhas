@@ -68,6 +68,14 @@ export abstract class CommandHandler<TAuthoritative, TRequestPayload, TResponseP
 
         // payload is the deserialized data sent by the client via `sendClientCommand`
         const payload = args as CommandPayload<TRequestPayload>;
+
+        if (payload.schemaVersion !== PROTOCOL_SCHEMA_VERSION) {
+            print(
+                `[${this.module}][Server][${this.command.REQUEST}] Rejecting unsupported schema version ${payload.schemaVersion} from player ${player.getUsername()}`
+            );
+            this.onUnsupportedSchema(player, payload);
+            return;
+        }
         
         const { protocol } = this.getModData(player);
 
@@ -147,6 +155,19 @@ export abstract class CommandHandler<TAuthoritative, TRequestPayload, TResponseP
      */
     protected onStaleCommand(_player: IsoPlayer, _payload: CommandPayload<TRequestPayload>): void {
         // Default behavior is to ignore stale commands without a reply.
+    }
+
+    /**
+     * Handles commands whose payload schemaVersion is not supported by the server.
+     *
+     * Subclasses can override this to emit an explicit rejection reply instead
+     * of silently ignoring incompatible requests.
+     *
+     * @param _player Player who sent the incompatible request.
+     * @param _payload Rejected request envelope.
+     */
+    protected onUnsupportedSchema(_player: IsoPlayer, _payload: CommandPayload<TRequestPayload>): void {
+        // Default behavior is to ignore incompatible commands without a reply.
     }
 
     /**
