@@ -47,7 +47,7 @@ export const NETWORK_MODULE = "Naninhas";
  * backward-incompatible way. Handlers that receive an unknown schemaVersion
  * must drop the message safely without crashing or corrupting state.
  */
-export const PROTOCOL_SCHEMA_VERSION = 1;
+export const PROTOCOL_SCHEMA_VERSION = 2;
 
 /**
  * Network command names shared between client and server.
@@ -60,5 +60,9 @@ export const Commands: Record<string, NetworkCommand> = {
     SYNC_PLUSHIE: {
         REQUEST: "SyncPlushie.Request",
         RESPONSE: "SyncPlushie.Response"
+    },
+    SYNC_SLEEP_BUFF: {
+        REQUEST: "SyncSleepBuff.Request",
+        RESPONSE: "SyncSleepBuff.Response"
     }
 };

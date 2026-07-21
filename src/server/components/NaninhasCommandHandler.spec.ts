@@ -12,7 +12,8 @@ const emptyAuthoritative = (): NaninhasAuthoritativeState => ({
 	activePlushieNames: [],
 	addedTraits: [],
 	suppressedTraits: [],
-	xpBoosts: {}
+	xpBoosts: {},
+	temporaryBuff: { source: null }
 });
 
 const makePayload = (revision: number, desiredNames: string[]): CommandPayload<SyncDesiredPlushiesPayload> => ({
@@ -42,6 +43,7 @@ describe("NaninhasCommandHandler", () => {
 			const mockPlayerApi = {
 				player: {},
 				getAttachedItemNames: jest.fn().mockReturnValue(new Set(["Doll"])),
+				getWorldAgeHours: jest.fn().mockReturnValue(0),
 				hasTrait: jest.fn().mockReturnValue(false),
 				addTrait: jest.fn(),
 				removeTrait: removeTraitFn,
@@ -72,7 +74,8 @@ describe("NaninhasCommandHandler", () => {
 					activePlushieNames: ["Doll"],
 					addedTraits: [],
 					suppressedTraits: ["ShortSighted"],
-					xpBoosts: {}
+					xpBoosts: {},
+					temporaryBuff: { source: null }
 				}
 			});
 
@@ -96,6 +99,7 @@ describe("NaninhasCommandHandler", () => {
 			const mockPlayerApi = {
 				player: {},
 				getAttachedItemNames: jest.fn().mockReturnValue(new Set(["SpiffoCherry"])),
+				getWorldAgeHours: jest.fn().mockReturnValue(0),
 				hasTrait: jest.fn((traitId: string) => traitId === "Organized"),
 				addTrait: addTraitFn,
 				removeTrait: removeTraitFn,
@@ -126,7 +130,8 @@ describe("NaninhasCommandHandler", () => {
 					activePlushieNames: ["SpiffoCherry"],
 					addedTraits: ["Organized"],
 					suppressedTraits: [],
-					xpBoosts: {}
+					xpBoosts: {},
+					temporaryBuff: { source: null }
 				}
 			});
 
@@ -211,6 +216,7 @@ describe("NaninhasCommandHandler", () => {
 			const mockPlayerApi = {
 				player: {},
 				getAttachedItemNames: jest.fn().mockReturnValue(new Set(["Doll"])),
+				getWorldAgeHours: jest.fn().mockReturnValue(0),
 				hasTrait: jest.fn().mockReturnValue(false),
 				addTrait: jest.fn(),
 				removeTrait: jest.fn(),
@@ -242,7 +248,8 @@ describe("NaninhasCommandHandler", () => {
 					activePlushieNames: ["Doll"],
 					addedTraits: [],
 					suppressedTraits: [],
-					xpBoosts: {}
+					xpBoosts: {},
+					temporaryBuff: { source: null }
 				}
 			});
 
@@ -287,6 +294,7 @@ describe("NaninhasCommandHandler", () => {
 			const mockPlayerApi = {
 				player: {},
 				getAttachedItemNames: jest.fn().mockReturnValue(new Set(["Doll"])),
+				getWorldAgeHours: jest.fn().mockReturnValue(0),
 				hasTrait: jest.fn().mockReturnValue(false),
 				addTrait: jest.fn(),
 				removeTrait: jest.fn(),
@@ -356,6 +364,7 @@ describe("NaninhasCommandHandler", () => {
 			const mockPlayerApi = {
 				player: {},
 				getAttachedItemNames: jest.fn().mockReturnValue(new Set(["Doll"])),
+				getWorldAgeHours: jest.fn().mockReturnValue(0),
 				hasTrait: jest.fn((trait: string) => trait === "ShortSighted"),
 				addTrait: addTraitFn,
 				removeTrait: removeTraitFn,
@@ -372,7 +381,8 @@ describe("NaninhasCommandHandler", () => {
 					activePlushieNames: ["Doll"],
 					addedTraits: ["OldTrait", "KeepTrait"],
 					suppressedTraits: ["Clumsy", "KeepSuppressed"],
-					xpBoosts: {}
+					xpBoosts: {},
+					temporaryBuff: { source: null }
 				}
 			};
 
@@ -398,7 +408,8 @@ describe("NaninhasCommandHandler", () => {
 					activePlushieNames: ["Doll"],
 					addedTraits: [],
 					suppressedTraits: [],
-					xpBoosts: {}
+					xpBoosts: {},
+					temporaryBuff: { source: null }
 				}
 			});
 
@@ -440,7 +451,8 @@ describe("NaninhasCommandHandler", () => {
 				activePlushieNames: [],
 				addedTraits: [],
 				suppressedTraits: [],
-				xpBoosts: {}
+				xpBoosts: {},
+				temporaryBuff: { source: null }
 			});
 		});
 
@@ -453,11 +465,13 @@ describe("NaninhasCommandHandler", () => {
 				activePlushieNames: ["Doll"],
 				addedTraits: ["Organized"],
 				suppressedTraits: ["ShortSighted"],
-				xpBoosts: { "xp:Fitness": 0.2 }
+				xpBoosts: { "xp:Fitness": 0.2 },
+				temporaryBuff: { source: "sleep", activeName: "ToyBear", expiresAtWorldAgeHours: 99 }
 			});
 
 			expect(ensured.activePlushieNames).toEqual(["Doll"]);
 			expect(ensured.xpBoosts).toEqual({ "xp:Fitness": 0.2 });
+			expect(ensured.temporaryBuff).toEqual({ source: "sleep", activeName: "ToyBear", expiresAtWorldAgeHours: 99 });
 		});
 	});
 });

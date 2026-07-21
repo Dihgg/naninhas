@@ -1,4 +1,5 @@
 import type { IsoPlayer, Perk } from "@asledgehammer/pipewrench";
+import { GameTime } from "@asledgehammer/pipewrench";
 import { PlayerApi } from "@shared/components/PlayerApi";
 
 const buildMockStats = () => ({
@@ -98,6 +99,61 @@ describe("PlayerApi", () => {
 
 		expect(mockPlayer.getModData).toHaveBeenCalled();
 		expect(result).toBe(mockModData);
+	});
+
+	it("delegates isAsleep to player", () => {
+		const stats = buildMockStats();
+		const mockPlayer = {
+			...buildPlayer(stats),
+			isAsleep: jest.fn().mockReturnValue(true)
+		} as unknown as IsoPlayer;
+
+		const playerApi = new PlayerApi(mockPlayer);
+		expect(playerApi.isAsleep()).toBe(true);
+		expect(mockPlayer.isAsleep).toHaveBeenCalled();
+	});
+
+	it("normalizes bed type variants to canonical values", () => {
+		const stats = buildMockStats();
+		const mockPlayer = {
+			...buildPlayer(stats),
+			getBedType: jest.fn().mockReturnValue("goodBedPillow")
+		} as unknown as IsoPlayer;
+
+		const playerApi = new PlayerApi(mockPlayer);
+		expect(playerApi.getBedType()).toBe("goodBed");
+	});
+
+	it("falls back to averageBed for unknown bed type values", () => {
+		const stats = buildMockStats();
+		const mockPlayer = {
+			...buildPlayer(stats),
+			getBedType: jest.fn().mockReturnValue("mysteryBed")
+		} as unknown as IsoPlayer;
+
+		const playerApi = new PlayerApi(mockPlayer);
+		expect(playerApi.getBedType()).toBe("averageBed");
+	});
+
+	it("returns bed object from player", () => {
+		const stats = buildMockStats();
+		const bed = { id: "bed-1" };
+		const mockPlayer = {
+			...buildPlayer(stats),
+			getBed: jest.fn().mockReturnValue(bed)
+		} as unknown as IsoPlayer;
+
+		const playerApi = new PlayerApi(mockPlayer);
+		expect(playerApi.getBed()).toBe(bed as any);
+	});
+
+	it("returns world age hours from GameTime", () => {
+		const stats = buildMockStats();
+		const mockPlayer = buildPlayer(stats);
+		jest.spyOn(GameTime, "getInstance").mockReturnValue({ getWorldAgeHours: () => 321 } as any);
+
+		const playerApi = new PlayerApi(mockPlayer);
+		expect(playerApi.getWorldAgeHours()).toBe(321);
 	});
 
 	it("delegates hasTrait to CharacterTraitApi", () => {

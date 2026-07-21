@@ -103,7 +103,8 @@ export class PlushieReconciler {
 			activePlushieNames: [...newActivePlushieNames],
 			addedTraits: [...desiredAddedTraits],
 			suppressedTraits: [...desiredSuppressedTraits],
-			xpBoosts: { ...desiredXpBoosts }
+			xpBoosts: { ...desiredXpBoosts },
+			temporaryBuff: currentState.temporaryBuff
 		};
 
 		return {
