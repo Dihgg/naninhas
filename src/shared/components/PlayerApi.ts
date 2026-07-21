@@ -1,6 +1,8 @@
+import { GameTime } from "@asledgehammer/pipewrench";
 import type { IsoPlayer, Perk } from "@asledgehammer/pipewrench";
 import { CharacterTraitApi } from "@shared/components/CharacterTraitApi";
 import { extractItemName } from "@shared/utils/ItemType";
+import type { BedType } from "@types";
 
 /**
  * Wrapper around IsoPlayer that centralizes Build 42 player operations.
@@ -59,6 +61,28 @@ export class PlayerApi {
 		return CharacterTraitApi.hasTrait(this._player, traitId);
 	}
 
+	/** Returns whether the wrapped player is currently asleep. */
+	public isAsleep(): boolean {
+		return this.player.isAsleep();
+	}
+
+	/** Returns the sleep-bed type classified by vanilla sleep flow. */
+	public getBedType(): BedType {
+		const raw = this.player.getBedType?.() ?? "averageBed";
+		if (raw === "badBed" || raw === "averageBed" || raw === "goodBed" || raw === "floor") {
+			return raw;
+		}
+		if (raw.includes("badBed")) return "badBed";
+		if (raw.includes("goodBed")) return "goodBed";
+		if (raw.includes("floor")) return "floor";
+		return "averageBed";
+	}
+
+	/** Returns the bed object associated with the player's current sleep context. */
+	public getBed(): ReturnType<IsoPlayer["getBed"]> {
+		return this.player.getBed();
+	}
+
 	/** Adds a trait to the player. */
 	public addTrait(traitId: string): void {
 		CharacterTraitApi.addTrait(this._player, traitId);
@@ -98,5 +122,10 @@ export class PlayerApi {
 	/** Reduces panic using Build 42 CharacterStat API. */
 	public reducePanic(amount: number): void {
 		this.stats.remove(CharacterStat.PANIC, amount);
+	}
+
+	/** Returns current monotonic world-age hours. */
+	public getWorldAgeHours(): number {
+		return GameTime.getInstance().getWorldAgeHours();
 	}
 }

@@ -55,6 +55,37 @@ export type SyncAppliedPlushiesPayload = {
 	rejectedNames: string[];
 };
 
+/** Sleep context bed-quality values used for temporary buff duration mapping. */
+export type BedType = "badBed" | "averageBed" | "goodBed" | "floor";
+
+/**
+ * Request data sent from the client when a player wakes up and may qualify
+ * for a temporary naninha buff from nearby placed plushies.
+ */
+export type SyncSleepBuffRequestPayload = {
+	/** Deduplicated plushie names detected around the sleep context at wake. */
+	candidateNames: string[];
+	/** Bed quality resolved on the client from the wake context. */
+	bedType: BedType;
+};
+
+/**
+ * Response data sent from the server after evaluating a wake-time temporary
+ * buff request.
+ */
+export type SyncSleepBuffAppliedPayload = {
+	/** Name of the temporary buff that was applied, if any. */
+	appliedName?: string;
+	/** Candidate names rejected by server-side validation. */
+	rejectedNames: string[];
+	/** Bed quality used by the server for duration resolution. */
+	resolvedBedType?: BedType;
+	/** Duration assigned to the temporary buff in in-game hours. */
+	durationHours?: number;
+	/** Absolute world-age hour when the temporary buff expires. */
+	expiresAtWorldAgeHours?: number;
+};
+
 // ---------------------------------------------------------------------------
 // Server-side authoritative state (stored in player modData under "Naninhas")
 // ---------------------------------------------------------------------------
@@ -83,6 +114,18 @@ export type NaninhasAuthoritativeState = {
 	suppressedTraits: string[];
 	/** XP multiplier deltas keyed by `"plushieName:perkName"`. */
 	xpBoosts: Record<string, number>;
+	/** Optional temporary buff source/state (sleep is the first source). */
+	temporaryBuff: TemporaryBuffState;
+};
+
+/** Temporary buff source namespace. */
+export type TemporaryBuffSource = "sleep";
+
+/** Temporary buff state tracked independently from attached plushie state. */
+export type TemporaryBuffState = {
+	activeName?: string;
+	expiresAtWorldAgeHours?: number;
+	source: TemporaryBuffSource | null;
 };
 
 /**

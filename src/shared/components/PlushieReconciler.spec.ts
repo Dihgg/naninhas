@@ -6,7 +6,8 @@ const emptyState = (): NaninhasAuthoritativeState => ({
 	activePlushieNames: [],
 	addedTraits: [],
 	suppressedTraits: [],
-	xpBoosts: {}
+	xpBoosts: {},
+	temporaryBuff: { source: null }
 });
 
 describe("PlushieReconciler", () => {
@@ -38,7 +39,8 @@ describe("PlushieReconciler", () => {
 				activePlushieNames: [PlushieNames.DOLL],
 				addedTraits: ["EagleEyed"],
 				suppressedTraits: ["ShortSighted"],
-				xpBoosts: {}
+				xpBoosts: {},
+				temporaryBuff: { source: null }
 			};
 		const plan = PlushieReconciler.reconcile(current, [PlushieNames.FLAMINGO]);
 			expect(plan.traitsToAdd).toContain("Graceful");
@@ -54,7 +56,8 @@ describe("PlushieReconciler", () => {
 				activePlushieNames: [PlushieNames.DOLL],
 				addedTraits: ["EagleEyed"],
 				suppressedTraits: ["ShortSighted"],
-				xpBoosts: {}
+				xpBoosts: {},
+				temporaryBuff: { source: null }
 			};
 		const plan = PlushieReconciler.reconcile(current, []);
 			expect(plan.traitsToRemove).toContain("EagleEyed");
@@ -71,7 +74,8 @@ describe("PlushieReconciler", () => {
 				activePlushieNames: [PlushieNames.DOLL],
 				addedTraits: ["EagleEyed"],
 				suppressedTraits: ["ShortSighted"],
-				xpBoosts: {}
+				xpBoosts: {},
+				temporaryBuff: { source: null }
 			};
 		const plan = PlushieReconciler.reconcile(current, [PlushieNames.DOLL]);
 			expect(plan.traitsToAdd).toHaveLength(0);
@@ -86,7 +90,8 @@ describe("PlushieReconciler", () => {
 				activePlushieNames: [PlushieNames.JACQUESBEAVER],
 				addedTraits: [],
 				suppressedTraits: [],
-				xpBoosts: { [`${PlushieNames.JACQUESBEAVER}:Woodwork`]: 1 }
+				xpBoosts: { [`${PlushieNames.JACQUESBEAVER}:Woodwork`]: 1 },
+				temporaryBuff: { source: null }
 			};
 		const plan = PlushieReconciler.reconcile(current, [PlushieNames.JACQUESBEAVER]);
 			expect(plan.xpBoostDeltas).toEqual({});
@@ -126,7 +131,8 @@ describe("PlushieReconciler", () => {
 				activePlushieNames: [PlushieNames.JACQUESBEAVER],
 				addedTraits: [],
 				suppressedTraits: [],
-				xpBoosts: { [`${PlushieNames.JACQUESBEAVER}:Woodwork`]: 1 }
+				xpBoosts: { [`${PlushieNames.JACQUESBEAVER}:Woodwork`]: 1 },
+				temporaryBuff: { source: null }
 			};
 		const plan = PlushieReconciler.reconcile(current, []);
 		expect(plan.xpBoostDeltas[`${PlushieNames.JACQUESBEAVER}:Woodwork`]).toBe(-1);

@@ -26,6 +26,12 @@ export const getCore = jest.fn().mockImplementation(() => ({
 	getVersionNumber: jest.fn().mockReturnValue("42.0")
 }));
 
+export class GameTime {
+	static getInstance = jest.fn(() => ({
+		getWorldAgeHours: jest.fn(() => 0)
+	}));
+}
+
 export const Perks = {
 	Woodwork: "Woodwork",
 	Aiming: "Aiming",

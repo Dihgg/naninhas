@@ -15,6 +15,9 @@ export {};
 declare type CharacterStatValue = { readonly __brand: "CharacterStatValue" };
 
 declare global {
+	/** Global PZ RNG helper. */
+	const ZombRand: (max: number) => number;
+
 	/**
 	 * Build 42 CharacterStat enum - global accessible from Lua.
 	 * Replaces the legacy direct stat getter/setter methods on Stats.

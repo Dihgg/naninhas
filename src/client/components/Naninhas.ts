@@ -4,6 +4,7 @@ import * as Events from "@asledgehammer/pipewrench-events";
 import { Subject } from "@client/components/Observer/Subject";
 import { Plushie } from "@client/components/Plushies/Plushie";
 import { PlushieSyncPublisher } from "@client/components/PlushieSyncPublisher";
+import { SleepBuffDetector } from "@client/components/SleepBuffDetector";
 import { PlayerApi } from "@shared/components/PlayerApi";
 import {
 	BorisBadger,
@@ -38,11 +39,13 @@ export class Naninhas {
 	private subject: Subject;
 
 	private readonly syncPublisher: PlushieSyncPublisher;
+	private readonly sleepBuffDetector: SleepBuffDetector;
 
 	constructor(player: IsoPlayer, plushies: Plushie[] = []) {
 		this.player = player;
 		this.subject = new Subject();
 		this.syncPublisher = new PlushieSyncPublisher(player);
+		this.sleepBuffDetector = new SleepBuffDetector(player);
 		this.PLUSHIES =
 			plushies.length > 0
 				? plushies
@@ -105,6 +108,9 @@ export class Naninhas {
 
 		// Step 5: Notify server of current plushie set (no-op in single-player)
 		this.syncPublisher.tick();
+
+		// Step 6: Detect wake transitions and publish temporary sleep-buff candidates.
+		this.sleepBuffDetector.tick();
 	}
 
 	/**
