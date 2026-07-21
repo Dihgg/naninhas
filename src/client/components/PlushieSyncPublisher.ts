@@ -1,11 +1,10 @@
 /* @noSelfInFile */
 import type { IsoPlayer } from "@asledgehammer/pipewrench";
-import { sendClientCommand } from "@asledgehammer/pipewrench";
-import * as Events from "@asledgehammer/pipewrench-events";
-import { Commands, NETWORK_MODULE, PROTOCOL_SCHEMA_VERSION } from "@constants";
+import { Commands } from "@constants";
 import type { CommandPayload, SyncAppliedPlushiesPayload, SyncDesiredPlushiesPayload } from "@types";
 import { isKnownPlushie } from "@shared/catalog/PlushieCatalog";
 import { PlayerApi } from "@shared/components/PlayerApi";
+import { CommandPublisher } from "@client/components/CommandPublisher";
 
 /**
  * Client-side publisher responsible for detecting plushie attachment changes
@@ -19,21 +18,18 @@ import { PlayerApi } from "@shared/components/PlayerApi";
  * A monotonically increasing revision counter is used so the server can
  * safely drop stale / out-of-order requests.
  */
-export class PlushieSyncPublisher {
+export class PlushieSyncPublisher extends CommandPublisher<SyncDesiredPlushiesPayload, SyncAppliedPlushiesPayload> {
 	private readonly playerApi: PlayerApi;
 
 	/** Names of plushies confirmed as active during the last acknowledged sync. */
 	private lastKnownNames: ReadonlySet<string> = new Set();
 
-	/** Monotonically increasing request counter. */
-	private revision = 0;
-
 	/**
 	 * @param player Local player whose attached plushies should be synchronized.
 	 */
 	constructor(player: IsoPlayer) {
+		super(player, Commands.SYNC_PLUSHIE);
 		this.playerApi = new PlayerApi(player);
-		this.registerReplyListener();
 	}
 
 	/**
@@ -78,18 +74,8 @@ export class PlushieSyncPublisher {
 	 * @param names Current known-good set of attached plushies.
 	 */
 	private send(names: Set<string>): void {
-		this.revision++;
 		this.lastKnownNames = new Set(names);
-
-		const payload: CommandPayload<SyncDesiredPlushiesPayload> = {
-			schemaVersion: PROTOCOL_SCHEMA_VERSION,
-			revision: this.revision,
-			data: {
-				desiredNames: [...names]
-			}
-		};
-
-		sendClientCommand(this.playerApi.player, NETWORK_MODULE, Commands.SYNC_PLUSHIE.REQUEST, payload);
+		this.sendRequest({ desiredNames: [...names] });
 	}
 
 	/**
@@ -97,32 +83,20 @@ export class PlushieSyncPublisher {
 	 * Updates `lastKnownNames` on a successful response so the next tick does
 	 * not re-send needlessly.
 	 */
-	private registerReplyListener(): void {
-		Events.onServerCommand.addListener((module, command, args) => {
-			if (module !== NETWORK_MODULE || command !== Commands.SYNC_PLUSHIE.RESPONSE) {
-				return;
-			}
+	protected onReply(payload: CommandPayload<SyncAppliedPlushiesPayload>): void {
+		if (payload.data.rejectedNames.length > 0) {
+			print(`[Naninhas] ${Commands.SYNC_PLUSHIE.RESPONSE}: rejected names: ${payload.data.rejectedNames.join(", ")}`);
+		}
 
-			const payload = args as unknown as CommandPayload<SyncAppliedPlushiesPayload>;
-
-			if (payload.schemaVersion !== PROTOCOL_SCHEMA_VERSION) {
-				return;
-			}
-
-			if (payload.data.rejectedNames.length > 0) {
-				print(`[Naninhas] ${Commands.SYNC_PLUSHIE.RESPONSE}: rejected names: ${payload.data.rejectedNames.join(", ")}`);
-			}
-
-			// Update our reference. If a corrective send already updated
-			// lastKnownNames ahead of this reply, the reply may contain a
-			// stale set — leave it as-is so the next tick re-evaluates correctly.
-			const replyNames = new Set([...payload.data.appliedNames, ...payload.data.rejectedNames]);
-			if (!this.hasChanged(replyNames)) {
-				// Reply matches our current expectation — nothing to do
-				return;
-			}
-			this.lastKnownNames = replyNames;
-		});
+		// Update our reference. If a corrective send already updated
+		// lastKnownNames ahead of this reply, the reply may contain a
+		// stale set — leave it as-is so the next tick re-evaluates correctly.
+		const replyNames = new Set([...payload.data.appliedNames, ...payload.data.rejectedNames]);
+		if (!this.hasChanged(replyNames)) {
+			// Reply matches our current expectation — nothing to do
+			return;
+		}
+		this.lastKnownNames = replyNames;
 	}
 
 	/**
