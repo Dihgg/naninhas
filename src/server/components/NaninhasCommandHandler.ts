@@ -1,6 +1,5 @@
 /* @noSelfInFile */
-import type { IsoPlayer, Perk } from "@asledgehammer/pipewrench";
-import { Perks } from "@asledgehammer/pipewrench";
+import type { IsoPlayer } from "@asledgehammer/pipewrench";
 import { Commands, NETWORK_MODULE, PROTOCOL_SCHEMA_VERSION } from "@constants";
 import type {
 	CommandPayload,
@@ -8,9 +7,9 @@ import type {
 	SyncDesiredPlushiesPayload,
 	NaninhasAuthoritativeState
 } from "@types";
-import { PlushieReconciler } from "@shared/components/PlushieReconciler";
 import { isKnownPlushie } from "@shared/catalog/PlushieCatalog";
 import { PlayerApi } from "@shared/components/PlayerApi";
+import { AuthoritativeStateController } from "@server/components/AuthoritativeStateController";
 import { CommandHandler } from "./CommandHandler";
 
 /**
@@ -27,7 +26,7 @@ export class NaninhasCommandHandler extends CommandHandler<NaninhasAuthoritative
 		super(
 			NETWORK_MODULE,
 			Commands.SYNC_PLUSHIE,
-			{ activePlushieNames: [], addedTraits: [], suppressedTraits: [], xpBoosts: {} }
+			{ activePlushieNames: [], addedTraits: [], suppressedTraits: [], xpBoosts: {}, temporaryBuff: { source: null } }
 		);
 	}
 
@@ -73,66 +72,20 @@ export class NaninhasCommandHandler extends CommandHandler<NaninhasAuthoritative
 		// -----------------------------------------------------------------------
 		// 3. Reconcile and apply
 		// -----------------------------------------------------------------------
-		const {
-			traitsToAdd,
-			traitsToRemove,
-			traitsToSuppress,
-			traitsToRestore,
-			xpBoostDeltas,
-			newState
-		} = PlushieReconciler.reconcile(authoritative, validNames);
-
-		// Only add traits the player does not already have; adding an existing
-		// trait can create duplicate entries in Build 42 trait lists.
-		const actuallyAdded: string[] = [];
-		for (const trait of traitsToAdd) {
-			if (!playerApi.hasTrait(trait)) {
-				playerApi.addTrait(trait);
-				actuallyAdded.push(trait);
-			}
-		}
-		for (const trait of traitsToRemove) {
-			playerApi.removeTrait(trait);
-		}
-
-		// Only suppress traits the player actually has — suppressing a trait the
-		// player never had would cause it to be granted on the next plushie removal.
-		const actuallySuppressed: string[] = [];
-		for (const trait of traitsToSuppress) {
-			if (playerApi.hasTrait(trait)) {
-				playerApi.removeTrait(trait);
-				actuallySuppressed.push(trait);
-			}
-		}
-
-		for (const trait of traitsToRestore) {
-			playerApi.addTrait(trait);
-		}
-
-		for (const [key, delta] of Object.entries(xpBoostDeltas)) {
-			const [, perkName] = key.split(":");
-			const perk = Perks[perkName as keyof typeof Perks] as Perk;
-			if (!perk) continue;
-			playerApi.applyXpMultiplierDelta(perk, delta);
-		}
+		const now = playerApi.getWorldAgeHours();
+		const nextTemporaryBuff = AuthoritativeStateController.sanitizeTemporaryBuff(authoritative.temporaryBuff, now);
+		const desiredEffectiveNames = AuthoritativeStateController.buildEffectiveNames(validNames, nextTemporaryBuff);
+		const nextState = AuthoritativeStateController.applyDesiredState(
+			playerApi,
+			authoritative,
+			desiredEffectiveNames,
+			validNames,
+			nextTemporaryBuff
+		);
 		// -----------------------------------------------------------------------
 		// 4. Persist updated server state
 		// -----------------------------------------------------------------------
-		// suppressedTraits must only contain traits actually removed from the player,
-		// not the full desired-suppression set from the reconciler.
-		// addedTraits must only contain traits that were actually added by the mod,
-		// so detaching plushies never removes a trait the player had originally.
-		serverModData.authoritative = {
-			...newState,
-			addedTraits: [
-				...authoritative.addedTraits.filter((t: string) => !traitsToRemove.includes(t)),
-				...actuallyAdded
-			],
-			suppressedTraits: [
-				...authoritative.suppressedTraits.filter((t: string) => !traitsToRestore.includes(t)),
-				...actuallySuppressed
-			]
-		};
+		serverModData.authoritative = nextState;
 
 		// -----------------------------------------------------------------------
 		// 5. Reply to the client
@@ -195,7 +148,12 @@ export class NaninhasCommandHandler extends CommandHandler<NaninhasAuthoritative
 			activePlushieNames: authoritative?.activePlushieNames ?? [],
 			addedTraits: authoritative?.addedTraits ?? [],
 			suppressedTraits: authoritative?.suppressedTraits ?? [],
-			xpBoosts: authoritative?.xpBoosts ?? {}
+			xpBoosts: authoritative?.xpBoosts ?? {},
+			temporaryBuff: {
+				activeName: authoritative?.temporaryBuff?.activeName,
+				expiresAtWorldAgeHours: authoritative?.temporaryBuff?.expiresAtWorldAgeHours,
+				source: authoritative?.temporaryBuff?.source ?? null
+			}
 		};
 	}
 }
