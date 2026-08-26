@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.13.1](https://github.com/dihgg/naninhas/compare/v1.13.0...v1.13.1) (2026-08-26)
+
+
+### Bug Fixes
+
+* **build:** replace removed LUA methods ([6562127](https://github.com/dihgg/naninhas/commit/6562127420e62ec3fff3da2fa2abb16012c5d2a0))
+
 ## [1.13.0](https://github.com/dihgg/naninhas/compare/v1.12.0...v1.13.0) (2026-07-20)
 
 
