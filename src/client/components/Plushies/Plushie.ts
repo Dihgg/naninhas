@@ -1,4 +1,3 @@
-
 import { PlayerApi } from "@shared/components/PlayerApi";
 import { Observer } from "@client/components/Observer/Observer";
 import type { EventData, PerkBoost, PlushieProps } from "@types";
@@ -9,7 +8,6 @@ import { getPlushieDefinition } from "@shared/catalog/PlushieCatalog";
 // TODO: Apply the LuaEventManager to allow other mods to interact with this one
 // import { LuaEventManager } from "@asledgehammer/pipewrench"
 
-
 /**
  * This class controls the Plushie behavior.
  *
@@ -18,7 +16,6 @@ import { getPlushieDefinition } from "@shared/catalog/PlushieCatalog";
  * events so that UI, audio, and external mod hooks continue to work.
  */
 export abstract class Plushie implements Observer {
-
 	/** The name of the Plushie */
 	name: string;
 	/** Wrapped player object */

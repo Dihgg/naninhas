@@ -232,7 +232,9 @@ describe("PlushieSyncPublisher", () => {
 		});
 
 		it("logs rejected names when server reply includes rejections", () => {
-			const printSpy = jest.spyOn(globalThis as any, "print").mockImplementation(() => undefined);
+			const printSpy = jest
+				.spyOn(globalThis as any, "print")
+				.mockImplementation(() => undefined);
 
 			getAttachedItemNamesMock.mockReturnValue(new Set(["Doll"]));
 			isKnownPlushie.mockReturnValue(true);

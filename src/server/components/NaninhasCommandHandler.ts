@@ -11,7 +11,6 @@ import { isKnownPlushie } from "@shared/catalog/PlushieCatalog";
 import { PlayerApi } from "@shared/components/PlayerApi";
 import { Logger } from "@shared/components/Logger";
 
-const sleepBuffLogger = new Logger("SleepBuff");
 import { AuthoritativeStateController } from "@server/components/AuthoritativeStateController";
 import { CommandHandler } from "./CommandHandler";
 
@@ -26,6 +25,7 @@ export class NaninhasCommandHandler extends CommandHandler<
 	SyncDesiredPlushiesPayload,
 	SyncAppliedPlushiesPayload
 > {
+	private logger = new Logger("SleepBuff");
 	/**
 	 * Configures the Naninhas multiplayer command flow.
 	 */
@@ -52,7 +52,7 @@ export class NaninhasCommandHandler extends CommandHandler<
 		);
 
 		if (activeTemporaryBuff.source !== null) {
-			sleepBuffLogger.log(
+			this.logger.log(
 				["Server", "Expiry"],
 				`player=${player.getUsername()}; worldAge=${now}; active=${activeTemporaryBuff.activeName ?? "unknown"}; expiresAt=${activeTemporaryBuff.expiresAtWorldAgeHours ?? "missing"}; status=${temporaryBuff.source === null ? "expired" : "active"}`
 			);
@@ -70,7 +70,7 @@ export class NaninhasCommandHandler extends CommandHandler<
 			attachedNames,
 			temporaryBuff
 		);
-		sleepBuffLogger.log(
+		this.logger.log(
 			["Server", "Expiry"],
 			`player=${player.getUsername()}; removed=${activeTemporaryBuff.activeName ?? "unknown"}; remainingAttached=${Logger.formatList(attachedNames)}`
 		);

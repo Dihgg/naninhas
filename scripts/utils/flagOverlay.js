@@ -34,7 +34,7 @@ const LOCALE_TO_COUNTRY = {
 	RO: "ro",
 	SV: "se",
 	AR: "sa",
-	CA: "es",
+	CA: "es"
 };
 
 /**
@@ -87,7 +87,9 @@ const overlayFlagOnImage = async (inputPath, outputPath, locale, options = {}) =
 
 	const countryCode = LOCALE_TO_COUNTRY[locale.toUpperCase()];
 	if (!countryCode) {
-		console.warn(`[flagOverlay] No country mapping for locale "${locale}" — skipping flag overlay.`);
+		console.warn(
+			`[flagOverlay] No country mapping for locale "${locale}" — skipping flag overlay.`
+		);
 		return;
 	}
 
@@ -99,7 +101,9 @@ const overlayFlagOnImage = async (inputPath, outputPath, locale, options = {}) =
 	try {
 		rawFlagBuffer = await fetchFlag(countryCode, flagWidth);
 	} catch (err) {
-		console.warn(`[flagOverlay] Could not fetch flag for ${locale} (${countryCode}): ${err.message}`);
+		console.warn(
+			`[flagOverlay] Could not fetch flag for ${locale} (${countryCode}): ${err.message}`
+		);
 		return;
 	}
 
@@ -110,7 +114,10 @@ const overlayFlagOnImage = async (inputPath, outputPath, locale, options = {}) =
 	const left = width - flagMeta.width - padding;
 	const top = height - flagMeta.height - padding;
 
-	const result = await baseImage.composite([{ input: flagBuffer, left, top }]).png().toBuffer();
+	const result = await baseImage
+		.composite([{ input: flagBuffer, left, top }])
+		.png()
+		.toBuffer();
 
 	const fs = require("fs-extra");
 	await fs.writeFile(outputPath, result);

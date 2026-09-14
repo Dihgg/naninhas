@@ -60,7 +60,7 @@ declare global {
 	};
 
 	const CharacterTrait: {
-		get: (this: void, id: unknown) => CharacterTraitRef | undefined
+		get: (this: void, id: unknown) => CharacterTraitRef | undefined;
 	};
 	const ResourceLocation: {
 		of: (this: void, id: string) => unknown;

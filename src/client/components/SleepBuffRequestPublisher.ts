@@ -10,8 +10,6 @@ import type {
 import { CommandPublisher } from "@client/components/CommandPublisher";
 import { Logger } from "@shared/components/Logger";
 
-const sleepBuffLogger = new Logger("SleepBuff");
-
 /**
  * Publishes wake-time temporary sleep buff requests to the authoritative server.
  */
@@ -19,13 +17,14 @@ export class SleepBuffRequestPublisher extends CommandPublisher<
 	SyncSleepBuffRequestPayload,
 	SyncSleepBuffAppliedPayload
 > {
+	private logger = new Logger("SleepBuff");
 	constructor(player: IsoPlayer) {
 		super(player, Commands.SYNC_SLEEP_BUFF);
 	}
 
 	/** Sends a wake-time candidate payload to the server. */
 	send(candidateNames: string[], bedType: BedType): void {
-		sleepBuffLogger.log(
+		this.logger.log(
 			["Client", "Network"],
 			`Sending wake request; bedType=${bedType}; candidates=${Logger.formatList(candidateNames)}`
 		);
@@ -37,7 +36,7 @@ export class SleepBuffRequestPublisher extends CommandPublisher<
 
 	protected onReply(payload: CommandPayload<SyncSleepBuffAppliedPayload>): void {
 		const data = payload.data;
-		sleepBuffLogger.log(
+		this.logger.log(
 			["Client", "Network"],
 			`Server response; applied=${data.appliedName ?? "none"}; duration=${data.durationHours ?? "none"}; expiresAt=${data.expiresAtWorldAgeHours ?? "none"}; rejected=${Logger.formatList(data.rejectedNames)}`
 		);

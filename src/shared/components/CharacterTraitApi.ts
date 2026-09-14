@@ -50,7 +50,6 @@ export class CharacterTraitApi {
 	 * @returns True if a matching trait is found, otherwise false
 	 */
 	private static hasKnownTrait(knownTraits: KnownTraitList, traitId: string): boolean {
-
 		for (let index = 0; index < knownTraits.size(); index += 1) {
 			if (this.matchesTraitId(knownTraits.get(index), traitId)) {
 				return true;
@@ -65,7 +64,9 @@ export class CharacterTraitApi {
 	 * @param player The player whose CharacterTraits container to retrieve
 	 * @returns The CharacterTraits container for the specified player
 	 */
-	public static getCharacterTraits(player: IsoPlayer): ReturnType<IsoPlayer["getCharacterTraits"]> {
+	public static getCharacterTraits(
+		player: IsoPlayer
+	): ReturnType<IsoPlayer["getCharacterTraits"]> {
 		return player.getCharacterTraits();
 	}
 

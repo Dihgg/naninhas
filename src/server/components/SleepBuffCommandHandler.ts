@@ -13,7 +13,6 @@ import { isKnownPlushie } from "@shared/catalog/PlushieCatalog";
 import { PlayerApi } from "@shared/components/PlayerApi";
 import { Logger } from "@shared/components/Logger";
 
-const sleepBuffLogger = new Logger("SleepBuff");
 import { AuthoritativeStateController } from "@server/components/AuthoritativeStateController";
 import { CommandHandler } from "./CommandHandler";
 
@@ -25,6 +24,8 @@ export class SleepBuffCommandHandler extends CommandHandler<
 	SyncSleepBuffRequestPayload,
 	SyncSleepBuffAppliedPayload
 > {
+	private logger = new Logger("SleepBuff");
+
 	constructor() {
 		super(NETWORK_MODULE, Commands.SYNC_SLEEP_BUFF, {
 			activePlushieNames: [],
@@ -44,13 +45,13 @@ export class SleepBuffCommandHandler extends CommandHandler<
 		const { authoritative } = serverModData;
 		const now = playerApi.getWorldAgeHours();
 		const username = player.getUsername();
-		sleepBuffLogger.log(
+		this.logger.log(
 			["Server", "Request"],
 			`player=${username}; worldAge=${now}; requestedBedType=${payload.data.bedType}; candidates=${Logger.formatList(payload.data.candidateNames)}`
 		);
 
 		const attachedKnownNames = this.getKnownAttachedNames(playerApi);
-		sleepBuffLogger.log(
+		this.logger.log(
 			["Server", "Validation"],
 			`player=${username}; attachedNaninhas=${Logger.formatList(attachedKnownNames)}`
 		);
@@ -64,7 +65,7 @@ export class SleepBuffCommandHandler extends CommandHandler<
 
 		for (const name of payload.data.candidateNames) {
 			if (!isKnownPlushie(name)) {
-				sleepBuffLogger.log(
+				this.logger.log(
 					["Server", "Validation"],
 					`player=${username}; rejected unknown candidate=${name}`
 				);
@@ -72,7 +73,7 @@ export class SleepBuffCommandHandler extends CommandHandler<
 				continue;
 			}
 			if (attachedKnownNames.includes(name)) {
-				sleepBuffLogger.log(
+				this.logger.log(
 					["Server", "Validation"],
 					`player=${username}; rejected already-attached candidate=${name}`
 				);
@@ -87,7 +88,7 @@ export class SleepBuffCommandHandler extends CommandHandler<
 		const resolvedBedType = this.normalizeBedType(payload.data.bedType);
 		const durationHours = this.getDurationForBedType(resolvedBedType);
 		const emptyWakeScan = payload.data.candidateNames.length === 0;
-		sleepBuffLogger.log(
+		this.logger.log(
 			["Server", "Selection"],
 			`player=${username}; validCandidates=${Logger.formatList(validCandidates)}; selected=${selectedName ?? "none"}; resolvedBedType=${resolvedBedType}; durationHours=${durationHours}`
 		);
@@ -95,7 +96,7 @@ export class SleepBuffCommandHandler extends CommandHandler<
 		let nextTemporaryBuff: TemporaryBuffState = currentTemporaryBuff;
 		if (emptyWakeScan) {
 			nextTemporaryBuff = { source: null };
-			sleepBuffLogger.log(
+			this.logger.log(
 				["Server", "Apply"],
 				`player=${username}; empty wake scan; clearing previous temporary buff=${currentTemporaryBuff.activeName ?? "none"}`
 			);
@@ -105,12 +106,12 @@ export class SleepBuffCommandHandler extends CommandHandler<
 				expiresAtWorldAgeHours: now + durationHours,
 				source: "sleep"
 			};
-			sleepBuffLogger.log(
+			this.logger.log(
 				["Server", "Apply"],
 				`player=${username}; applying=${selectedName}; expiresAtWorldAge=${nextTemporaryBuff.expiresAtWorldAgeHours}`
 			);
 		} else {
-			sleepBuffLogger.log(
+			this.logger.log(
 				["Server", "Apply"],
 				`player=${username}; no valid selection; existing temporary buff remains=${currentTemporaryBuff.activeName ?? "none"}`
 			);
@@ -127,7 +128,7 @@ export class SleepBuffCommandHandler extends CommandHandler<
 			attachedKnownNames,
 			nextTemporaryBuff
 		);
-		sleepBuffLogger.log(
+		this.logger.log(
 			["Server", "Apply"],
 			`player=${username}; effectiveNaninhas=${Logger.formatList(desiredEffectiveNames)}; state persisted`
 		);

@@ -21,12 +21,12 @@ describe("PlushieReconciler", () => {
 		});
 
 		it("sets xpBoostDeltas for xp plushie", () => {
-		const plan = PlushieReconciler.reconcile(emptyState(), [PlushieNames.JACQUESBEAVER]);
+			const plan = PlushieReconciler.reconcile(emptyState(), [PlushieNames.JACQUESBEAVER]);
 			expect(plan.xpBoostDeltas[`${PlushieNames.JACQUESBEAVER}:Woodwork`]).toBe(1);
 		});
 
 		it("new state reflects the active plushie effects", () => {
-		const plan = PlushieReconciler.reconcile(emptyState(), [PlushieNames.DOLL]);
+			const plan = PlushieReconciler.reconcile(emptyState(), [PlushieNames.DOLL]);
 			expect(plan.newState.activePlushieNames).toContain(PlushieNames.DOLL);
 			expect(plan.newState.addedTraits).toContain("EagleEyed");
 			expect(plan.newState.suppressedTraits).toContain("ShortSighted");
@@ -42,7 +42,7 @@ describe("PlushieReconciler", () => {
 				xpBoosts: {},
 				temporaryBuff: { source: null }
 			};
-		const plan = PlushieReconciler.reconcile(current, [PlushieNames.FLAMINGO]);
+			const plan = PlushieReconciler.reconcile(current, [PlushieNames.FLAMINGO]);
 			expect(plan.traitsToAdd).toContain("Graceful");
 			expect(plan.traitsToRemove).toContain("EagleEyed");
 			expect(plan.traitsToSuppress).toContain("Clumsy");
@@ -59,7 +59,7 @@ describe("PlushieReconciler", () => {
 				xpBoosts: {},
 				temporaryBuff: { source: null }
 			};
-		const plan = PlushieReconciler.reconcile(current, []);
+			const plan = PlushieReconciler.reconcile(current, []);
 			expect(plan.traitsToRemove).toContain("EagleEyed");
 			expect(plan.traitsToRestore).toContain("ShortSighted");
 			expect(plan.traitsToAdd).toHaveLength(0);
@@ -77,7 +77,7 @@ describe("PlushieReconciler", () => {
 				xpBoosts: {},
 				temporaryBuff: { source: null }
 			};
-		const plan = PlushieReconciler.reconcile(current, [PlushieNames.DOLL]);
+			const plan = PlushieReconciler.reconcile(current, [PlushieNames.DOLL]);
 			expect(plan.traitsToAdd).toHaveLength(0);
 			expect(plan.traitsToRemove).toHaveLength(0);
 			expect(plan.traitsToSuppress).toHaveLength(0);
@@ -93,14 +93,17 @@ describe("PlushieReconciler", () => {
 				xpBoosts: { [`${PlushieNames.JACQUESBEAVER}:Woodwork`]: 1 },
 				temporaryBuff: { source: null }
 			};
-		const plan = PlushieReconciler.reconcile(current, [PlushieNames.JACQUESBEAVER]);
+			const plan = PlushieReconciler.reconcile(current, [PlushieNames.JACQUESBEAVER]);
 			expect(plan.xpBoostDeltas).toEqual({});
 		});
 	});
 
 	describe("overlapping effects", () => {
 		it("unions traits from multiple plushies", () => {
-		const plan = PlushieReconciler.reconcile(emptyState(), [PlushieNames.DOLL, PlushieNames.FLAMINGO]);
+			const plan = PlushieReconciler.reconcile(emptyState(), [
+				PlushieNames.DOLL,
+				PlushieNames.FLAMINGO
+			]);
 			expect(plan.traitsToAdd).toContain("EagleEyed");
 			expect(plan.traitsToAdd).toContain("Graceful");
 			expect(plan.traitsToSuppress).toContain("ShortSighted");
@@ -108,7 +111,7 @@ describe("PlushieReconciler", () => {
 		});
 
 		it("sums xp boosts from multiple xp plushies", () => {
-		const plan = PlushieReconciler.reconcile(emptyState(), [
+			const plan = PlushieReconciler.reconcile(emptyState(), [
 				PlushieNames.JACQUESBEAVER,
 				PlushieNames.SPIFFOSHAMROCK
 			]);
@@ -119,7 +122,7 @@ describe("PlushieReconciler", () => {
 
 	describe("unknown plushie names", () => {
 		it("silently skips names not in catalog", () => {
-		const plan = PlushieReconciler.reconcile(emptyState(), ["FakePlushie"]);
+			const plan = PlushieReconciler.reconcile(emptyState(), ["FakePlushie"]);
 			expect(plan.traitsToAdd).toHaveLength(0);
 			expect(plan.newState.activePlushieNames).toContain("FakePlushie");
 		});
@@ -134,8 +137,8 @@ describe("PlushieReconciler", () => {
 				xpBoosts: { [`${PlushieNames.JACQUESBEAVER}:Woodwork`]: 1 },
 				temporaryBuff: { source: null }
 			};
-		const plan = PlushieReconciler.reconcile(current, []);
-		expect(plan.xpBoostDeltas[`${PlushieNames.JACQUESBEAVER}:Woodwork`]).toBe(-1);
+			const plan = PlushieReconciler.reconcile(current, []);
+			expect(plan.xpBoostDeltas[`${PlushieNames.JACQUESBEAVER}:Woodwork`]).toBe(-1);
 		});
 	});
 });

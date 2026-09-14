@@ -13,52 +13,52 @@ visibility: public
 
 ## ⚙️ How It Works
 
-- Attach a supported plushie to your backpack
-- Its bonus activates while equipped
-- Unequip it and the effect is removed
-- Trait and XP effects are handled to avoid permanent leftovers
+-   Attach a supported plushie to your backpack
+-   Its bonus activates while equipped
+-   Unequip it and the effect is removed
+-   Trait and XP effects are handled to avoid permanent leftovers
 
 ---
 
 ## 🧸 All Plushies & Effects
 
-- 🦡 **Boris The Badger**: Grants *Cat's Eyes / Night Vision*
-- 🧸 **Doll**: Grants *Eagle Eyed* (suppresses *Short Sighted*)
-- 🦩 **Flamingo**: Grants *Graceful* (suppresses *Clumsy*)
-- 🐇 **Fluffyfoot The Bunny**: Grants *Light Eater*
-- 🦊 **Freddy The Fox**: Grants *Inconspicuous* (suppresses *Conspicuous*)
-- 🐿️ **Furbert The Squirrel**: Grants *Outdoorsman*
-- 👽 **Green Sci-Fi Goblin**: Grants *Fast Learner* (suppresses *Slow Learner*)
-- 🐾 **Moley The Mole**: Foraging XP bonus
-- 🐶 **Otis The Pug**: Grants *Fast Reader* (suppresses *Slow Reader*)
-- 🦔 **Pancake The Hedgehog**: Sprinting + Agility XP bonuses
-- 🪵 **Jacques The Beaver**: Carpentry XP bonus
-- 🦝 **Spiffo**: Endurance support while equipped
-- 🫐 **Spiffo Blueberry**: Grants *Low Thirst* (suppresses *High Thirst*)
-- 🍒 **Spiffo Cherry**: Grants *Organized* (suppresses *Disorganized*)
-- 🐾 **Spiffo PAWS (Gray)**: Nimble + Blunt + Blade XP bonuses
-- ❤️ **Spiffo Heart**: First Aid XP bonus
-- 🌈 **Spiffo Rainbow**: Reduces boredom/fatigue and helps endurance
-- 🎅 **Spiffo Santa**: Slowly reduces boredom
-- 🍀 **Spiffo Shamrock**: Aiming + Reloading XP bonuses
-- 🪆 **Substitution Doll**: Grants *Brave*
-- 🐻 **Toy Bear**: Reduces panic/fear
-- 🧸 **Toy Bear (Small)**: Reduced version of Toy Bear effect
+-   🦡 **Boris The Badger**: Grants _Cat's Eyes / Night Vision_
+-   🧸 **Doll**: Grants _Eagle Eyed_ (suppresses _Short Sighted_)
+-   🦩 **Flamingo**: Grants _Graceful_ (suppresses _Clumsy_)
+-   🐇 **Fluffyfoot The Bunny**: Grants _Light Eater_
+-   🦊 **Freddy The Fox**: Grants _Inconspicuous_ (suppresses _Conspicuous_)
+-   🐿️ **Furbert The Squirrel**: Grants _Outdoorsman_
+-   👽 **Green Sci-Fi Goblin**: Grants _Fast Learner_ (suppresses _Slow Learner_)
+-   🐾 **Moley The Mole**: Foraging XP bonus
+-   🐶 **Otis The Pug**: Grants _Fast Reader_ (suppresses _Slow Reader_)
+-   🦔 **Pancake The Hedgehog**: Sprinting + Agility XP bonuses
+-   🪵 **Jacques The Beaver**: Carpentry XP bonus
+-   🦝 **Spiffo**: Endurance support while equipped
+-   🫐 **Spiffo Blueberry**: Grants _Low Thirst_ (suppresses _High Thirst_)
+-   🍒 **Spiffo Cherry**: Grants _Organized_ (suppresses _Disorganized_)
+-   🐾 **Spiffo PAWS (Gray)**: Nimble + Blunt + Blade XP bonuses
+-   ❤️ **Spiffo Heart**: First Aid XP bonus
+-   🌈 **Spiffo Rainbow**: Reduces boredom/fatigue and helps endurance
+-   🎅 **Spiffo Santa**: Slowly reduces boredom
+-   🍀 **Spiffo Shamrock**: Aiming + Reloading XP bonuses
+-   🪆 **Substitution Doll**: Grants _Brave_
+-   🐻 **Toy Bear**: Reduces panic/fear
+-   🧸 **Toy Bear (Small)**: Reduced version of Toy Bear effect
 
 ---
 
 ## 📦 Requirements
 
-- This mod requires one of the [**Authentic Z**](https://steamcommunity.com/sharedfiles/filedetails/?id=2335368829) mods that allows attachable items, either:
-- **Authentic Z - Current** (full mod)
-- **AuthenticZBackpacks+** (only the backpacks)
+-   This mod requires one of the [**Authentic Z**](https://steamcommunity.com/sharedfiles/filedetails/?id=2335368829) mods that allows attachable items, either:
+-   **Authentic Z - Current** (full mod)
+-   **AuthenticZBackpacks+** (only the backpacks)
 
 ---
 
 ## 🔗 Links
 
-- [GitHub Repository](https://github.com/dihgg/naninhas)
-- [Steam Workshop Page](https://steamcommunity.com/sharedfiles/filedetails/?id=3624617298)
+-   [GitHub Repository](https://github.com/dihgg/naninhas)
+-   [Steam Workshop Page](https://steamcommunity.com/sharedfiles/filedetails/?id=3624617298)
 
 ---
 

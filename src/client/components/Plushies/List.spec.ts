@@ -31,13 +31,13 @@ jest.mock("@client/components/Plushies/Plushie");
 describe("List.ts", () => {
 	const player = mock<IsoPlayer>({
 		getTraits: jest.fn().mockImplementation(() => ({
-			addAll: jest.fn(),
+			addAll: jest.fn()
 		})),
 		getStats: jest.fn().mockImplementation(() => ({
 			add: jest.fn(),
 			remove: jest.fn(),
 			get: jest.fn(),
-			set: jest.fn(),
+			set: jest.fn()
 		}))
 	});
 	const PLUSHIES = [

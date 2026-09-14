@@ -9,7 +9,6 @@ const archiver = require("archiver");
  * Creates a easy to share zip
  */
 const createZip = async () => {
-
 	if (!(await fs.pathExists(distPath()))) {
 		console.error("Error: dist path does not exist. Please run the build script first.");
 		process.exit(1);
@@ -18,7 +17,7 @@ const createZip = async () => {
 	const { name, zipname } = getInfo();
 	const tempPath = path.join(os.tmpdir(), `${name}-temp`);
 
-	await fs.ensureDir(tempPath);	
+	await fs.ensureDir(tempPath);
 
 	await copyFolder(distPath(), tempPath);
 

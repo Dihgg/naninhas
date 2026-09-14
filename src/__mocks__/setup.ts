@@ -1,5 +1,6 @@
 globalThis.print = console.log;
-(globalThis as unknown as { ZombRand: (max: number) => number }).ZombRand = (max: number) => Math.floor(Math.random() * max);
+(globalThis as unknown as { ZombRand: (max: number) => number }).ZombRand = (max: number) =>
+	Math.floor(Math.random() * max);
 
 (globalThis as unknown as { CharacterStat: unknown }).CharacterStat = {
 	ANGER: "ANGER",
