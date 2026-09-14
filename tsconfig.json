@@ -25,9 +25,7 @@
 			"@shared/utils/*": ["shared/utils/*"],
 			"@server/components/*": ["server/components/*"],
 			"@client/components/*": ["client/components/*"],
-			"@mocks/*": [
-				"__mocks__/*"
-			]
+			"@mocks/*": ["__mocks__/*"]
 		}
 	},
 	"tstl": {

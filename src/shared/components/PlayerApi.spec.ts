@@ -9,9 +9,10 @@ const buildMockStats = () => ({
 	set: jest.fn()
 });
 
-const buildPlayer = (stats: ReturnType<typeof buildMockStats>): IsoPlayer => ({
-	getStats: jest.fn().mockReturnValue(stats)
-} as unknown as IsoPlayer);
+const buildPlayer = (stats: ReturnType<typeof buildMockStats>): IsoPlayer =>
+	({
+		getStats: jest.fn().mockReturnValue(stats)
+	}) as unknown as IsoPlayer;
 
 describe("PlayerApi", () => {
 	it("reduces boredom through CharacterStat", () => {
@@ -51,7 +52,8 @@ describe("PlayerApi", () => {
 	});
 
 	it("throws when CharacterStat API is unavailable", () => {
-		const previousCharacterStat = (globalThis as unknown as { CharacterStat?: unknown }).CharacterStat;
+		const previousCharacterStat = (globalThis as unknown as { CharacterStat?: unknown })
+			.CharacterStat;
 		delete (globalThis as unknown as { CharacterStat?: unknown }).CharacterStat;
 
 		try {
@@ -59,7 +61,8 @@ describe("PlayerApi", () => {
 			const player = new PlayerApi(buildPlayer(stats));
 			expect(() => player.reduceBoredom(0.1)).toThrow();
 		} finally {
-			(globalThis as unknown as { CharacterStat?: unknown }).CharacterStat = previousCharacterStat;
+			(globalThis as unknown as { CharacterStat?: unknown }).CharacterStat =
+				previousCharacterStat;
 		}
 	});
 
@@ -76,7 +79,7 @@ describe("PlayerApi", () => {
 		const stats = buildMockStats();
 		const mockPlayer = {
 			...buildPlayer(stats),
-			getXp: jest.fn().mockReturnValue(mockXpTracker),
+			getXp: jest.fn().mockReturnValue(mockXpTracker)
 		} as unknown as IsoPlayer;
 
 		const playerApi = new PlayerApi(mockPlayer);
@@ -91,7 +94,7 @@ describe("PlayerApi", () => {
 		const stats = buildMockStats();
 		const mockPlayer = {
 			...buildPlayer(stats),
-			getModData: jest.fn().mockReturnValue(mockModData),
+			getModData: jest.fn().mockReturnValue(mockModData)
 		} as unknown as IsoPlayer;
 
 		const playerApi = new PlayerApi(mockPlayer);
@@ -160,27 +163,31 @@ describe("PlayerApi", () => {
 		const stats = buildMockStats();
 		const mockGetCharacterTraits = jest.fn(() => ({
 			get: jest.fn().mockReturnValue(true),
-			getKnownTraits: jest.fn(() => ({ size: () => 0 })),
+			getKnownTraits: jest.fn(() => ({ size: () => 0 }))
 		}));
 
 		const mockPlayer = {
 			...buildPlayer(stats),
-			getCharacterTraits: mockGetCharacterTraits,
+			getCharacterTraits: mockGetCharacterTraits
 		} as unknown as IsoPlayer;
 
 		const playerApi = new PlayerApi(mockPlayer);
 
-		(globalThis as unknown as {
-			CharacterTrait?: { get: (id: unknown) => object };
-			ResourceLocation?: { of: (id: string) => unknown };
-		}).CharacterTrait = {
-			get: jest.fn(() => ({ getName: () => "TestTrait" })),
+		(
+			globalThis as unknown as {
+				CharacterTrait?: { get: (id: unknown) => object };
+				ResourceLocation?: { of: (id: string) => unknown };
+			}
+		).CharacterTrait = {
+			get: jest.fn(() => ({ getName: () => "TestTrait" }))
 		};
 
-		(globalThis as unknown as {
-			ResourceLocation?: { of: (id: string) => unknown };
-		}).ResourceLocation = {
-			of: jest.fn(() => ({})),
+		(
+			globalThis as unknown as {
+				ResourceLocation?: { of: (id: string) => unknown };
+			}
+		).ResourceLocation = {
+			of: jest.fn(() => ({}))
 		};
 
 		const result = playerApi.hasTrait("TestTrait");
@@ -197,22 +204,26 @@ describe("PlayerApi", () => {
 		const mockAddFn = jest.fn();
 		const mockPlayer = {
 			...buildPlayer(stats),
-			getCharacterTraits: jest.fn(() => ({ add: mockAddFn })),
+			getCharacterTraits: jest.fn(() => ({ add: mockAddFn }))
 		} as unknown as IsoPlayer;
 
 		const playerApi = new PlayerApi(mockPlayer);
 
-		(globalThis as unknown as {
-			CharacterTrait?: { get: (id: unknown) => object };
-			ResourceLocation?: { of: (id: string) => unknown };
-		}).CharacterTrait = {
-			get: jest.fn(() => ({ getName: () => "TestTrait" })),
+		(
+			globalThis as unknown as {
+				CharacterTrait?: { get: (id: unknown) => object };
+				ResourceLocation?: { of: (id: string) => unknown };
+			}
+		).CharacterTrait = {
+			get: jest.fn(() => ({ getName: () => "TestTrait" }))
 		};
 
-		(globalThis as unknown as {
-			ResourceLocation?: { of: (id: string) => unknown };
-		}).ResourceLocation = {
-			of: jest.fn(() => ({})),
+		(
+			globalThis as unknown as {
+				ResourceLocation?: { of: (id: string) => unknown };
+			}
+		).ResourceLocation = {
+			of: jest.fn(() => ({}))
 		};
 
 		playerApi.addTrait("TestTrait");
@@ -229,22 +240,26 @@ describe("PlayerApi", () => {
 		const mockRemoveFn = jest.fn();
 		const mockPlayer = {
 			...buildPlayer(stats),
-			getCharacterTraits: jest.fn(() => ({ remove: mockRemoveFn })),
+			getCharacterTraits: jest.fn(() => ({ remove: mockRemoveFn }))
 		} as unknown as IsoPlayer;
 
 		const playerApi = new PlayerApi(mockPlayer);
 
-		(globalThis as unknown as {
-			CharacterTrait?: { get: (id: unknown) => object };
-			ResourceLocation?: { of: (id: string) => unknown };
-		}).CharacterTrait = {
-			get: jest.fn(() => ({ getName: () => "TestTrait" })),
+		(
+			globalThis as unknown as {
+				CharacterTrait?: { get: (id: unknown) => object };
+				ResourceLocation?: { of: (id: string) => unknown };
+			}
+		).CharacterTrait = {
+			get: jest.fn(() => ({ getName: () => "TestTrait" }))
 		};
 
-		(globalThis as unknown as {
-			ResourceLocation?: { of: (id: string) => unknown };
-		}).ResourceLocation = {
-			of: jest.fn(() => ({})),
+		(
+			globalThis as unknown as {
+				ResourceLocation?: { of: (id: string) => unknown };
+			}
+		).ResourceLocation = {
+			of: jest.fn(() => ({}))
 		};
 
 		playerApi.removeTrait("TestTrait");

@@ -10,12 +10,15 @@ import { PlayerApi } from "@shared/components/PlayerApi";
  */
 export class AuthoritativeStateController {
 	/** Returns a sanitized temporary buff state with expiration applied. */
-	static sanitizeTemporaryBuff(temporaryBuff: TemporaryBuffState, nowWorldAgeHours: number): TemporaryBuffState {
+	static sanitizeTemporaryBuff(
+		temporaryBuff: TemporaryBuffState,
+		nowWorldAgeHours: number
+	): TemporaryBuffState {
 		if (
-            !temporaryBuff.activeName ||
-            temporaryBuff.expiresAtWorldAgeHours === undefined ||
-            temporaryBuff.expiresAtWorldAgeHours <= nowWorldAgeHours
-        ) {
+			!temporaryBuff.activeName ||
+			temporaryBuff.expiresAtWorldAgeHours === undefined ||
+			temporaryBuff.expiresAtWorldAgeHours <= nowWorldAgeHours
+		) {
 			return { source: null };
 		}
 
@@ -23,12 +26,11 @@ export class AuthoritativeStateController {
 	}
 
 	/** Builds effective names from attached names plus active temporary buff. */
-	static buildEffectiveNames(attachedNames: string[], temporaryBuff: TemporaryBuffState): string[] {
-		if (
-            !temporaryBuff.activeName ||
-            attachedNames.includes(temporaryBuff.activeName)
-        
-        ) {
+	static buildEffectiveNames(
+		attachedNames: string[],
+		temporaryBuff: TemporaryBuffState
+	): string[] {
+		if (!temporaryBuff.activeName || attachedNames.includes(temporaryBuff.activeName)) {
 			return [...attachedNames];
 		}
 

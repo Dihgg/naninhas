@@ -1,7 +1,11 @@
 /* @noSelfInFile */
 import type { IsoPlayer } from "@asledgehammer/pipewrench";
 import { Commands } from "@constants";
-import type { CommandPayload, SyncAppliedPlushiesPayload, SyncDesiredPlushiesPayload } from "@types";
+import type {
+	CommandPayload,
+	SyncAppliedPlushiesPayload,
+	SyncDesiredPlushiesPayload
+} from "@types";
 import { isKnownPlushie } from "@shared/catalog/PlushieCatalog";
 import { PlayerApi } from "@shared/components/PlayerApi";
 import { CommandPublisher } from "@client/components/CommandPublisher";
@@ -18,7 +22,10 @@ import { CommandPublisher } from "@client/components/CommandPublisher";
  * A monotonically increasing revision counter is used so the server can
  * safely drop stale / out-of-order requests.
  */
-export class PlushieSyncPublisher extends CommandPublisher<SyncDesiredPlushiesPayload, SyncAppliedPlushiesPayload> {
+export class PlushieSyncPublisher extends CommandPublisher<
+	SyncDesiredPlushiesPayload,
+	SyncAppliedPlushiesPayload
+> {
 	private readonly playerApi: PlayerApi;
 
 	/** Names of plushies confirmed as active during the last acknowledged sync. */
@@ -85,7 +92,9 @@ export class PlushieSyncPublisher extends CommandPublisher<SyncDesiredPlushiesPa
 	 */
 	protected onReply(payload: CommandPayload<SyncAppliedPlushiesPayload>): void {
 		if (payload.data.rejectedNames.length > 0) {
-			print(`[Naninhas] ${Commands.SYNC_PLUSHIE.RESPONSE}: rejected names: ${payload.data.rejectedNames.join(", ")}`);
+			print(
+				`[Naninhas] ${Commands.SYNC_PLUSHIE.RESPONSE}: rejected names: ${payload.data.rejectedNames.join(", ")}`
+			);
 		}
 
 		// Update our reference. If a corrective send already updated

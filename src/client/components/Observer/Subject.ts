@@ -1,4 +1,3 @@
-
 import { Observer } from "@client/components/Observer/Observer";
 
 /**

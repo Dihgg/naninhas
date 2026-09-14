@@ -3,7 +3,6 @@ import { isKnownPlushie } from "@shared/catalog/PlushieCatalog";
 import { PlayerApi } from "@shared/components/PlayerApi";
 import { Logger } from "@shared/components/Logger";
 
-const sleepBuffLogger = new Logger("SleepBuff");
 import { extractItemName } from "@shared/utils/ItemType";
 import type { BedType } from "@types";
 import type { IsoPlayer, InventoryItem } from "@asledgehammer/pipewrench";
@@ -16,6 +15,7 @@ export class SleepBuffDetector {
 	private static readonly SCAN_RADIUS = 6;
 	private readonly playerApi: PlayerApi;
 	private readonly publisher: SleepBuffRequestPublisher;
+	private logger = new Logger("SleepBuff");
 	private wasAsleep = false;
 
 	constructor(player: IsoPlayer) {
@@ -178,7 +178,7 @@ export class SleepBuffDetector {
 	}
 
 	private log(message: string): void {
-		sleepBuffLogger.log(["Client", "Detector"], message);
+		this.logger.log(["Client", "Detector"], message);
 	}
 
 	/** Circular distance rule used by the wake-time scan. */

@@ -70,7 +70,15 @@ const generateLocaleTranslations = async (language, locale, outputPath) => {
 		throw new Error("Missing EN source translations at src/translations-json/EN");
 	}
 
-	const targetTranslateDir = path.join(outputPath, "42", "media", "lua", "shared", "Translate", locale);
+	const targetTranslateDir = path.join(
+		outputPath,
+		"42",
+		"media",
+		"lua",
+		"shared",
+		"Translate",
+		locale
+	);
 	await fs.ensureDir(targetTranslateDir);
 
 	const humanReviewedLocaleDir = path.join(process.cwd(), "src", "translations-json", locale);
@@ -89,7 +97,9 @@ const generateLocaleTranslations = async (language, locale, outputPath) => {
 			translations.set(key, value);
 		}
 
-		for (const [key, value] of await loadTranslations(path.join(humanReviewedLocaleDir, file))) {
+		for (const [key, value] of await loadTranslations(
+			path.join(humanReviewedLocaleDir, file)
+		)) {
 			translations.set(key, value);
 		}
 
@@ -141,7 +151,7 @@ const generateLocaleTranslations = async (language, locale, outputPath) => {
 const overlayFlagsOnImages = async (outputPath, locale) => {
 	const posterPaths = [
 		path.join(outputPath, "poster.png"),
-		path.join(outputPath, "42", "poster.png"),
+		path.join(outputPath, "42", "poster.png")
 	];
 	for (const posterPath of posterPaths) {
 		if (await fs.pathExists(posterPath)) {
@@ -179,7 +189,8 @@ const copyRootAssets = async outputPath => {
  */
 const translateDescription = async (name, locale, language) => {
 	try {
-		return (await translate(`Translation package for ${name} in ${locale}.`, { to: language })).text;
+		return (await translate(`Translation package for ${name} in ${locale}.`, { to: language }))
+			.text;
 	} catch (err) {
 		console.error("Error translating description:", err);
 		console.info(`Using fallback description for ${name} - ${locale}`);
@@ -217,9 +228,7 @@ const writeTranslatedModInfo = async (outputPath, locale, language) => {
  */
 const getArgs = () => {
 	const program = new Command();
-	program
-		.argument("<language>", "Language code to translate to (e.g. pt, es, de)")
-		.parse();
+	program.argument("<language>", "Language code to translate to (e.g. pt, es, de)").parse();
 
 	const language = (program.args[0] || "").trim().toLowerCase();
 	if (!language) {
@@ -236,7 +245,7 @@ const run = async () => {
 	await generateLocaleTranslations(language, locale, outputPath);
 	await copyRootAssets(outputPath);
 	await overlayFlagsOnImages(outputPath, locale);
-	await writeTranslatedModInfo(outputPath, locale , language);
+	await writeTranslatedModInfo(outputPath, locale, language);
 
 	console.info(`Translations package generated: ${outputPath}`);
 };

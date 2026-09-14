@@ -10,7 +10,9 @@ jest.mock("@shared/catalog/PlushieCatalog");
 
 describe("Plushie", () => {
 	const triggerEventMock = triggerEvent as jest.MockedFunction<typeof triggerEvent>;
-	const getPlushieDefinitionMock = plushieCatalog.getPlushieDefinition as jest.MockedFunction<typeof plushieCatalog.getPlushieDefinition>;
+	const getPlushieDefinitionMock = plushieCatalog.getPlushieDefinition as jest.MockedFunction<
+		typeof plushieCatalog.getPlushieDefinition
+	>;
 	const addXpMultiplier = jest.fn();
 	const getMultiplier = jest.fn();
 	const addTraitFn = jest.fn();
@@ -39,16 +41,20 @@ describe("Plushie", () => {
 			xpBoostsToAdd: []
 		});
 
-		(globalThis as unknown as {
-			CharacterTrait?: { get: (id: unknown) => typeof runtimeTrait };
-			ResourceLocation?: { of: (id: string) => unknown };
-		}).CharacterTrait = {
+		(
+			globalThis as unknown as {
+				CharacterTrait?: { get: (id: unknown) => typeof runtimeTrait };
+				ResourceLocation?: { of: (id: string) => unknown };
+			}
+		).CharacterTrait = {
 			get: jest.fn(() => runtimeTrait)
 		};
 
-		(globalThis as unknown as {
-			ResourceLocation?: { of: (id: string) => unknown };
-		}).ResourceLocation = {
+		(
+			globalThis as unknown as {
+				ResourceLocation?: { of: (id: string) => unknown };
+			}
+		).ResourceLocation = {
 			of: jest.fn(() => ({ id: "mocked" }))
 		};
 	});
@@ -57,7 +63,7 @@ describe("Plushie", () => {
 		delete (globalThis as unknown as { CharacterTrait?: unknown }).CharacterTrait;
 		delete (globalThis as unknown as { ResourceLocation?: unknown }).ResourceLocation;
 	});
-	
+
 	const mockPlayer = (hasTrait = false) => {
 		const modData: Record<string, unknown> = {};
 		hasTraitFn.mockReturnValue(hasTrait);
@@ -95,18 +101,24 @@ describe("Plushie", () => {
 		});
 
 		expect(() => plushie.update()).not.toThrow();
-		expect(triggerEventMock).toHaveBeenCalledWith(EventsEnum.Update, expect.objectContaining({
-			name: "mocked"
-		}));
+		expect(triggerEventMock).toHaveBeenCalledWith(
+			EventsEnum.Update,
+			expect.objectContaining({
+				name: "mocked"
+			})
+		);
 	});
 
 	describe("subscribe()", () => {
 		it("fires Equipped event with plushie name", () => {
 			const plushie = new TestPlushie({ player: mockPlayer(), name: "mocked" });
 			plushie.subscribe();
-			expect(triggerEventMock).toHaveBeenCalledWith(EventsEnum.Equipped, expect.objectContaining({
-				name: "mocked"
-			}));
+			expect(triggerEventMock).toHaveBeenCalledWith(
+				EventsEnum.Equipped,
+				expect.objectContaining({
+					name: "mocked"
+				})
+			);
 		});
 
 		it("never calls addTrait directly (server-authoritative)", () => {
@@ -150,9 +162,12 @@ describe("Plushie", () => {
 		it("fires Unequipped event with plushie name", () => {
 			const plushie = new TestPlushie({ player: mockPlayer(), name: "mocked" });
 			plushie.unsubscribe();
-			expect(triggerEventMock).toHaveBeenCalledWith(EventsEnum.Unequipped, expect.objectContaining({
-				name: "mocked"
-			}));
+			expect(triggerEventMock).toHaveBeenCalledWith(
+				EventsEnum.Unequipped,
+				expect.objectContaining({
+					name: "mocked"
+				})
+			);
 		});
 
 		it("never calls removeTrait directly (server-authoritative)", () => {

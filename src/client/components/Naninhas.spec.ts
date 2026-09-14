@@ -31,9 +31,7 @@ describe("Naninhas.class", () => {
 							mock({
 								getItem: jest.fn().mockReturnValue(
 									mock<InventoryItem>({
-										getFullType: jest
-											.fn()
-											.mockReturnValue(fullType)
+										getFullType: jest.fn().mockReturnValue(fullType)
 									})
 								)
 							})
@@ -68,9 +66,7 @@ describe("Naninhas.class", () => {
 			jest.spyOn(Subject.prototype, "find")
 				.mockReturnValueOnce(undefined) // First call returns undefined, meaning no plushie is attached
 				.mockReturnValueOnce(mock<Plushie>({ name: "SpiffoSanta" })); // In second call, it finds the plushie
-			const naninhas = new Naninhas(player, [
-				mock({ name: "SpiffoSanta" })
-			]);
+			const naninhas = new Naninhas(player, [mock({ name: "SpiffoSanta" })]);
 			naninhas.update();
 			expect(Subject.prototype.unsubscribe).toHaveBeenCalledWith("SpiffoSanta");
 		});

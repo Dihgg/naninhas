@@ -1,38 +1,38 @@
 import { NetworkCommand } from "@types";
 
 export enum PlushieNames {
-    BORISBADGER = "BorisBadger",
-    DOLL = "Doll",
-    FLAMINGO = "Flamingo",
-    FLUFFYFOOTBUNNY = "FluffyfootBunny",
-    FREDDYFOX = "FreddyFox",
-    FURBERTSQUIRREL = "FurbertSquirrel",
-    GROGUAZ = "GroguAZ",
-    JACQUESBEAVER = "JacquesBeaver",
-    MOLEYMOLE = "MoleyMole",
-    OTISPUG = "OtisPug",
-    PANCAKEHEDGEHOG = "PancakeHedgehog",
-    SPIFFO = "Spiffo",
-    SPIFFOBLUEBERRY = "SpiffoBlueberry",
-    SPIFFOCHERRY = "SpiffoCherry",
-    SPIFFOGREY = "SpiffoGrey",
-    SPIFFOHEART = "SpiffoHeart",
-    SPIFFOPLUSHIERAINBOW = "SpiffoPlushieRainbow",
-    SPIFFOSANTA = "SpiffoSanta",
-    SPIFFOSHAMROCK = "SpiffoShamrock",
-    SUBSTITUTIONDOLL = "SubstitutionDoll",
-    TOYBEAR = "ToyBear",
-    TOYBEARSMALL = "ToyBearSmall",
-};
+	BORISBADGER = "BorisBadger",
+	DOLL = "Doll",
+	FLAMINGO = "Flamingo",
+	FLUFFYFOOTBUNNY = "FluffyfootBunny",
+	FREDDYFOX = "FreddyFox",
+	FURBERTSQUIRREL = "FurbertSquirrel",
+	GROGUAZ = "GroguAZ",
+	JACQUESBEAVER = "JacquesBeaver",
+	MOLEYMOLE = "MoleyMole",
+	OTISPUG = "OtisPug",
+	PANCAKEHEDGEHOG = "PancakeHedgehog",
+	SPIFFO = "Spiffo",
+	SPIFFOBLUEBERRY = "SpiffoBlueberry",
+	SPIFFOCHERRY = "SpiffoCherry",
+	SPIFFOGREY = "SpiffoGrey",
+	SPIFFOHEART = "SpiffoHeart",
+	SPIFFOPLUSHIERAINBOW = "SpiffoPlushieRainbow",
+	SPIFFOSANTA = "SpiffoSanta",
+	SPIFFOSHAMROCK = "SpiffoShamrock",
+	SUBSTITUTIONDOLL = "SubstitutionDoll",
+	TOYBEAR = "ToyBear",
+	TOYBEARSMALL = "ToyBearSmall"
+}
 
 export enum EventsEnum {
-    /** Event fired when a plushie is equipped. */
-    Equipped = "NaninhasEquipped",
-    /** Event fired when a plushie is unequipped. */
-    Unequipped = "NaninhasUnequipped",
-    /** Event fired when the player updates */
-    Update = "NaninhasUpdate"
-};
+	/** Event fired when a plushie is equipped. */
+	Equipped = "NaninhasEquipped",
+	/** Event fired when a plushie is unequipped. */
+	Unequipped = "NaninhasUnequipped",
+	/** Event fired when the player updates */
+	Update = "NaninhasUpdate"
+}
 
 /**
  * PZ networking module name used as the first argument of
@@ -57,12 +57,12 @@ export const PROTOCOL_SCHEMA_VERSION = 2;
  * while the payload schema lives in `CommandPayload<T>`.
  */
 export const Commands: Record<string, NetworkCommand> = {
-    SYNC_PLUSHIE: {
-        REQUEST: "SyncPlushie.Request",
-        RESPONSE: "SyncPlushie.Response"
-    },
-    SYNC_SLEEP_BUFF: {
-        REQUEST: "SyncSleepBuff.Request",
-        RESPONSE: "SyncSleepBuff.Response"
-    }
+	SYNC_PLUSHIE: {
+		REQUEST: "SyncPlushie.Request",
+		RESPONSE: "SyncPlushie.Response"
+	},
+	SYNC_SLEEP_BUFF: {
+		REQUEST: "SyncSleepBuff.Request",
+		RESPONSE: "SyncSleepBuff.Response"
+	}
 };

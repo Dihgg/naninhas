@@ -180,7 +180,6 @@ jobs:
             needs.prepare_release.result == 'success' &&
             (needs.build_translation_zips.result == 'success' || needs.build_translation_zips.result == 'skipped')
         runs-on: ubuntu-latest
-
         steps:
             - name: Checkout repository
               uses: actions/checkout@v4

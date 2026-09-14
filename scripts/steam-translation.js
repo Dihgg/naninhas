@@ -58,14 +58,9 @@ const getTranslationWorkshopMetadata = async (language, locale) => {
 					: typeof value.id === "string"
 						? value.id.trim()
 						: "";
-			const excerpt =
-				typeof value.excerpt === "string"
-					? value.excerpt.trim()
-					: undefined;
+			const excerpt = typeof value.excerpt === "string" ? value.excerpt.trim() : undefined;
 			const description =
-				typeof value.description === "string"
-					? value.description.trim()
-					: undefined;
+				typeof value.description === "string" ? value.description.trim() : undefined;
 
 			if (id) {
 				return { id, excerpt, description };
@@ -85,7 +80,9 @@ const getTranslationWorkshopMetadata = async (language, locale) => {
  */
 const getArgs = () => {
 	const program = new Command();
-	program.argument("<language>", "Language code to prepare steam translation (e.g. pt, es, de)").parse();
+	program
+		.argument("<language>", "Language code to prepare steam translation (e.g. pt, es, de)")
+		.parse();
 
 	const language = (program.args[0] || "").trim().toLowerCase();
 	if (!language) {
@@ -133,7 +130,9 @@ const ensureTranslatedPackage = async (language, locale, packageName) => {
 		return localePackagePath;
 	}
 
-	console.info(`Translation package not found at ${localePackagePath}. Running translate script...`);
+	console.info(
+		`Translation package not found at ${localePackagePath}. Running translate script...`
+	);
 	await execa("npm", ["run", "translate", "--", language], { stdio: "inherit" });
 
 	if (!(await fs.pathExists(localePackagePath))) {
@@ -185,7 +184,10 @@ const getLocalizedWorkshopDescription = async (workshopMdPath, locale, language)
 			descriptionBbcode: markdownToBbcode(translatedContent)
 		};
 	} catch (err) {
-		console.warn("Could not translate workshop markdown content; using source description.", err);
+		console.warn(
+			"Could not translate workshop markdown content; using source description.",
+			err
+		);
 		return {
 			extracted,
 			descriptionBbcode: markdownToBbcode(content)
@@ -203,17 +205,26 @@ const getLocalizedWorkshopDescription = async (workshopMdPath, locale, language)
 const generateTranslationWorkshopTxt = async (language, locale, workshopMdPath, outputTxtPath) => {
 	const { version, name } = getInfo();
 	const translationWorkshopMetadata = await getTranslationWorkshopMetadata(language, locale);
-	const { extracted, descriptionBbcode: generatedDescriptionBbcode } = await getLocalizedWorkshopDescription(workshopMdPath, locale, language);
+	const { extracted, descriptionBbcode: generatedDescriptionBbcode } =
+		await getLocalizedWorkshopDescription(workshopMdPath, locale, language);
 	const descriptionBbcode = translationWorkshopMetadata.description || generatedDescriptionBbcode;
-	const excerpt = await getTranslationExcerpt(name, translationWorkshopMetadata.excerpt, language);
+	const excerpt = await getTranslationExcerpt(
+		name,
+		translationWorkshopMetadata.excerpt,
+		language
+	);
 
 	const titleSuffix = `(${locale} Translation)`;
-	const title = extracted.title && extracted.title.includes(titleSuffix)
-		? extracted.title
-		: `${extracted.title} ${titleSuffix}`.trim();
+	const title =
+		extracted.title && extracted.title.includes(titleSuffix)
+			? extracted.title
+			: `${extracted.title} ${titleSuffix}`.trim();
 
 	const description = `[quote]${excerpt}[/quote]${descriptionBbcode}`;
-	const modId = translationWorkshopMetadata.id !== "0" ? `${name.toLowerCase()}-${locale.toLowerCase()}` : name;
+	const modId =
+		translationWorkshopMetadata.id !== "0"
+			? `${name.toLowerCase()}-${locale.toLowerCase()}`
+			: name;
 	const workshopTxt = [
 		`version=${version}`,
 		`id=${translationWorkshopMetadata.id}`,

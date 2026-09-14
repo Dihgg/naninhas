@@ -7,25 +7,25 @@ import { mock } from "jest-mock-extended";
 jest.mock("@constants", () => ({
 	PlushieNames: {
 		ALPHA: "MockAlpha",
-		BETA: "MockBeta",
+		BETA: "MockBeta"
 	}
 }));
 
 describe("TooltipPatcher", () => {
 	const scriptManagerMock = mock<ScriptManager>();
-	
-	it('should instantiate the TooltipPatcher', () => {
+
+	it("should instantiate the TooltipPatcher", () => {
 		const patcher = new TooltipPatcher();
 		expect(patcher).toBeInstanceOf(TooltipPatcher);
 	});
 
-	it.each([
-		'MockModule1',
-		'MockModule2',
-	])('should call getItem for each plushie and module %s', (moduleName) => {
-		const getItemSpy = jest.spyOn(scriptManagerMock, 'getItem');
-		new TooltipPatcher(scriptManagerMock, [moduleName]);
-		expect(getItemSpy).toHaveBeenCalledWith(`${moduleName}.MockAlpha`);
-		expect(getItemSpy).toHaveBeenCalledWith(`${moduleName}.MockBeta`);
-	});
+	it.each(["MockModule1", "MockModule2"])(
+		"should call getItem for each plushie and module %s",
+		moduleName => {
+			const getItemSpy = jest.spyOn(scriptManagerMock, "getItem");
+			new TooltipPatcher(scriptManagerMock, [moduleName]);
+			expect(getItemSpy).toHaveBeenCalledWith(`${moduleName}.MockAlpha`);
+			expect(getItemSpy).toHaveBeenCalledWith(`${moduleName}.MockBeta`);
+		}
+	);
 });

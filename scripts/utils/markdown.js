@@ -139,34 +139,36 @@ const extractWorkshopArray = value => {
  * @typedef { Record<string, string | number | boolean | string[]> } Extracted
  */
 /**
- * 
- * @param {string} markdownPath 
- * @param {Record<string, "string" | "number" | "boolean" | "array">} schema 
+ *
+ * @param {string} markdownPath
+ * @param {Record<string, "string" | "number" | "boolean" | "array">} schema
  * @return {{ extracted: Extracted, content: string }}
  */
 const extractFrontMatterData = (markdownPath, schema) => {
-    /** @type {Extracted} */
-    const extracted = {};
-    const { data, content } = matter(markdownPath);
-    for (const [key, type] of Object.entries(schema)) {
-        switch (type) {
-            case "string":
-            case "number":
-                extracted[key] = ["string", "number"].includes(typeof data[key]) ? String(data[key]).trim() : "";
-                break;
-            case "boolean":
-                extracted[key] = typeof data[key] === "boolean" ? Boolean(data[key]) : false;
-                break;
-            case "array":
-                extracted[key] = extractWorkshopArray(data[key]);
-                break;
-            default:
-                extracted[key] = null;
-                break;
-        }
-    }
-    return { extracted, content };
-}
+	/** @type {Extracted} */
+	const extracted = {};
+	const { data, content } = matter(markdownPath);
+	for (const [key, type] of Object.entries(schema)) {
+		switch (type) {
+			case "string":
+			case "number":
+				extracted[key] = ["string", "number"].includes(typeof data[key])
+					? String(data[key]).trim()
+					: "";
+				break;
+			case "boolean":
+				extracted[key] = typeof data[key] === "boolean" ? Boolean(data[key]) : false;
+				break;
+			case "array":
+				extracted[key] = extractWorkshopArray(data[key]);
+				break;
+			default:
+				extracted[key] = null;
+				break;
+		}
+	}
+	return { extracted, content };
+};
 
 module.exports = {
 	markdownToBbcode,

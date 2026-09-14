@@ -44,7 +44,10 @@ export class PlushieReconciler {
 	 * @param newActivePlushieNames - The verified list of plushies to make active.
 	 * @returns A plan describing what to change and the resulting new state.
 	 */
-	static reconcile(currentState: NaninhasAuthoritativeState, newActivePlushieNames: string[]): ReconcilePlan {
+	static reconcile(
+		currentState: NaninhasAuthoritativeState,
+		newActivePlushieNames: string[]
+	): ReconcilePlan {
 		// -----------------------------------------------------------------------
 		// 1. Build desired aggregate from the new active set
 		// -----------------------------------------------------------------------
@@ -55,7 +58,7 @@ export class PlushieReconciler {
 		for (const name of newActivePlushieNames) {
 			const definitions = getPlushieDefinition(name);
 			if (!definitions) continue;
-			
+
 			const { traitsToAdd, traitsToSuppress, xpBoostsToAdd } = definitions;
 
 			for (const trait of traitsToAdd) {
@@ -65,7 +68,7 @@ export class PlushieReconciler {
 			for (const trait of traitsToSuppress) {
 				desiredSuppressedTraits.add(trait);
 			}
-			
+
 			for (const boost of xpBoostsToAdd) {
 				const key = `${name}:${boost.perk}`;
 				desiredXpBoosts[key] = boost.value;
@@ -79,9 +82,15 @@ export class PlushieReconciler {
 		const currentSuppressedTraits = new Set<string>(currentState.suppressedTraits);
 
 		const traitsToAdd = [...desiredAddedTraits].filter(t => !currentAddedTraits.has(t));
-		const traitsToRemove = [...currentAddedTraits].filter((t): t is string => !desiredAddedTraits.has(t));
-		const traitsToSuppress = [...desiredSuppressedTraits].filter(t => !currentSuppressedTraits.has(t));
-		const traitsToRestore = [...currentSuppressedTraits].filter((t): t is string => !desiredSuppressedTraits.has(t));
+		const traitsToRemove = [...currentAddedTraits].filter(
+			(t): t is string => !desiredAddedTraits.has(t)
+		);
+		const traitsToSuppress = [...desiredSuppressedTraits].filter(
+			t => !currentSuppressedTraits.has(t)
+		);
+		const traitsToRestore = [...currentSuppressedTraits].filter(
+			(t): t is string => !desiredSuppressedTraits.has(t)
+		);
 
 		// XP deltas: add new boosts (positive delta) and remove dropped boosts (negative delta)
 		const xpBoostDeltas: Record<string, number> = {};
