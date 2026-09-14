@@ -19,7 +19,11 @@ describe("server Naninhas event registration", () => {
 			SleepBuffCommandHandler: sleepHandlerCtor
 		}));
 		jest.doMock("@asledgehammer/pipewrench-events", () => ({
-			onClientCommand: { addListener }
+			onClientCommand: { addListener },
+			everyOneMinute: { addListener: jest.fn() }
+		}));
+		jest.doMock("@asledgehammer/pipewrench", () => ({
+			getOnlinePlayers: jest.fn(() => ({ size: () => 0, get: jest.fn() }))
 		}));
 
 		require("./Naninhas");
@@ -32,7 +36,11 @@ describe("server Naninhas event registration", () => {
 			(module: string, command: string, player: unknown, args: unknown) => void
 		];
 		const player = { getUsername: jest.fn(() => "server-player") };
-		const args = { revision: 7, schemaVersion: PROTOCOL_SCHEMA_VERSION, data: { desiredNames: ["Doll"] } };
+		const args = {
+			revision: 7,
+			schemaVersion: PROTOCOL_SCHEMA_VERSION,
+			data: { desiredNames: ["Doll"] }
+		};
 
 		listener(NETWORK_MODULE, Commands.SYNC_PLUSHIE.REQUEST, player, args);
 		expect(plushieHandlerFn).toHaveBeenCalledWith({
@@ -61,7 +69,11 @@ describe("server Naninhas event registration", () => {
 			SleepBuffCommandHandler: jest.fn(() => ({ handler: sleepHandlerFn }))
 		}));
 		jest.doMock("@asledgehammer/pipewrench-events", () => ({
-			onClientCommand: { addListener }
+			onClientCommand: { addListener },
+			everyOneMinute: { addListener: jest.fn() }
+		}));
+		jest.doMock("@asledgehammer/pipewrench", () => ({
+			getOnlinePlayers: jest.fn(() => ({ size: () => 0, get: jest.fn() }))
 		}));
 
 		require("./Naninhas");
@@ -76,6 +88,36 @@ describe("server Naninhas event registration", () => {
 		expect(sleepHandlerFn).not.toHaveBeenCalled();
 	});
 
+	it("checks every online player for expired temporary buffs each minute", () => {
+		const expireTemporaryBuff = jest.fn();
+		const minuteAddListener = jest.fn();
+		const players = [{ id: 1 }, { id: 2 }];
+
+		jest.doMock("@server/components/NaninhasCommandHandler", () => ({
+			NaninhasCommandHandler: jest.fn(() => ({ handler: jest.fn(), expireTemporaryBuff }))
+		}));
+		jest.doMock("@server/components/SleepBuffCommandHandler", () => ({
+			SleepBuffCommandHandler: jest.fn(() => ({ handler: jest.fn() }))
+		}));
+		jest.doMock("@asledgehammer/pipewrench-events", () => ({
+			onClientCommand: { addListener: jest.fn() },
+			everyOneMinute: { addListener: minuteAddListener }
+		}));
+		jest.doMock("@asledgehammer/pipewrench", () => ({
+			getOnlinePlayers: jest.fn(() => ({
+				size: () => players.length,
+				get: (index: number) => players[index]
+			}))
+		}));
+
+		require("./Naninhas");
+		const [listener] = minuteAddListener.mock.calls[0] as [() => void];
+		listener();
+
+		expect(expireTemporaryBuff).toHaveBeenNthCalledWith(1, players[0]);
+		expect(expireTemporaryBuff).toHaveBeenNthCalledWith(2, players[1]);
+	});
+
 	it("forwards same-module non-matching commands so handler can filter", () => {
 		const handlerFn = jest.fn();
 		const sleepHandlerFn = jest.fn();
@@ -88,7 +130,11 @@ describe("server Naninhas event registration", () => {
 			SleepBuffCommandHandler: jest.fn(() => ({ handler: sleepHandlerFn }))
 		}));
 		jest.doMock("@asledgehammer/pipewrench-events", () => ({
-			onClientCommand: { addListener }
+			onClientCommand: { addListener },
+			everyOneMinute: { addListener: jest.fn() }
+		}));
+		jest.doMock("@asledgehammer/pipewrench", () => ({
+			getOnlinePlayers: jest.fn(() => ({ size: () => 0, get: jest.fn() }))
 		}));
 
 		require("./Naninhas");

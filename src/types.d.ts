@@ -2,7 +2,7 @@ import type { IsoPlayer, KahluaTable, Perk } from "@asledgehammer/pipewrench";
 
 export type PerkBoost = {
 	perk: Perk;
-	value: number
+	value: number;
 };
 
 export type PlushieProps = {
@@ -95,8 +95,10 @@ export type SyncSleepBuffAppliedPayload = {
  * schema mismatches across client reconnects.
  */
 export type ServerProtocolState = {
-	/** The last `revision` value accepted from this client. */
+	/** Legacy aggregate revision retained for save compatibility. */
 	lastClientRevision: number;
+	/** Last accepted revision keyed by request command name. */
+	lastClientRevisionByCommand?: Record<string, number>;
 	/** The `schemaVersion` that was in effect when state was last written. */
 	lastSchemaVersion: number;
 };

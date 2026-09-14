@@ -10,7 +10,7 @@ import type { BedType } from "@types";
 export class PlayerApi {
 	/** The underlying IsoPlayer instance. */
 	private readonly _player: IsoPlayer;
-	
+
 	/**
 	 * Creates a new PlayerApi instance for the given player.
 	 * @param _player The IsoPlayer to wrap
@@ -28,7 +28,7 @@ export class PlayerApi {
 
 	/** Returns the underlying Stats instance.
 	 * @returns The Stats object for the player
-	*/
+	 */
 	private get stats() {
 		return this.player.getStats();
 	}
@@ -66,11 +66,23 @@ export class PlayerApi {
 		return this.player.isAsleep();
 	}
 
+	public getVehicle(): ReturnType<IsoPlayer["getVehicle"]> {
+		return this.player.getVehicle();
+	}
+
+	public getSquare(): ReturnType<IsoPlayer["getSquare"]> {
+		return this.player.getSquare();
+	}
+
+	public getCell(): ReturnType<IsoPlayer["getCell"]> {
+		return this.player.getCell();
+	}
+
 	/** Returns the sleep-bed type classified by vanilla sleep flow. */
 	public getBedType(): BedType {
 		const raw = this.player.getBedType?.() ?? "averageBed";
-		if (raw === "badBed" || raw === "averageBed" || raw === "goodBed" || raw === "floor") {
-			return raw;
+		if (["badBed", "averageBed", "goodBed", "floor"].includes(raw)) {
+			return raw as BedType;
 		}
 		if (raw.includes("badBed")) return "badBed";
 		if (raw.includes("goodBed")) return "goodBed";

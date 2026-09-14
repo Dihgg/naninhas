@@ -9,6 +9,9 @@ import type {
 } from "@types";
 import { isKnownPlushie } from "@shared/catalog/PlushieCatalog";
 import { PlayerApi } from "@shared/components/PlayerApi";
+import { Logger } from "@shared/components/Logger";
+
+const sleepBuffLogger = new Logger("SleepBuff");
 import { AuthoritativeStateController } from "@server/components/AuthoritativeStateController";
 import { CommandHandler } from "./CommandHandler";
 
@@ -18,16 +21,61 @@ import { CommandHandler } from "./CommandHandler";
  * Receives client sync requests, validates them, applies reconciled effects to
  * the live player, and sends a confirmed reply back to the client.
  */
-export class NaninhasCommandHandler extends CommandHandler<NaninhasAuthoritativeState, SyncDesiredPlushiesPayload, SyncAppliedPlushiesPayload> {
+export class NaninhasCommandHandler extends CommandHandler<
+	NaninhasAuthoritativeState,
+	SyncDesiredPlushiesPayload,
+	SyncAppliedPlushiesPayload
+> {
 	/**
 	 * Configures the Naninhas multiplayer command flow.
 	 */
 	constructor() {
-		super(
-			NETWORK_MODULE,
-			Commands.SYNC_PLUSHIE,
-			{ activePlushieNames: [], addedTraits: [], suppressedTraits: [], xpBoosts: {}, temporaryBuff: { source: null } }
+		super(NETWORK_MODULE, Commands.SYNC_PLUSHIE, {
+			activePlushieNames: [],
+			addedTraits: [],
+			suppressedTraits: [],
+			xpBoosts: {},
+			temporaryBuff: { source: null }
+		});
+	}
+
+	/** Removes an expired temporary buff during the server minute tick. */
+	public expireTemporaryBuff(player: IsoPlayer): boolean {
+		const playerApi = new PlayerApi(player);
+		const serverModData = this.getModData(playerApi.player);
+		const { authoritative } = serverModData;
+		const now = playerApi.getWorldAgeHours();
+		const activeTemporaryBuff = authoritative.temporaryBuff;
+		const temporaryBuff = AuthoritativeStateController.sanitizeTemporaryBuff(
+			authoritative.temporaryBuff,
+			now
 		);
+
+		if (activeTemporaryBuff.source !== null) {
+			sleepBuffLogger.log(
+				["Server", "Expiry"],
+				`player=${player.getUsername()}; worldAge=${now}; active=${activeTemporaryBuff.activeName ?? "unknown"}; expiresAt=${activeTemporaryBuff.expiresAtWorldAgeHours ?? "missing"}; status=${temporaryBuff.source === null ? "expired" : "active"}`
+			);
+		}
+
+		if (temporaryBuff.source !== null || authoritative.temporaryBuff.source === null) {
+			return false;
+		}
+
+		const attachedNames = this.getKnownAttachedNames(playerApi);
+		serverModData.authoritative = AuthoritativeStateController.applyDesiredState(
+			playerApi,
+			authoritative,
+			attachedNames,
+			attachedNames,
+			temporaryBuff
+		);
+		sleepBuffLogger.log(
+			["Server", "Expiry"],
+			`player=${player.getUsername()}; removed=${activeTemporaryBuff.activeName ?? "unknown"}; remainingAttached=${Logger.formatList(attachedNames)}`
+		);
+
+		return true;
 	}
 
 	/**
@@ -44,7 +92,10 @@ export class NaninhasCommandHandler extends CommandHandler<NaninhasAuthoritative
 	 * @param player The player sending the sync request
 	 * @param payload The deserialized payload sent by the client via `sendClientCommand`
 	 */
-	protected onCommand(player: IsoPlayer, payload: CommandPayload<SyncDesiredPlushiesPayload>): void {
+	protected onCommand(
+		player: IsoPlayer,
+		payload: CommandPayload<SyncDesiredPlushiesPayload>
+	): void {
 		// -----------------------------------------------------------------------
 		// 1. Load or initialize server state
 		// -----------------------------------------------------------------------
@@ -73,8 +124,14 @@ export class NaninhasCommandHandler extends CommandHandler<NaninhasAuthoritative
 		// 3. Reconcile and apply
 		// -----------------------------------------------------------------------
 		const now = playerApi.getWorldAgeHours();
-		const nextTemporaryBuff = AuthoritativeStateController.sanitizeTemporaryBuff(authoritative.temporaryBuff, now);
-		const desiredEffectiveNames = AuthoritativeStateController.buildEffectiveNames(validNames, nextTemporaryBuff);
+		const nextTemporaryBuff = AuthoritativeStateController.sanitizeTemporaryBuff(
+			authoritative.temporaryBuff,
+			now
+		);
+		const desiredEffectiveNames = AuthoritativeStateController.buildEffectiveNames(
+			validNames,
+			nextTemporaryBuff
+		);
 		const nextState = AuthoritativeStateController.applyDesiredState(
 			playerApi,
 			authoritative,
@@ -104,7 +161,10 @@ export class NaninhasCommandHandler extends CommandHandler<NaninhasAuthoritative
 	 * @param player Player who sent the stale request.
 	 * @param payload Stale request envelope being rejected.
 	 */
-	protected onStaleCommand(player: IsoPlayer, payload: CommandPayload<SyncDesiredPlushiesPayload>): void {
+	protected onStaleCommand(
+		player: IsoPlayer,
+		payload: CommandPayload<SyncDesiredPlushiesPayload>
+	): void {
 		const reply: SyncAppliedPlushiesPayload = {
 			appliedNames: [],
 			rejectedNames: payload.data.desiredNames
@@ -118,12 +178,25 @@ export class NaninhasCommandHandler extends CommandHandler<NaninhasAuthoritative
 	 * @param player Player who sent the incompatible request.
 	 * @param payload Rejected request envelope being rejected.
 	 */
-	protected onUnsupportedSchema(player: IsoPlayer, payload: CommandPayload<SyncDesiredPlushiesPayload>): void {
+	protected onUnsupportedSchema(
+		player: IsoPlayer,
+		payload: CommandPayload<SyncDesiredPlushiesPayload>
+	): void {
 		const reply: SyncAppliedPlushiesPayload = {
 			appliedNames: [],
 			rejectedNames: payload.data.desiredNames
 		};
 		this.sendResponse(player, payload, reply);
+	}
+
+	private getKnownAttachedNames(playerApi: PlayerApi): string[] {
+		const names: string[] = [];
+		for (const name of playerApi.getAttachedItemNames()) {
+			if (isKnownPlushie(name)) {
+				names.push(name);
+			}
+		}
+		return names;
 	}
 
 	/**
@@ -134,9 +207,14 @@ export class NaninhasCommandHandler extends CommandHandler<NaninhasAuthoritative
 	 * @param authoritativeData Partially populated persisted authoritative state.
 	 * @returns Current authoritative state shape for runtime use.
 	 */
-	protected migrateAuthoritativeData(persistedVersion: number, authoritativeData: unknown): NaninhasAuthoritativeState {
+	protected migrateAuthoritativeData(
+		persistedVersion: number,
+		authoritativeData: unknown
+	): NaninhasAuthoritativeState {
 		if (persistedVersion < PROTOCOL_SCHEMA_VERSION) {
-			print(`[Naninhas] Migrating server mod data from schema v${persistedVersion} to v${PROTOCOL_SCHEMA_VERSION}`);
+			print(
+				`[Naninhas] Migrating server mod data from schema v${persistedVersion} to v${PROTOCOL_SCHEMA_VERSION}`
+			);
 			//TODO: Add migration logic here when a breaking schema change is introduced:
 			// if (persistedVersion < 2) { /* reshape fields for schema 2 */ }
 			// if (persistedVersion < 3) { /* reshape fields for schema 3 */ }

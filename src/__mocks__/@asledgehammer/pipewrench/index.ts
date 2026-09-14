@@ -8,6 +8,8 @@ export const addXPBoost = jest.fn();
 
 export const sendClientCommand = jest.fn();
 export const sendServerCommand = jest.fn();
+export const getOnlinePlayers = jest.fn(() => ({ size: () => 0, get: jest.fn() }));
+export const isDebugEnabled = jest.fn(() => false);
 
 /** Default: single-player. Override per-test with mockReturnValue(true) to simulate MP client. */
 export const isClient = jest.fn().mockReturnValue(false);
@@ -17,9 +19,9 @@ export const isServer = jest.fn().mockReturnValue(false);
 export const TraitFactory = {
 	addTrait: jest.fn(() =>
 		mock<Trait>({
-			addXPBoost,
+			addXPBoost
 		})
-	),
+	)
 };
 
 export const getCore = jest.fn().mockImplementation(() => ({
@@ -34,13 +36,13 @@ export class GameTime {
 
 export const Perks = {
 	Woodwork: "Woodwork",
-	Aiming: "Aiming",
+	Aiming: "Aiming"
 };
 
 (globalThis as any).string = {
 	match: (version: string) => {
 		const [, major, minor] = version.match(/(\d+)\.(\d+)/) ?? [];
-		return [ major, minor ];
+		return [major, minor];
 	}
 };
 

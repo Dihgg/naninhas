@@ -31,9 +31,10 @@ const defaultAuthoritativeState = (): TestAuthoritativeState => ({
 	tags: []
 });
 
-const makePlayer = (username = "player"): IsoPlayer => ({
-	getUsername: jest.fn().mockReturnValue(username)
-} as unknown as IsoPlayer);
+const makePlayer = (username = "player"): IsoPlayer =>
+	({
+		getUsername: jest.fn().mockReturnValue(username)
+	}) as unknown as IsoPlayer;
 
 const makePayload = (
 	revision: number,
@@ -44,20 +45,27 @@ const makePayload = (
 	data
 });
 
-class TestCommandHandler extends CommandHandler<TestAuthoritativeState, TestRequestPayload, TestResponsePayload> {
+class TestCommandHandler extends CommandHandler<
+	TestAuthoritativeState,
+	TestRequestPayload,
+	TestResponsePayload
+> {
 	public readonly onCommandMock = jest.fn();
 	public readonly onStaleCommandMock = jest.fn();
 	public readonly onUnsupportedSchemaMock = jest.fn();
 
-	constructor() {
-		super(TEST_MODULE, TEST_COMMAND, defaultAuthoritativeState());
+	constructor(command: NetworkCommand = TEST_COMMAND) {
+		super(TEST_MODULE, command, defaultAuthoritativeState());
 	}
 
 	public loadModData(player: IsoPlayer): ServerModData<TestAuthoritativeState> {
 		return this.getModData(player);
 	}
 
-	public migrateForTest(persistedVersion: number, authoritativeData: unknown): TestAuthoritativeState {
+	public migrateForTest(
+		persistedVersion: number,
+		authoritativeData: unknown
+	): TestAuthoritativeState {
 		return this.migrateAuthoritativeData(persistedVersion, authoritativeData);
 	}
 
@@ -69,15 +77,24 @@ class TestCommandHandler extends CommandHandler<TestAuthoritativeState, TestRequ
 		this.sendResponse(player, payload, data);
 	}
 
-	protected override onCommand(player: IsoPlayer, payload: CommandPayload<TestRequestPayload>): void {
+	protected override onCommand(
+		player: IsoPlayer,
+		payload: CommandPayload<TestRequestPayload>
+	): void {
 		this.onCommandMock(player, payload);
 	}
 
-	protected override onStaleCommand(player: IsoPlayer, payload: CommandPayload<TestRequestPayload>): void {
+	protected override onStaleCommand(
+		player: IsoPlayer,
+		payload: CommandPayload<TestRequestPayload>
+	): void {
 		this.onStaleCommandMock(player, payload);
 	}
 
-	protected override onUnsupportedSchema(player: IsoPlayer, payload: CommandPayload<TestRequestPayload>): void {
+	protected override onUnsupportedSchema(
+		player: IsoPlayer,
+		payload: CommandPayload<TestRequestPayload>
+	): void {
 		this.onUnsupportedSchemaMock(player, payload);
 	}
 
@@ -93,24 +110,36 @@ class TestCommandHandler extends CommandHandler<TestAuthoritativeState, TestRequ
 	}
 }
 
-class DefaultStaleCommandHandler extends CommandHandler<TestAuthoritativeState, TestRequestPayload, TestResponsePayload> {
+class DefaultStaleCommandHandler extends CommandHandler<
+	TestAuthoritativeState,
+	TestRequestPayload,
+	TestResponsePayload
+> {
 	public readonly onCommandMock = jest.fn();
 
 	constructor() {
 		super(TEST_MODULE, TEST_COMMAND, defaultAuthoritativeState());
 	}
 
-	public migrateForTest(persistedVersion: number, authoritativeData: unknown): TestAuthoritativeState {
+	public migrateForTest(
+		persistedVersion: number,
+		authoritativeData: unknown
+	): TestAuthoritativeState {
 		return this.migrateAuthoritativeData(persistedVersion, authoritativeData);
 	}
 
-	protected override onCommand(player: IsoPlayer, payload: CommandPayload<TestRequestPayload>): void {
+	protected override onCommand(
+		player: IsoPlayer,
+		payload: CommandPayload<TestRequestPayload>
+	): void {
 		this.onCommandMock(player, payload);
 	}
 }
 
 describe("CommandHandler", () => {
-	const sendServerCommandMock = sendServerCommand as jest.MockedFunction<typeof sendServerCommand>;
+	const sendServerCommandMock = sendServerCommand as jest.MockedFunction<
+		typeof sendServerCommand
+	>;
 	const { ModData } = jest.requireMock("@shared/components/ModData");
 
 	beforeEach(() => {
@@ -152,6 +181,7 @@ describe("CommandHandler", () => {
 		const serverData: ServerModData<TestAuthoritativeState> = {
 			protocol: {
 				lastClientRevision: 4,
+				lastClientRevisionByCommand: { [TEST_COMMAND.REQUEST]: 4 },
 				lastSchemaVersion: 0
 			},
 			authoritative: {
@@ -173,13 +203,54 @@ describe("CommandHandler", () => {
 
 		expect(handler.onCommandMock).toHaveBeenCalledWith(player, payload);
 		expect(serverData.protocol.lastClientRevision).toBe(1);
+		expect(serverData.protocol.lastClientRevisionByCommand?.[TEST_COMMAND.REQUEST]).toBe(1);
 		expect(serverData.protocol.lastSchemaVersion).toBe(PROTOCOL_SCHEMA_VERSION);
 		expect(handler.onStaleCommandMock).not.toHaveBeenCalled();
 		expect(handler.onUnsupportedSchemaMock).not.toHaveBeenCalled();
 	});
 
+	it("tracks independent revision sequences for different commands", () => {
+		const otherCommand: NetworkCommand = {
+			REQUEST: "OtherTest.Request",
+			RESPONSE: "OtherTest.Response"
+		};
+		const firstHandler = new TestCommandHandler(TEST_COMMAND);
+		const secondHandler = new TestCommandHandler(otherCommand);
+		const serverData: ServerModData<TestAuthoritativeState> = {
+			protocol: {
+				lastClientRevision: 0,
+				lastClientRevisionByCommand: {},
+				lastSchemaVersion: PROTOCOL_SCHEMA_VERSION
+			},
+			authoritative: defaultAuthoritativeState()
+		};
+		ModData.mockImplementation(() => ({ data: serverData }));
+
+		firstHandler.handler({
+			module: TEST_MODULE,
+			command: TEST_COMMAND.REQUEST,
+			player: makePlayer(),
+			args: makePayload(8)
+		});
+		secondHandler.handler({
+			module: TEST_MODULE,
+			command: otherCommand.REQUEST,
+			player: makePlayer(),
+			args: makePayload(1)
+		});
+
+		expect(firstHandler.onCommandMock).toHaveBeenCalledTimes(1);
+		expect(secondHandler.onCommandMock).toHaveBeenCalledTimes(1);
+		expect(serverData.protocol.lastClientRevisionByCommand).toEqual({
+			[TEST_COMMAND.REQUEST]: 8,
+			[otherCommand.REQUEST]: 1
+		});
+	});
+
 	it("rejects unsupported schema versions before loading modData", () => {
-		const printSpy = jest.spyOn(globalThis as typeof globalThis & { print: typeof print }, "print").mockImplementation(() => undefined);
+		const printSpy = jest
+			.spyOn(globalThis as typeof globalThis & { print: typeof print }, "print")
+			.mockImplementation(() => undefined);
 		const handler = new TestCommandHandler();
 		const player = makePlayer("SchemaMismatchPlayer");
 		const payload = {
@@ -206,11 +277,14 @@ describe("CommandHandler", () => {
 	});
 
 	it("rejects stale revisions and calls the stale hook", () => {
-		const printSpy = jest.spyOn(globalThis as typeof globalThis & { print: typeof print }, "print").mockImplementation(() => undefined);
+		const printSpy = jest
+			.spyOn(globalThis as typeof globalThis & { print: typeof print }, "print")
+			.mockImplementation(() => undefined);
 		const handler = new TestCommandHandler();
 		const serverData: ServerModData<TestAuthoritativeState> = {
 			protocol: {
 				lastClientRevision: 3,
+				lastClientRevisionByCommand: { [TEST_COMMAND.REQUEST]: 3 },
 				lastSchemaVersion: 7
 			},
 			authoritative: defaultAuthoritativeState()
@@ -232,18 +306,21 @@ describe("CommandHandler", () => {
 		expect(handler.onUnsupportedSchemaMock).not.toHaveBeenCalled();
 		expect(serverData.protocol.lastSchemaVersion).toBe(7);
 		expect(printSpy).toHaveBeenCalledWith(
-			`[${TEST_MODULE}][Server][${TEST_COMMAND.REQUEST}] Ignoring stale or out-of-order request from player StalePlayer`
+			`[${TEST_MODULE}][Server][${TEST_COMMAND.REQUEST}] Ignoring stale or out-of-order request from player StalePlayer; incomingRevision=3; previousRevision=3`
 		);
 
 		printSpy.mockRestore();
 	});
 
 	it("uses the default stale hook as a no-op when subclasses do not override it", () => {
-		const printSpy = jest.spyOn(globalThis as typeof globalThis & { print: typeof print }, "print").mockImplementation(() => undefined);
+		const printSpy = jest
+			.spyOn(globalThis as typeof globalThis & { print: typeof print }, "print")
+			.mockImplementation(() => undefined);
 		const handler = new DefaultStaleCommandHandler();
 		const serverData: ServerModData<TestAuthoritativeState> = {
 			protocol: {
 				lastClientRevision: 9,
+				lastClientRevisionByCommand: { [TEST_COMMAND.REQUEST]: 9 },
 				lastSchemaVersion: PROTOCOL_SCHEMA_VERSION
 			},
 			authoritative: defaultAuthoritativeState()
@@ -266,22 +343,31 @@ describe("CommandHandler", () => {
 
 	it("normalizes persisted modData through the ensure callback", () => {
 		const handler = new TestCommandHandler();
-		ModData.mockImplementation(({ ensure }: { ensure: (data: Partial<ServerModData<unknown>>) => ServerModData<TestAuthoritativeState> }) => ({
-			data: ensure({
-				protocol: {
-					lastClientRevision: 6
-				},
-				authoritative: {
-					count: 12
-				}
-			} as Partial<ServerModData<unknown>>)
-		}));
+		ModData.mockImplementation(
+			({
+				ensure
+			}: {
+				ensure: (
+					data: Partial<ServerModData<unknown>>
+				) => ServerModData<TestAuthoritativeState>;
+			}) => ({
+				data: ensure({
+					protocol: {
+						lastClientRevision: 6
+					},
+					authoritative: {
+						count: 12
+					}
+				} as Partial<ServerModData<unknown>>)
+			})
+		);
 
 		const modData = handler.loadModData(makePlayer());
 
 		expect(modData).toEqual({
 			protocol: {
 				lastClientRevision: 6,
+				lastClientRevisionByCommand: {},
 				lastSchemaVersion: 0
 			},
 			authoritative: {
@@ -294,13 +380,18 @@ describe("CommandHandler", () => {
 	it("falls back to default authoritative data when persisted payload is missing", () => {
 		const handler = new DefaultStaleCommandHandler();
 
-		const ensured = (handler as unknown as {
-			ensureServerModData: (data: Partial<ServerModData<unknown>>) => ServerModData<TestAuthoritativeState>;
-		}).ensureServerModData({});
+		const ensured = (
+			handler as unknown as {
+				ensureServerModData: (
+					data: Partial<ServerModData<unknown>>
+				) => ServerModData<TestAuthoritativeState>;
+			}
+		).ensureServerModData({});
 
 		expect(ensured).toEqual({
 			protocol: {
 				lastClientRevision: 0,
+				lastClientRevisionByCommand: {},
 				lastSchemaVersion: 0
 			},
 			authoritative: defaultAuthoritativeState()
@@ -324,12 +415,17 @@ describe("CommandHandler", () => {
 
 		handler.sendResponseForTest(player, payload, { accepted: true });
 
-		expect(sendServerCommandMock).toHaveBeenCalledWith(player, TEST_MODULE, TEST_COMMAND.RESPONSE, {
-			schemaVersion: PROTOCOL_SCHEMA_VERSION,
-			revision: 11,
-			data: {
-				accepted: true
+		expect(sendServerCommandMock).toHaveBeenCalledWith(
+			player,
+			TEST_MODULE,
+			TEST_COMMAND.RESPONSE,
+			{
+				schemaVersion: PROTOCOL_SCHEMA_VERSION,
+				revision: 11,
+				data: {
+					accepted: true
+				}
 			}
-		});
+		);
 	});
 });

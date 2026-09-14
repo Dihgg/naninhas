@@ -11,6 +11,9 @@ import type {
 } from "@types";
 import { isKnownPlushie } from "@shared/catalog/PlushieCatalog";
 import { PlayerApi } from "@shared/components/PlayerApi";
+import { Logger } from "@shared/components/Logger";
+
+const sleepBuffLogger = new Logger("SleepBuff");
 import { AuthoritativeStateController } from "@server/components/AuthoritativeStateController";
 import { CommandHandler } from "./CommandHandler";
 
@@ -23,31 +26,56 @@ export class SleepBuffCommandHandler extends CommandHandler<
 	SyncSleepBuffAppliedPayload
 > {
 	constructor() {
-		super(
-			NETWORK_MODULE,
-			Commands.SYNC_SLEEP_BUFF,
-			{ activePlushieNames: [], addedTraits: [], suppressedTraits: [], xpBoosts: {}, temporaryBuff: { source: null } }
-		);
+		super(NETWORK_MODULE, Commands.SYNC_SLEEP_BUFF, {
+			activePlushieNames: [],
+			addedTraits: [],
+			suppressedTraits: [],
+			xpBoosts: {},
+			temporaryBuff: { source: null }
+		});
 	}
 
-	protected onCommand(player: IsoPlayer, payload: CommandPayload<SyncSleepBuffRequestPayload>): void {
+	protected onCommand(
+		player: IsoPlayer,
+		payload: CommandPayload<SyncSleepBuffRequestPayload>
+	): void {
 		const playerApi = new PlayerApi(player);
 		const serverModData = this.getModData(playerApi.player);
 		const { authoritative } = serverModData;
 		const now = playerApi.getWorldAgeHours();
+		const username = player.getUsername();
+		sleepBuffLogger.log(
+			["Server", "Request"],
+			`player=${username}; worldAge=${now}; requestedBedType=${payload.data.bedType}; candidates=${Logger.formatList(payload.data.candidateNames)}`
+		);
 
 		const attachedKnownNames = this.getKnownAttachedNames(playerApi);
-		const currentTemporaryBuff = AuthoritativeStateController.sanitizeTemporaryBuff(authoritative.temporaryBuff, now);
+		sleepBuffLogger.log(
+			["Server", "Validation"],
+			`player=${username}; attachedNaninhas=${Logger.formatList(attachedKnownNames)}`
+		);
+		const currentTemporaryBuff = AuthoritativeStateController.sanitizeTemporaryBuff(
+			authoritative.temporaryBuff,
+			now
+		);
 
 		const rejectedNames: string[] = [];
 		const validCandidatesSet = new Set<string>();
 
 		for (const name of payload.data.candidateNames) {
 			if (!isKnownPlushie(name)) {
+				sleepBuffLogger.log(
+					["Server", "Validation"],
+					`player=${username}; rejected unknown candidate=${name}`
+				);
 				rejectedNames.push(name);
 				continue;
 			}
 			if (attachedKnownNames.includes(name)) {
+				sleepBuffLogger.log(
+					["Server", "Validation"],
+					`player=${username}; rejected already-attached candidate=${name}`
+				);
 				rejectedNames.push(name);
 				continue;
 			}
@@ -58,17 +86,40 @@ export class SleepBuffCommandHandler extends CommandHandler<
 		const selectedName = this.selectRandom(validCandidates);
 		const resolvedBedType = this.normalizeBedType(payload.data.bedType);
 		const durationHours = this.getDurationForBedType(resolvedBedType);
+		const emptyWakeScan = payload.data.candidateNames.length === 0;
+		sleepBuffLogger.log(
+			["Server", "Selection"],
+			`player=${username}; validCandidates=${Logger.formatList(validCandidates)}; selected=${selectedName ?? "none"}; resolvedBedType=${resolvedBedType}; durationHours=${durationHours}`
+		);
 
 		let nextTemporaryBuff: TemporaryBuffState = currentTemporaryBuff;
-		if (selectedName) {
+		if (emptyWakeScan) {
+			nextTemporaryBuff = { source: null };
+			sleepBuffLogger.log(
+				["Server", "Apply"],
+				`player=${username}; empty wake scan; clearing previous temporary buff=${currentTemporaryBuff.activeName ?? "none"}`
+			);
+		} else if (selectedName) {
 			nextTemporaryBuff = {
 				activeName: selectedName,
 				expiresAtWorldAgeHours: now + durationHours,
 				source: "sleep"
 			};
+			sleepBuffLogger.log(
+				["Server", "Apply"],
+				`player=${username}; applying=${selectedName}; expiresAtWorldAge=${nextTemporaryBuff.expiresAtWorldAgeHours}`
+			);
+		} else {
+			sleepBuffLogger.log(
+				["Server", "Apply"],
+				`player=${username}; no valid selection; existing temporary buff remains=${currentTemporaryBuff.activeName ?? "none"}`
+			);
 		}
 
-		const desiredEffectiveNames = AuthoritativeStateController.buildEffectiveNames(attachedKnownNames, nextTemporaryBuff);
+		const desiredEffectiveNames = AuthoritativeStateController.buildEffectiveNames(
+			attachedKnownNames,
+			nextTemporaryBuff
+		);
 		serverModData.authoritative = AuthoritativeStateController.applyDesiredState(
 			playerApi,
 			authoritative,
@@ -76,24 +127,36 @@ export class SleepBuffCommandHandler extends CommandHandler<
 			attachedKnownNames,
 			nextTemporaryBuff
 		);
+		sleepBuffLogger.log(
+			["Server", "Apply"],
+			`player=${username}; effectiveNaninhas=${Logger.formatList(desiredEffectiveNames)}; state persisted`
+		);
 
 		const reply: SyncSleepBuffAppliedPayload = {
 			appliedName: selectedName,
 			rejectedNames,
 			resolvedBedType,
 			durationHours: selectedName ? durationHours : undefined,
-			expiresAtWorldAgeHours: selectedName ? nextTemporaryBuff.expiresAtWorldAgeHours : undefined
+			expiresAtWorldAgeHours: selectedName
+				? nextTemporaryBuff.expiresAtWorldAgeHours
+				: undefined
 		};
 		this.sendResponse(player, payload, reply);
 	}
 
-	protected onStaleCommand(player: IsoPlayer, payload: CommandPayload<SyncSleepBuffRequestPayload>): void {
+	protected onStaleCommand(
+		player: IsoPlayer,
+		payload: CommandPayload<SyncSleepBuffRequestPayload>
+	): void {
 		this.sendResponse(player, payload, {
 			rejectedNames: payload.data.candidateNames
 		});
 	}
 
-	protected onUnsupportedSchema(player: IsoPlayer, payload: CommandPayload<SyncSleepBuffRequestPayload>): void {
+	protected onUnsupportedSchema(
+		player: IsoPlayer,
+		payload: CommandPayload<SyncSleepBuffRequestPayload>
+	): void {
 		this.sendResponse(player, payload, {
 			rejectedNames: payload.data.candidateNames
 		});
@@ -104,7 +167,9 @@ export class SleepBuffCommandHandler extends CommandHandler<
 		authoritativeData: unknown
 	): NaninhasAuthoritativeState {
 		if (persistedVersion < PROTOCOL_SCHEMA_VERSION) {
-			print(`[Naninhas] Migrating server mod data from schema v${persistedVersion} to v${PROTOCOL_SCHEMA_VERSION}`);
+			print(
+				`[Naninhas] Migrating server mod data from schema v${persistedVersion} to v${PROTOCOL_SCHEMA_VERSION}`
+			);
 		}
 
 		const authoritative = authoritativeData as Partial<NaninhasAuthoritativeState> | undefined;
@@ -138,27 +203,27 @@ export class SleepBuffCommandHandler extends CommandHandler<
 	}
 
 	private normalizeBedType(bedType: string): BedType {
-        switch(bedType) {
-            case "badBed":
-            case "averageBed":
-            case "goodBed":
-            case "floor":
-                return bedType;
-            default:
-                return "averageBed";
-        }
+		switch (bedType) {
+			case "badBed":
+			case "averageBed":
+			case "goodBed":
+			case "floor":
+				return bedType;
+			default:
+				return "averageBed";
+		}
 	}
 
 	private getDurationForBedType(bedType: BedType): number {
-        switch(bedType) {
-            case "goodBed":
-                return 8;
-            case "averageBed":
-                return 6;
-            case "badBed":
-            case "floor":
-            default:
-                return 3;
-        }
+		switch (bedType) {
+			case "goodBed":
+				return 8;
+			case "averageBed":
+				return 6;
+			case "badBed":
+			case "floor":
+			default:
+				return 3;
+		}
 	}
 }

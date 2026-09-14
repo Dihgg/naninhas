@@ -24,7 +24,9 @@ const makeState = (): NaninhasAuthoritativeState => ({
 	temporaryBuff: { source: null }
 });
 
-const makePayload = (data: Partial<SyncSleepBuffRequestPayload> = {}): CommandPayload<SyncSleepBuffRequestPayload> => ({
+const makePayload = (
+	data: Partial<SyncSleepBuffRequestPayload> = {}
+): CommandPayload<SyncSleepBuffRequestPayload> => ({
 	schemaVersion: PROTOCOL_SCHEMA_VERSION,
 	revision: 1,
 	data: {
@@ -42,6 +44,7 @@ describe("SleepBuffCommandHandler", () => {
 	it("applies a temporary sleep buff from valid candidates", () => {
 		const sendServerCommandMock = jest.fn();
 		jest.doMock("@asledgehammer/pipewrench", () => ({
+			isDebugEnabled: jest.fn(() => false),
 			sendServerCommand: sendServerCommandMock,
 			Perks: {}
 		}));
@@ -111,6 +114,7 @@ describe("SleepBuffCommandHandler", () => {
 	it("rejects unknown and already attached candidates", () => {
 		const sendServerCommandMock = jest.fn();
 		jest.doMock("@asledgehammer/pipewrench", () => ({
+			isDebugEnabled: jest.fn(() => false),
 			sendServerCommand: sendServerCommandMock,
 			Perks: {}
 		}));
@@ -169,6 +173,76 @@ describe("SleepBuffCommandHandler", () => {
 					appliedName: undefined,
 					rejectedNames: ["Doll", "Unknown"]
 				})
+			})
+		);
+	});
+
+	it("clears the previous temporary buff after an empty wake scan", () => {
+		const sendServerCommandMock = jest.fn();
+		jest.doMock("@asledgehammer/pipewrench", () => ({
+			isDebugEnabled: jest.fn(() => false),
+			sendServerCommand: sendServerCommandMock,
+			Perks: {}
+		}));
+
+		const modData = {
+			protocol: { lastClientRevision: 0, lastSchemaVersion: PROTOCOL_SCHEMA_VERSION },
+			authoritative: {
+				...makeState(),
+				activePlushieNames: [],
+				addedTraits: ["Lucky"],
+				temporaryBuff: {
+					source: "sleep" as const,
+					activeName: "Doll",
+					expiresAtWorldAgeHours: 108
+				}
+			}
+		};
+
+		jest.doMock("@shared/components/ModData", () => ({
+			ModData: jest.fn().mockImplementation(() => ({ data: modData }))
+		}));
+
+		const removeTrait = jest.fn();
+		const mockPlayerApi = {
+			player: {},
+			getAttachedItemNames: jest.fn().mockReturnValue(new Set<string>()),
+			getWorldAgeHours: jest.fn().mockReturnValue(101),
+			hasTrait: jest.fn().mockReturnValue(true),
+			addTrait: jest.fn(),
+			removeTrait,
+			applyXpMultiplierDelta: jest.fn()
+		};
+		jest.doMock("@shared/components/PlayerApi", () => ({
+			PlayerApi: jest.fn().mockImplementation(() => mockPlayerApi)
+		}));
+
+		const { PlushieReconciler } = jest.requireMock("@shared/components/PlushieReconciler");
+		PlushieReconciler.reconcile = jest.fn().mockReturnValue({
+			traitsToAdd: [],
+			traitsToRemove: ["Lucky"],
+			traitsToSuppress: [],
+			traitsToRestore: [],
+			xpBoostDeltas: {},
+			newState: makeState()
+		});
+
+		const { SleepBuffCommandHandler } = require("@server/components/SleepBuffCommandHandler");
+		new SleepBuffCommandHandler().handler({
+			module: "Naninhas",
+			command: Commands.SYNC_SLEEP_BUFF.REQUEST,
+			player: makePlayer("sleeper") as any,
+			args: makePayload({ candidateNames: [] })
+		});
+
+		expect(removeTrait).toHaveBeenCalledWith("Lucky");
+		expect(modData.authoritative.temporaryBuff).toEqual({ source: null });
+		expect(sendServerCommandMock).toHaveBeenCalledWith(
+			expect.anything(),
+			"Naninhas",
+			Commands.SYNC_SLEEP_BUFF.RESPONSE,
+			expect.objectContaining({
+				data: expect.objectContaining({ appliedName: undefined, rejectedNames: [] })
 			})
 		);
 	});
