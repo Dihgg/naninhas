@@ -1,4 +1,8 @@
-import type { CommandPayload, SyncDesiredPlushiesPayload, NaninhasAuthoritativeState } from "@types";
+import type {
+	CommandPayload,
+	SyncDesiredPlushiesPayload,
+	NaninhasAuthoritativeState
+} from "@types";
 import { Commands, PROTOCOL_SCHEMA_VERSION } from "@constants";
 
 jest.mock("@asledgehammer/pipewrench");
@@ -16,7 +20,10 @@ const emptyAuthoritative = (): NaninhasAuthoritativeState => ({
 	temporaryBuff: { source: null }
 });
 
-const makePayload = (revision: number, desiredNames: string[]): CommandPayload<SyncDesiredPlushiesPayload> => ({
+const makePayload = (
+	revision: number,
+	desiredNames: string[]
+): CommandPayload<SyncDesiredPlushiesPayload> => ({
 	schemaVersion: PROTOCOL_SCHEMA_VERSION,
 	revision,
 	data: { desiredNames }
@@ -57,7 +64,10 @@ describe("NaninhasCommandHandler", () => {
 			jest.doMock("@shared/components/ModData", () => ({
 				ModData: jest.fn().mockImplementation(() => ({
 					data: {
-						protocol: { lastClientRevision: 0, lastSchemaVersion: PROTOCOL_SCHEMA_VERSION },
+						protocol: {
+							lastClientRevision: 0,
+							lastSchemaVersion: PROTOCOL_SCHEMA_VERSION
+						},
 						authoritative: emptyAuthoritative()
 					}
 				}))
@@ -156,6 +166,7 @@ describe("NaninhasCommandHandler", () => {
 
 			const sendServerCommandMock = jest.fn();
 			jest.doMock("@asledgehammer/pipewrench", () => ({
+				isDebugEnabled: jest.fn(() => false),
 				sendServerCommand: sendServerCommandMock,
 				Perks: {}
 			}));
@@ -209,6 +220,7 @@ describe("NaninhasCommandHandler", () => {
 
 			const sendServerCommandMock = jest.fn();
 			jest.doMock("@asledgehammer/pipewrench", () => ({
+				isDebugEnabled: jest.fn(() => false),
 				sendServerCommand: sendServerCommandMock,
 				Perks: {}
 			}));
@@ -229,7 +241,11 @@ describe("NaninhasCommandHandler", () => {
 
 			const initialAuthoritative = emptyAuthoritative();
 			const serverData = {
-				protocol: { lastClientRevision: 10, lastSchemaVersion: PROTOCOL_SCHEMA_VERSION },
+				protocol: {
+					lastClientRevision: 10,
+					lastClientRevisionByCommand: { [Commands.SYNC_PLUSHIE.REQUEST]: 10 },
+					lastSchemaVersion: PROTOCOL_SCHEMA_VERSION
+				},
 				authoritative: initialAuthoritative
 			};
 
@@ -265,7 +281,9 @@ describe("NaninhasCommandHandler", () => {
 				args: makePayload(1, ["Doll"])
 			});
 
-			expect(PlushieReconciler.reconcile).toHaveBeenCalledWith(initialAuthoritative, ["Doll"]);
+			expect(PlushieReconciler.reconcile).toHaveBeenCalledWith(initialAuthoritative, [
+				"Doll"
+			]);
 			expect(serverData.protocol.lastClientRevision).toBe(1);
 			expect(sendServerCommandMock).toHaveBeenCalledWith(
 				expect.anything(),
@@ -287,6 +305,7 @@ describe("NaninhasCommandHandler", () => {
 
 			const sendServerCommandMock = jest.fn();
 			jest.doMock("@asledgehammer/pipewrench", () => ({
+				isDebugEnabled: jest.fn(() => false),
 				sendServerCommand: sendServerCommandMock,
 				Perks: {}
 			}));
@@ -306,7 +325,11 @@ describe("NaninhasCommandHandler", () => {
 			}));
 
 			const serverData = {
-				protocol: { lastClientRevision: 5, lastSchemaVersion: PROTOCOL_SCHEMA_VERSION },
+				protocol: {
+					lastClientRevision: 5,
+					lastClientRevisionByCommand: { [Commands.SYNC_PLUSHIE.REQUEST]: 5 },
+					lastSchemaVersion: PROTOCOL_SCHEMA_VERSION
+				},
 				authoritative: emptyAuthoritative()
 			};
 
@@ -351,6 +374,7 @@ describe("NaninhasCommandHandler", () => {
 			const sendServerCommandMock = jest.fn();
 			const fitnessPerk = { id: "Fitness" };
 			jest.doMock("@asledgehammer/pipewrench", () => ({
+				isDebugEnabled: jest.fn(() => false),
 				sendServerCommand: sendServerCommandMock,
 				Perks: {
 					Fitness: fitnessPerk
@@ -466,12 +490,116 @@ describe("NaninhasCommandHandler", () => {
 				addedTraits: ["Organized"],
 				suppressedTraits: ["ShortSighted"],
 				xpBoosts: { "xp:Fitness": 0.2 },
-				temporaryBuff: { source: "sleep", activeName: "ToyBear", expiresAtWorldAgeHours: 99 }
+				temporaryBuff: {
+					source: "sleep",
+					activeName: "ToyBear",
+					expiresAtWorldAgeHours: 99
+				}
 			});
 
 			expect(ensured.activePlushieNames).toEqual(["Doll"]);
 			expect(ensured.xpBoosts).toEqual({ "xp:Fitness": 0.2 });
-			expect(ensured.temporaryBuff).toEqual({ source: "sleep", activeName: "ToyBear", expiresAtWorldAgeHours: 99 });
+			expect(ensured.temporaryBuff).toEqual({
+				source: "sleep",
+				activeName: "ToyBear",
+				expiresAtWorldAgeHours: 99
+			});
+		});
+	});
+
+	describe("temporary buff expiration tick", () => {
+		it("reconciles an expired sleep buff while preserving attached plushies", () => {
+			jest.resetModules();
+
+			const authoritative: NaninhasAuthoritativeState = {
+				activePlushieNames: ["Doll"],
+				addedTraits: ["Lucky"],
+				suppressedTraits: [],
+				xpBoosts: {},
+				temporaryBuff: {
+					source: "sleep",
+					activeName: "ToyBear",
+					expiresAtWorldAgeHours: 108
+				}
+			};
+			const serverData = {
+				protocol: { lastClientRevision: 0, lastSchemaVersion: PROTOCOL_SCHEMA_VERSION },
+				authoritative
+			};
+			const playerApi = {
+				player: {},
+				getWorldAgeHours: jest.fn(() => 108),
+				getAttachedItemNames: jest.fn(() => new Set(["Doll"]))
+			};
+			const nextState = { ...authoritative, temporaryBuff: { source: null } };
+			const applyDesiredState = jest.fn(() => nextState);
+
+			jest.doMock("@shared/components/PlayerApi", () => ({
+				PlayerApi: jest.fn(() => playerApi)
+			}));
+			jest.doMock("@shared/components/ModData", () => ({
+				ModData: jest.fn(() => ({ data: serverData }))
+			}));
+			jest.doMock("@shared/catalog/PlushieCatalog", () => ({
+				isKnownPlushie: jest.fn(() => true)
+			}));
+			jest.doMock("@server/components/AuthoritativeStateController", () => ({
+				AuthoritativeStateController: {
+					sanitizeTemporaryBuff: jest.fn(() => ({ source: null })),
+					applyDesiredState
+				}
+			}));
+
+			const { NaninhasCommandHandler } = require("@server/components/NaninhasCommandHandler");
+			const expired = new NaninhasCommandHandler().expireTemporaryBuff({
+				getUsername: () => "TestPlayer"
+			} as any);
+
+			expect(expired).toBe(true);
+			expect(applyDesiredState).toHaveBeenCalledWith(
+				playerApi,
+				authoritative,
+				["Doll"],
+				["Doll"],
+				{ source: null }
+			);
+			expect(serverData.authoritative).toBe(nextState);
+		});
+
+		it("does nothing while the temporary buff is still active", () => {
+			jest.resetModules();
+			const temporaryBuff = {
+				source: "sleep",
+				activeName: "ToyBear",
+				expiresAtWorldAgeHours: 108
+			};
+			const serverData = {
+				protocol: { lastClientRevision: 0, lastSchemaVersion: PROTOCOL_SCHEMA_VERSION },
+				authoritative: { ...emptyAuthoritative(), temporaryBuff }
+			};
+			const playerApi = { player: {}, getWorldAgeHours: jest.fn(() => 107) };
+			const applyDesiredState = jest.fn();
+
+			jest.doMock("@shared/components/PlayerApi", () => ({
+				PlayerApi: jest.fn(() => playerApi)
+			}));
+			jest.doMock("@shared/components/ModData", () => ({
+				ModData: jest.fn(() => ({ data: serverData }))
+			}));
+			jest.doMock("@server/components/AuthoritativeStateController", () => ({
+				AuthoritativeStateController: {
+					sanitizeTemporaryBuff: jest.fn(() => temporaryBuff),
+					applyDesiredState
+				}
+			}));
+
+			const { NaninhasCommandHandler } = require("@server/components/NaninhasCommandHandler");
+			expect(
+				new NaninhasCommandHandler().expireTemporaryBuff({
+					getUsername: () => "TestPlayer"
+				} as any)
+			).toBe(false);
+			expect(applyDesiredState).not.toHaveBeenCalled();
 		});
 	});
 });
