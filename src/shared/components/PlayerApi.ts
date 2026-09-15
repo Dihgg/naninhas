@@ -66,14 +66,17 @@ export class PlayerApi {
 		return this.player.isAsleep();
 	}
 
+	/** Returns the vehicle currently occupied by the player, if any. */
 	public getVehicle(): ReturnType<IsoPlayer["getVehicle"]> {
 		return this.player.getVehicle();
 	}
 
+	/** Returns the world square currently occupied by the player. */
 	public getSquare(): ReturnType<IsoPlayer["getSquare"]> {
 		return this.player.getSquare();
 	}
 
+	/** Returns the cell containing the player and its loaded world squares. */
 	public getCell(): ReturnType<IsoPlayer["getCell"]> {
 		return this.player.getCell();
 	}

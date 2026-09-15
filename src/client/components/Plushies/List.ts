@@ -7,6 +7,7 @@ import { PlushieNames } from "@constants";
  * Helps the player see in low-light conditions.
  */
 export class BorisBadger extends Plushie {
+	/** Creates Boris Badger for the given player. */
 	constructor(player: IsoPlayer) {
 		super({ player, name: PlushieNames.BORISBADGER });
 	}
@@ -17,6 +18,7 @@ export class BorisBadger extends Plushie {
  * Adds the EagleEyed trait and suppresses ShortSighted.
  */
 export class Doll extends Plushie {
+	/** Creates Doll for the given player. */
 	constructor(player: IsoPlayer) {
 		super({ player, name: PlushieNames.DOLL });
 	}
@@ -27,6 +29,7 @@ export class Doll extends Plushie {
  * Adds the Graceful trait and suppresses Clumsy.
  */
 export class Flamingo extends Plushie {
+	/** Creates Flamingo for the given player. */
 	constructor(player: IsoPlayer) {
 		super({ player, name: PlushieNames.FLAMINGO });
 	}
@@ -37,6 +40,7 @@ export class Flamingo extends Plushie {
  * Adds the LightEater trait and suppresses HeartyAppitite.
  */
 export class FluffyfootBunny extends Plushie {
+	/** Creates Fluffyfoot Bunny for the given player. */
 	constructor(player: IsoPlayer) {
 		super({ player, name: PlushieNames.FLUFFYFOOTBUNNY });
 	}
@@ -47,6 +51,7 @@ export class FluffyfootBunny extends Plushie {
  * Adds the Inconspicuous trait and suppresses Conspicuous.
  */
 export class FreddyFox extends Plushie {
+	/** Creates Freddy Fox for the given player. */
 	constructor(player: IsoPlayer) {
 		super({ player, name: PlushieNames.FREDDYFOX });
 	}
@@ -57,6 +62,7 @@ export class FreddyFox extends Plushie {
  * Adds the Outdoorsman trait for better survival in nature.
  */
 export class FurbertSquirrel extends Plushie {
+	/** Creates Furbert Squirrel for the given player. */
 	constructor(player: IsoPlayer) {
 		super({ player, name: PlushieNames.FURBERTSQUIRREL });
 	}
@@ -67,6 +73,7 @@ export class FurbertSquirrel extends Plushie {
  * Adds the FastLearner trait and suppresses SlowLearner.
  */
 export class GroguAZ extends Plushie {
+	/** Creates Grogu AZ for the given player. */
 	constructor(player: IsoPlayer) {
 		super({ player, name: PlushieNames.GROGUAZ });
 	}
@@ -77,6 +84,7 @@ export class GroguAZ extends Plushie {
  * Adds +1 Woodwork XP multiplier while equipped.
  */
 export class JacquesBeaver extends Plushie {
+	/** Creates Jacques Beaver for the given player. */
 	constructor(player: IsoPlayer) {
 		super({ player, name: PlushieNames.JACQUESBEAVER });
 	}
@@ -87,6 +95,7 @@ export class JacquesBeaver extends Plushie {
  * Adds +2 Plant Scavenging XP multiplier while equipped.
  */
 export class MoleyMole extends Plushie {
+	/** Creates Moley Mole for the given player. */
 	constructor(player: IsoPlayer) {
 		super({ player, name: PlushieNames.MOLEYMOLE });
 	}
@@ -97,6 +106,7 @@ export class MoleyMole extends Plushie {
  * Adds the FastReader trait and suppresses SlowReader.
  */
 export class OtisPug extends Plushie {
+	/** Creates Otis Pug for the given player. */
 	constructor(player: IsoPlayer) {
 		super({ player, name: PlushieNames.OTISPUG });
 	}
@@ -107,6 +117,7 @@ export class OtisPug extends Plushie {
  * Adds +1 Sprinting and +1 Agility XP multipliers while equipped.
  */
 export class PancakeHedgehog extends Plushie {
+	/** Creates Pancake Hedgehog for the given player. */
 	constructor(player: IsoPlayer) {
 		super({ player, name: PlushieNames.PANCAKEHEDGEHOG });
 	}
@@ -117,9 +128,11 @@ export class PancakeHedgehog extends Plushie {
  * Passively increases player endurance by 0.1 every update.
  */
 export class Spiffo extends Plushie {
+	/** Creates Spiffo for the given player. */
 	constructor(player: IsoPlayer) {
 		super({ player, name: PlushieNames.SPIFFO });
 	}
+	/** Restores endurance before emitting the standard plushie update event. */
 	update() {
 		this.playerApi.increaseEndurance(0.1);
 		super.update();
@@ -131,6 +144,7 @@ export class Spiffo extends Plushie {
  * Adds the LowThirst trait and suppresses HighThirst.
  */
 export class SpiffoBlueberry extends Plushie {
+	/** Creates Spiffo Blueberry for the given player. */
 	constructor(player: IsoPlayer) {
 		super({ player, name: PlushieNames.SPIFFOBLUEBERRY });
 	}
@@ -141,6 +155,7 @@ export class SpiffoBlueberry extends Plushie {
  * Adds the Organized trait and suppresses Disorganized.
  */
 export class SpiffoCherry extends Plushie {
+	/** Creates Spiffo Cherry for the given player. */
 	constructor(player: IsoPlayer) {
 		super({ player, name: PlushieNames.SPIFFOCHERRY });
 	}
@@ -151,6 +166,7 @@ export class SpiffoCherry extends Plushie {
  * Adds +1 multiplier to Nimble, LongBlade, SmallBlade, Blunt, and SmallBlunt.
  */
 export class SpiffoGrey extends Plushie {
+	/** Creates Spiffo Grey for the given player. */
 	constructor(player: IsoPlayer) {
 		super({ player, name: PlushieNames.SPIFFOGREY });
 	}
@@ -161,6 +177,7 @@ export class SpiffoGrey extends Plushie {
  * Adds +2 Doctor XP multiplier while equipped.
  */
 export class SpiffoHeart extends Plushie {
+	/** Creates Spiffo Heart for the given player. */
 	constructor(player: IsoPlayer) {
 		super({ player, name: PlushieNames.SPIFFOHEART });
 	}
@@ -171,9 +188,11 @@ export class SpiffoHeart extends Plushie {
  * Every update: reduces boredom by 0.5, increases endurance by 0.5, and reduces fatigue by 0.5.
  */
 export class SpiffoPlushieRainbow extends Plushie {
+	/** Creates Spiffo Rainbow for the given player. */
 	constructor(player: IsoPlayer) {
 		super({ player, name: PlushieNames.SPIFFOPLUSHIERAINBOW });
 	}
+	/** Improves comfort stats before emitting the standard plushie update event. */
 	update() {
 		this.playerApi.reduceBoredom(0.5);
 		this.playerApi.increaseEndurance(0.5);
@@ -187,9 +206,11 @@ export class SpiffoPlushieRainbow extends Plushie {
  * Every update: reduces boredom by 0.5 to combat loneliness during harsh winters.
  */
 export class SpiffoSanta extends Plushie {
+	/** Creates Spiffo Santa for the given player. */
 	constructor(player: IsoPlayer) {
 		super({ player, name: PlushieNames.SPIFFOSANTA });
 	}
+	/** Reduces boredom before emitting the standard plushie update event. */
 	public update() {
 		this.playerApi.reduceBoredom(0.5);
 		super.update();
@@ -201,6 +222,7 @@ export class SpiffoSanta extends Plushie {
  * Adds +5 Aiming and +5 Reloading XP multipliers while equipped.
  */
 export class SpiffoShamrock extends Plushie {
+	/** Creates Spiffo Shamrock for the given player. */
 	constructor(player: IsoPlayer) {
 		super({ player, name: PlushieNames.SPIFFOSHAMROCK });
 	}
@@ -211,6 +233,7 @@ export class SpiffoShamrock extends Plushie {
  * Adds the Brave trait and suppresses fear-based traits (Desensitized, Cowardly, Agoraphobic, Claustophobic).
  */
 export class SubstitutionDoll extends Plushie {
+	/** Creates Substitution Doll for the given player. */
 	constructor(player: IsoPlayer) {
 		super({ player, name: PlushieNames.SUBSTITUTIONDOLL });
 	}
@@ -221,9 +244,11 @@ export class SubstitutionDoll extends Plushie {
  * Every update: reduces panic by 0.5 to soothe the player's nerves.
  */
 export class ToyBear extends Plushie {
+	/** Creates Toy Bear for the given player. */
 	constructor(player: IsoPlayer) {
 		super({ player, name: PlushieNames.TOYBEAR });
 	}
+	/** Reduces panic before emitting the standard plushie update event. */
 	update() {
 		this.playerApi.reducePanic(0.5);
 		super.update();
@@ -235,9 +260,11 @@ export class ToyBear extends Plushie {
  * Every update: reduces panic by 0.1 for gentle emotional support.
  */
 export class ToyBearSmall extends Plushie {
+	/** Creates Small Toy Bear for the given player. */
 	constructor(player: IsoPlayer) {
 		super({ player, name: PlushieNames.TOYBEARSMALL });
 	}
+	/** Slightly reduces panic before emitting the standard plushie update event. */
 	update() {
 		this.playerApi.reducePanic(0.1);
 		super.update();

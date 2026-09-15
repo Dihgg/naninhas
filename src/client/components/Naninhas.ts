@@ -41,6 +41,12 @@ export class Naninhas {
 	private readonly syncPublisher: PlushieSyncPublisher;
 	private readonly sleepBuffDetector: SleepBuffDetector;
 
+	/**
+	 * Creates the client coordinator and registers its periodic game event.
+	 *
+	 * @param player Local player whose plushies are tracked.
+	 * @param plushies Optional plushie instances, primarily for testing or customization.
+	 */
 	constructor(player: IsoPlayer, plushies: Plushie[] = []) {
 		this.player = player;
 		this.subject = new Subject();

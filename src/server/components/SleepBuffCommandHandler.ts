@@ -26,6 +26,7 @@ export class SleepBuffCommandHandler extends CommandHandler<
 > {
 	private logger = new Logger("SleepBuff");
 
+	/** Configures the authoritative wake-time buff command flow. */
 	constructor() {
 		super(NETWORK_MODULE, Commands.SYNC_SLEEP_BUFF, {
 			activePlushieNames: [],
@@ -36,6 +37,13 @@ export class SleepBuffCommandHandler extends CommandHandler<
 		});
 	}
 
+	/**
+	 * Validates wake-time candidates, selects a temporary buff, and persists the
+	 * resulting authoritative player state.
+	 *
+	 * @param player Player who submitted the wake-time scan.
+	 * @param payload Validated request containing nearby plushies and bed quality.
+	 */
 	protected onCommand(
 		player: IsoPlayer,
 		payload: CommandPayload<SyncSleepBuffRequestPayload>
@@ -145,6 +153,12 @@ export class SleepBuffCommandHandler extends CommandHandler<
 		this.sendResponse(player, payload, reply);
 	}
 
+	/**
+	 * Rejects every candidate in a stale or out-of-order wake-time request.
+	 *
+	 * @param player Player who submitted the stale request.
+	 * @param payload Stale request envelope to echo in the response.
+	 */
 	protected onStaleCommand(
 		player: IsoPlayer,
 		payload: CommandPayload<SyncSleepBuffRequestPayload>
@@ -154,6 +168,12 @@ export class SleepBuffCommandHandler extends CommandHandler<
 		});
 	}
 
+	/**
+	 * Rejects every candidate when the request schema is unsupported.
+	 *
+	 * @param player Player who submitted the incompatible request.
+	 * @param payload Incompatible request envelope to echo in the response.
+	 */
 	protected onUnsupportedSchema(
 		player: IsoPlayer,
 		payload: CommandPayload<SyncSleepBuffRequestPayload>
@@ -163,6 +183,13 @@ export class SleepBuffCommandHandler extends CommandHandler<
 		});
 	}
 
+	/**
+	 * Normalizes persisted state into the complete current authoritative shape.
+	 *
+	 * @param persistedVersion Schema version stored with the persisted state.
+	 * @param authoritativeData Persisted state, which may be partial or absent.
+	 * @returns Fully initialized authoritative state for runtime use.
+	 */
 	protected migrateAuthoritativeData(
 		persistedVersion: number,
 		authoritativeData: unknown
@@ -187,6 +214,7 @@ export class SleepBuffCommandHandler extends CommandHandler<
 		};
 	}
 
+	/** Returns the known plushie names currently attached to the player. */
 	private getKnownAttachedNames(playerApi: PlayerApi): string[] {
 		const names: string[] = [];
 		for (const name of playerApi.getAttachedItemNames()) {
@@ -197,12 +225,18 @@ export class SleepBuffCommandHandler extends CommandHandler<
 		return names;
 	}
 
+	/**
+	 * Selects one candidate with Project Zomboid's runtime random generator.
+	 *
+	 * @returns A candidate name, or `undefined` when the list is empty.
+	 */
 	private selectRandom(candidates: string[]): string | undefined {
 		if (candidates.length === 0) return undefined;
 		const index = ZombRand(candidates.length);
 		return candidates[index];
 	}
 
+	/** Returns a supported bed type, defaulting unknown values to `averageBed`. */
 	private normalizeBedType(bedType: string): BedType {
 		switch (bedType) {
 			case "badBed":
@@ -215,6 +249,7 @@ export class SleepBuffCommandHandler extends CommandHandler<
 		}
 	}
 
+	/** Returns the temporary buff duration, in world-age hours, for a bed type. */
 	private getDurationForBedType(bedType: BedType): number {
 		switch (bedType) {
 			case "goodBed":

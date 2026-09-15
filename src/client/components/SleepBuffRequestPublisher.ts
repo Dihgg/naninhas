@@ -18,6 +18,12 @@ export class SleepBuffRequestPublisher extends CommandPublisher<
 	SyncSleepBuffAppliedPayload
 > {
 	private logger = new Logger("SleepBuff");
+
+	/**
+	 * Creates a wake-time request publisher for a local player.
+	 *
+	 * @param player Local player whose sleep context is being reported.
+	 */
 	constructor(player: IsoPlayer) {
 		super(player, Commands.SYNC_SLEEP_BUFF);
 	}
@@ -34,6 +40,11 @@ export class SleepBuffRequestPublisher extends CommandPublisher<
 		});
 	}
 
+	/**
+	 * Logs the authoritative result returned for a wake-time request.
+	 *
+	 * @param payload Server response describing the applied or rejected buff.
+	 */
 	protected onReply(payload: CommandPayload<SyncSleepBuffAppliedPayload>): void {
 		const data = payload.data;
 		this.logger.log(
