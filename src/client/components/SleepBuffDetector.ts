@@ -32,10 +32,10 @@ export class SleepBuffDetector {
 	tick(): void {
 		const asleep = this.playerApi.isAsleep();
 		if (!this.wasAsleep && asleep) {
-			this.log("Sleep started; waiting for wake transition");
+			this.debug("Sleep started; waiting for wake transition");
 		}
 		if (this.wasAsleep && !asleep) {
-			this.log("Wake detected; inspecting sleep context");
+			this.debug("Wake detected; inspecting sleep context");
 			this.onWake();
 		}
 		this.wasAsleep = asleep;
@@ -45,19 +45,19 @@ export class SleepBuffDetector {
 	private onWake(): void {
 		// Explicit v1 decision: no vehicle sleep support.
 		if (this.playerApi.getVehicle() !== null) {
-			this.log("Skipping candidate scan because vehicle sleep is not supported");
+			this.debug("Skipping candidate scan because vehicle sleep is not supported");
 			return;
 		}
 
 		const bedType = this.playerApi.getBedType();
-		this.log(`Resolved bed type: ${bedType}`);
+		this.debug(`Resolved bed type: ${bedType}`);
 		const candidates = this.collectCandidateNames();
 		if (candidates.length === 0) {
-			this.log(
+			this.debug(
 				"Scan complete; no eligible naninhas found, sending empty wake request to clear any previous buff"
 			);
 		} else {
-			this.log(`Scan complete; sending candidates: ${candidates.join(", ")}`);
+			this.debug(`Scan complete; sending candidates: ${candidates.join(", ")}`);
 		}
 
 		this.publisher.send(candidates, bedType);
@@ -71,20 +71,20 @@ export class SleepBuffDetector {
 	private collectCandidateNames(): string[] {
 		const found = new Set<string>();
 		const bed = this.playerApi.getBed();
-		this.log(bed === null ? "No bed object found; scanning player square" : "Bed object found");
+		this.debug(bed === null ? "No bed object found; scanning player square" : "Bed object found");
 
 		const bedContainer = bed?.getContainer?.();
 		if (bedContainer !== null && bedContainer !== undefined) {
 			const items = bedContainer.getItems();
-			this.log(`Scanning bed container (${items.size()} items)`);
+			this.debug(`Scanning bed container (${items.size()} items)`);
 			this.addFromContainerItems(found, items, "bed container");
 		} else {
-			this.log("Bed container not found");
+			this.debug("Bed container not found");
 		}
 
 		const playerSquare = this.playerApi.getSquare();
 		if (playerSquare === null || playerSquare === undefined) {
-			this.log("Player square not found; radius scan cannot run");
+			this.debug("Player square not found; radius scan cannot run");
 			return [...found];
 		}
 
@@ -115,7 +115,7 @@ export class SleepBuffDetector {
 		let outsideRoomSquares = 0;
 		let unavailableSquares = 0;
 
-		this.log(
+		this.debug(
 			`Starting radius scan; center=(${centerX},${centerY},${centerZ}); radius=${radius}; room=${roomName}; sameRoomOnly=${restrictToRoom}`
 		);
 
@@ -144,7 +144,7 @@ export class SleepBuffDetector {
 			}
 		}
 
-		this.log(
+		this.debug(
 			`Radius scan complete; scanned=${scannedSquares}; outsideRoom=${outsideRoomSquares}; unavailable=${unavailableSquares}; uniqueNaninhas=${found.size}`
 		);
 	}
@@ -165,7 +165,7 @@ export class SleepBuffDetector {
 	private addFromSquareWorldObjects(found: Set<string>, square: Square, source: string): void {
 		const worldObjects = square.getWorldObjects();
 		if (worldObjects.size() > 0) {
-			this.log(`${source} contains ${worldObjects.size()} world objects`);
+			this.debug(`${source} contains ${worldObjects.size()} world objects`);
 		}
 		for (let i = 0; i < worldObjects.size(); i++) {
 			const item = worldObjects.get(i).getItem();
@@ -180,17 +180,17 @@ export class SleepBuffDetector {
 		const fullType = item.getFullType();
 		const name = extractItemName(fullType);
 		if (!isKnownPlushie(name)) {
-			this.log(`Ignoring non-naninha item from ${source}: ${fullType}`);
+			this.debug(`Ignoring non-naninha item from ${source}: ${fullType}`);
 			return;
 		}
 
-		this.log(`Found naninha in ${source}: ${name}${found.has(name) ? " (duplicate)" : ""}`);
+		this.debug(`Found naninha in ${source}: ${name}${found.has(name) ? " (duplicate)" : ""}`);
 		found.add(name);
 	}
 
 	/** Emits a client scan diagnostic through the debug-only logger. */
-	private log(message: string): void {
-		this.logger.log(["Client", "Detector"], message);
+	private debug(message: string): void {
+		this.logger.debug(message, ["Client", "Detector"]);
 	}
 
 	/** Circular distance rule used by the wake-time scan. */

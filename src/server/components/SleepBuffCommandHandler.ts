@@ -53,15 +53,15 @@ export class SleepBuffCommandHandler extends CommandHandler<
 		const { authoritative } = serverModData;
 		const now = playerApi.getWorldAgeHours();
 		const username = player.getUsername();
-		this.logger.log(
-			["Server", "Request"],
-			`player=${username}; worldAge=${now}; requestedBedType=${payload.data.bedType}; candidates=${Logger.formatList(payload.data.candidateNames)}`
+		this.logger.debug(
+			`player=${username}; worldAge=${now}; requestedBedType=${payload.data.bedType}; candidates=${Logger.formatList(payload.data.candidateNames)}`,
+			["Server", "Request"]
 		);
 
 		const attachedKnownNames = this.getKnownAttachedNames(playerApi);
-		this.logger.log(
-			["Server", "Validation"],
-			`player=${username}; attachedNaninhas=${Logger.formatList(attachedKnownNames)}`
+		this.logger.debug(
+			`player=${username}; attachedNaninhas=${Logger.formatList(attachedKnownNames)}`,
+			["Server", "Validation"]
 		);
 		const currentTemporaryBuff = AuthoritativeStateController.sanitizeTemporaryBuff(
 			authoritative.temporaryBuff,
@@ -73,17 +73,17 @@ export class SleepBuffCommandHandler extends CommandHandler<
 
 		for (const name of payload.data.candidateNames) {
 			if (!isKnownPlushie(name)) {
-				this.logger.log(
-					["Server", "Validation"],
-					`player=${username}; rejected unknown candidate=${name}`
+				this.logger.debug(
+					`player=${username}; rejected unknown candidate=${name}`,
+					["Server", "Validation"]
 				);
 				rejectedNames.push(name);
 				continue;
 			}
 			if (attachedKnownNames.includes(name)) {
-				this.logger.log(
-					["Server", "Validation"],
-					`player=${username}; rejected already-attached candidate=${name}`
+				this.logger.debug(
+					`player=${username}; rejected already-attached candidate=${name}`,
+					["Server", "Validation"]
 				);
 				rejectedNames.push(name);
 				continue;
@@ -96,17 +96,17 @@ export class SleepBuffCommandHandler extends CommandHandler<
 		const resolvedBedType = this.normalizeBedType(payload.data.bedType);
 		const durationHours = this.getDurationForBedType(resolvedBedType);
 		const emptyWakeScan = payload.data.candidateNames.length === 0;
-		this.logger.log(
-			["Server", "Selection"],
-			`player=${username}; validCandidates=${Logger.formatList(validCandidates)}; selected=${selectedName ?? "none"}; resolvedBedType=${resolvedBedType}; durationHours=${durationHours}`
+		this.logger.debug(
+			`player=${username}; validCandidates=${Logger.formatList(validCandidates)}; selected=${selectedName ?? "none"}; resolvedBedType=${resolvedBedType}; durationHours=${durationHours}`,
+			["Server", "Selection"]
 		);
 
 		let nextTemporaryBuff: TemporaryBuffState = currentTemporaryBuff;
 		if (emptyWakeScan) {
 			nextTemporaryBuff = { source: null };
-			this.logger.log(
-				["Server", "Apply"],
-				`player=${username}; empty wake scan; clearing previous temporary buff=${currentTemporaryBuff.activeName ?? "none"}`
+			this.logger.debug(
+				`player=${username}; empty wake scan; clearing previous temporary buff=${currentTemporaryBuff.activeName ?? "none"}`,
+				["Server", "Apply"]
 			);
 		} else if (selectedName) {
 			nextTemporaryBuff = {
@@ -114,14 +114,14 @@ export class SleepBuffCommandHandler extends CommandHandler<
 				expiresAtWorldAgeHours: now + durationHours,
 				source: "sleep"
 			};
-			this.logger.log(
-				["Server", "Apply"],
-				`player=${username}; applying=${selectedName}; expiresAtWorldAge=${nextTemporaryBuff.expiresAtWorldAgeHours}`
+			this.logger.debug(
+				`player=${username}; applying=${selectedName}; expiresAtWorldAge=${nextTemporaryBuff.expiresAtWorldAgeHours}`,
+				["Server", "Apply"]
 			);
 		} else {
-			this.logger.log(
-				["Server", "Apply"],
-				`player=${username}; no valid selection; existing temporary buff remains=${currentTemporaryBuff.activeName ?? "none"}`
+			this.logger.debug(
+				`player=${username}; no valid selection; existing temporary buff remains=${currentTemporaryBuff.activeName ?? "none"}`,
+				["Server", "Apply"]
 			);
 		}
 
@@ -136,9 +136,9 @@ export class SleepBuffCommandHandler extends CommandHandler<
 			attachedKnownNames,
 			nextTemporaryBuff
 		);
-		this.logger.log(
-			["Server", "Apply"],
-			`player=${username}; effectiveNaninhas=${Logger.formatList(desiredEffectiveNames)}; state persisted`
+		this.logger.debug(
+			`player=${username}; effectiveNaninhas=${Logger.formatList(desiredEffectiveNames)}; state persisted`,
+			["Server", "Apply"]
 		);
 
 		const reply: SyncSleepBuffAppliedPayload = {

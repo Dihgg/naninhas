@@ -14,13 +14,13 @@ describe("Logger", () => {
 
 	it("does not print outside debug mode", () => {
 		debugMock.mockReturnValue(false);
-		logger.log(["Client", "Detector"], "hidden");
+		logger.debug("hidden", ["Client", "Detector"]);
 		expect(printSpy).not.toHaveBeenCalled();
 	});
 
 	it("prints the configured module and scope in debug mode", () => {
 		debugMock.mockReturnValue(true);
-		logger.log(["Client", "Detector"], "visible");
+		logger.debug("visible", ["Client", "Detector"]);
 		expect(printSpy).toHaveBeenCalledWith("[Naninhas][SleepBuff][Client][Detector] visible");
 	});
 
