@@ -189,6 +189,7 @@ export class NaninhasCommandHandler extends CommandHandler<
 		this.sendResponse(player, payload, reply);
 	}
 
+	/** Returns the known plushie names currently attached to the player. */
 	private getKnownAttachedNames(playerApi: PlayerApi): string[] {
 		const names: string[] = [];
 		for (const name of playerApi.getAttachedItemNames()) {

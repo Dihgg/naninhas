@@ -11,6 +11,12 @@ import type { CommandPayload, NetworkCommand } from "@types";
 export abstract class CommandPublisher<TRequest, TResponse> {
 	private revision = 0;
 
+	/**
+	 * Creates a publisher for one network command and begins listening for replies.
+	 *
+	 * @param player Local player used as the command sender.
+	 * @param command Request and response command names for this publisher.
+	 */
 	protected constructor(
 		private readonly player: IsoPlayer,
 		private readonly command: NetworkCommand
@@ -32,6 +38,7 @@ export abstract class CommandPublisher<TRequest, TResponse> {
 	/** Handles a validated response envelope for this publisher's command. */
 	protected abstract onReply(payload: CommandPayload<TResponse>): void;
 
+	/** Registers the server-command listener that filters and dispatches compatible replies. */
 	private registerReplyListener(): void {
 		Events.onServerCommand.addListener((module, command, args) => {
 			if (module !== NETWORK_MODULE || command !== this.command.RESPONSE) {

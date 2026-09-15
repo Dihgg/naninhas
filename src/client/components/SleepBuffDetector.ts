@@ -4,7 +4,7 @@ import { PlayerApi } from "@shared/components/PlayerApi";
 import { Logger } from "@shared/components/Logger";
 
 import { extractItemName } from "@shared/utils/ItemType";
-import type { BedType } from "@types";
+import type { BedType, Square } from "@types";
 import type { IsoPlayer, InventoryItem } from "@asledgehammer/pipewrench";
 import { SleepBuffRequestPublisher } from "@client/components/SleepBuffRequestPublisher";
 
@@ -18,6 +18,11 @@ export class SleepBuffDetector {
 	private logger = new Logger("SleepBuff");
 	private wasAsleep = false;
 
+	/**
+	 * Creates a detector for one local player's sleep transitions.
+	 *
+	 * @param player Player whose wake events and surroundings should be scanned.
+	 */
 	constructor(player: IsoPlayer) {
 		this.playerApi = new PlayerApi(player);
 		this.publisher = new SleepBuffRequestPublisher(player);
@@ -36,6 +41,7 @@ export class SleepBuffDetector {
 		this.wasAsleep = asleep;
 	}
 
+	/** Scans the wake location and publishes all eligible plushie candidates. */
 	private onWake(): void {
 		// Explicit v1 decision: no vehicle sleep support.
 		if (this.playerApi.getVehicle() !== null) {
@@ -57,6 +63,11 @@ export class SleepBuffDetector {
 		this.publisher.send(candidates, bedType);
 	}
 
+	/**
+	 * Collects unique plushie names from the bed container and nearby squares.
+	 *
+	 * @returns Candidate item names for server-side validation and selection.
+	 */
 	private collectCandidateNames(): string[] {
 		const found = new Set<string>();
 		const bed = this.playerApi.getBed();
@@ -82,6 +93,12 @@ export class SleepBuffDetector {
 		return [...found];
 	}
 
+	/**
+	 * Adds plushies found on loaded squares within the scan radius and eligible room.
+	 *
+	 * @param found Set receiving unique candidate names.
+	 * @param center Square used as the scan origin and room boundary.
+	 */
 	private addFromNearbySquares(
 		found: Set<string>,
 		center: ReturnType<PlayerApi["getSquare"]>
@@ -132,6 +149,7 @@ export class SleepBuffDetector {
 		);
 	}
 
+	/** Adds plushie names from every inventory item in a container list. */
 	private addFromContainerItems(
 		found: Set<string>,
 		items: { size: () => number; get: (index: number) => InventoryItem },
@@ -143,16 +161,8 @@ export class SleepBuffDetector {
 		}
 	}
 
-	private addFromSquareWorldObjects(
-		found: Set<string>,
-		square: {
-			getWorldObjects: () => {
-				size: () => number;
-				get: (index: number) => { getItem: () => InventoryItem | undefined };
-			};
-		},
-		source: string
-	): void {
+	/** Adds plushie names from inventory-item world objects on a square. */
+	private addFromSquareWorldObjects(found: Set<string>, square: Square, source: string): void {
 		const worldObjects = square.getWorldObjects();
 		if (worldObjects.size() > 0) {
 			this.log(`${source} contains ${worldObjects.size()} world objects`);
@@ -165,6 +175,7 @@ export class SleepBuffDetector {
 		}
 	}
 
+	/** Adds an item's extracted name when it belongs to the known plushie catalog. */
 	private addItemName(found: Set<string>, item: InventoryItem, source: string): void {
 		const fullType = item.getFullType();
 		const name = extractItemName(fullType);
@@ -177,6 +188,7 @@ export class SleepBuffDetector {
 		found.add(name);
 	}
 
+	/** Emits a client scan diagnostic through the debug-only logger. */
 	private log(message: string): void {
 		this.logger.log(["Client", "Detector"], message);
 	}

@@ -10,6 +10,14 @@ export class ModData<T> {
 	private readonly defaultData: T;
 	private readonly ensure?: ModDataProps<T>["ensure"];
 
+	/**
+	 * Creates a typed view over one entry in an object's mod-data table.
+	 *
+	 * @param object Object that owns the mod-data table.
+	 * @param modKey Key used to store this value.
+	 * @param defaultData Value seeded when the key is absent.
+	 * @param ensure Optional normalizer for persisted or partial values.
+	 */
 	constructor({ object, modKey, defaultData, ensure }: ModDataProps<T>) {
 		this.object = object;
 		this.modKey = modKey;
@@ -17,6 +25,7 @@ export class ModData<T> {
 		this.ensure = ensure;
 	}
 
+	/** Reads the configured key from either a Kahlua table or plain object. */
 	private getValue(store: ReturnType<ModDataProps<T>["object"]["getModData"]>): T | undefined {
 		if (typeof store.get === "function") {
 			return store.get(this.modKey) as T | undefined;
@@ -25,6 +34,7 @@ export class ModData<T> {
 		return (store as Record<string, T | undefined>)[this.modKey];
 	}
 
+	/** Writes the configured key to either a Kahlua table or plain object. */
 	private setValue(store: ReturnType<ModDataProps<T>["object"]["getModData"]>, value: T): void {
 		if (typeof store.set === "function") {
 			store.set(this.modKey, value);

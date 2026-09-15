@@ -1,4 +1,4 @@
-import type { IsoPlayer, KahluaTable, Perk } from "@asledgehammer/pipewrench";
+import type { InventoryItem, IsoPlayer, KahluaTable, Perk } from "@asledgehammer/pipewrench";
 
 export type PerkBoost = {
 	perk: Perk;
@@ -57,6 +57,22 @@ export type SyncAppliedPlushiesPayload = {
 
 /** Sleep context bed-quality values used for temporary buff duration mapping. */
 export type BedType = "badBed" | "averageBed" | "goodBed" | "floor";
+
+/**
+ * Represents a square in the game world, providing access to the objects it contains.
+ */
+export type Square = {
+	/** Retrieves the world objects present on this square. */
+	getWorldObjects: () => {
+		/** Returns the number of world objects on this square. */
+		size: () => number;
+		/** Retrieves the world object at the specified index. */
+		get: (index: number) => {
+			/** Retrieves the inventory item associated with this world object, if any. */
+			getItem: () => InventoryItem | undefined;
+		};
+	};
+};
 
 /**
  * Request data sent from the client when a player wakes up and may qualify
