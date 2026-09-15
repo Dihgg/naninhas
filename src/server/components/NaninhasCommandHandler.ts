@@ -25,7 +25,8 @@ export class NaninhasCommandHandler extends CommandHandler<
 	SyncDesiredPlushiesPayload,
 	SyncAppliedPlushiesPayload
 > {
-	private logger = new Logger("SleepBuff");
+	/** Logger instance for emitting server-side sleep buff related messages. */
+	private readonly logger = new Logger("SleepBuff");
 	/**
 	 * Configures the Naninhas multiplayer command flow.
 	 */
@@ -52,9 +53,9 @@ export class NaninhasCommandHandler extends CommandHandler<
 		);
 
 		if (activeTemporaryBuff.source !== null) {
-			this.logger.log(
-				["Server", "Expiry"],
-				`player=${player.getUsername()}; worldAge=${now}; active=${activeTemporaryBuff.activeName ?? "unknown"}; expiresAt=${activeTemporaryBuff.expiresAtWorldAgeHours ?? "missing"}; status=${temporaryBuff.source === null ? "expired" : "active"}`
+			this.logger.debug(
+				`player=${player.getUsername()}; worldAge=${now}; active=${activeTemporaryBuff.activeName ?? "unknown"}; expiresAt=${activeTemporaryBuff.expiresAtWorldAgeHours ?? "missing"}; status=${temporaryBuff.source === null ? "expired" : "active"}`,
+				["Server", "Expiry"]
 			);
 		}
 
@@ -70,9 +71,9 @@ export class NaninhasCommandHandler extends CommandHandler<
 			attachedNames,
 			temporaryBuff
 		);
-		this.logger.log(
-			["Server", "Expiry"],
-			`player=${player.getUsername()}; removed=${activeTemporaryBuff.activeName ?? "unknown"}; remainingAttached=${Logger.formatList(attachedNames)}`
+		this.logger.debug(
+			`player=${player.getUsername()}; removed=${activeTemporaryBuff.activeName ?? "unknown"}; remainingAttached=${Logger.formatList(attachedNames)}`,
+			["Server", "Expiry"]
 		);
 
 		return true;
@@ -213,8 +214,9 @@ export class NaninhasCommandHandler extends CommandHandler<
 		authoritativeData: unknown
 	): NaninhasAuthoritativeState {
 		if (persistedVersion < PROTOCOL_SCHEMA_VERSION) {
-			print(
-				`[Naninhas] Migrating server mod data from schema v${persistedVersion} to v${PROTOCOL_SCHEMA_VERSION}`
+			this.logger.debug(
+				`Migrating server mod data from schema v${persistedVersion} to v${PROTOCOL_SCHEMA_VERSION}`,
+				["Migration"]
 			);
 			//TODO: Add migration logic here when a breaking schema change is introduced:
 			// if (persistedVersion < 2) { /* reshape fields for schema 2 */ }

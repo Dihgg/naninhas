@@ -12,6 +12,13 @@ import { NETWORK_MODULE } from "@constants";
  * sent by clients during multiplayer sessions.
  */
 const handler = new NaninhasCommandHandler();
+
+/**
+ * Server-side entry point for the SleepBuff mod.
+ *
+ * Registers the OnClientCommand listener for SleepBuff commands
+ * sent by clients during multiplayer sessions.
+ */
 const sleepBuffHandler = new SleepBuffCommandHandler();
 
 Events.onClientCommand.addListener((module, command, player, args) => {
